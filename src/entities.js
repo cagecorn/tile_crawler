@@ -9,6 +9,7 @@ export class Monster {
         this.height = tileSize / 2;
         this.color = 'red';
         this.hp = 3; // 몬스터의 체력
+        this.maxHp = 3; // 최대 체력 속성 추가
     }
 
     takeDamage(amount) {
