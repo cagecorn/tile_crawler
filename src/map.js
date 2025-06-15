@@ -1,3 +1,5 @@
+// src/map.js
+
 const TILE_TYPES = {
     FLOOR: 0,
     WALL: 1,
@@ -46,15 +48,12 @@ export class MapManager {
         }
         return map;
     }
-
-    // 크기가 서로 다른 유닛을 배치하기 위해 sizeInTiles 인자를 받음
-    // sizeInTiles: {w: <가로 타일 수>, h: <세로 타일 수>}
-    getRandomFloorPosition(sizeInTiles = { w: 1, h: 1 }) {
+    
+    getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
         let attempts = 0;
         while (attempts < 50) {
             const x = Math.floor(Math.random() * (this.width - sizeInTiles.w));
             const y = Math.floor(Math.random() * (this.height - sizeInTiles.h));
-
             let canPlace = true;
             for (let i = 0; i < sizeInTiles.w; i++) {
                 for (let j = 0; j < sizeInTiles.h; j++) {
@@ -65,7 +64,6 @@ export class MapManager {
                 }
                 if (!canPlace) break;
             }
-
             if (canPlace) {
                 return {
                     x: x * this.tileSize + (this.tileSize / 4),
@@ -74,23 +72,17 @@ export class MapManager {
             }
             attempts++;
         }
-        // 적절한 위치를 찾지 못하면 null 반환
         return null;
     }
 
-    // 유닛의 크기에 맞춰 네 모서리를 확인하도록 수정
     isWallAt(worldX, worldY, entityWidth = 0, entityHeight = 0) {
         const checkPoints = [
-            { x: worldX, y: worldY },
-            { x: worldX + entityWidth, y: worldY },
-            { x: worldX, y: worldY + entityHeight },
-            { x: worldX + entityWidth, y: worldY + entityHeight },
+            {x: worldX, y: worldY}, {x: worldX + entityWidth, y: worldY},
+            {x: worldX, y: worldY + entityHeight}, {x: worldX + entityWidth, y: worldY + entityHeight},
         ];
-
         for (const point of checkPoints) {
             const mapX = Math.floor(point.x / this.tileSize);
             const mapY = Math.floor(point.y / this.tileSize);
-
             if (mapX < 0 || mapX >= this.width || mapY < 0 || mapY >= this.height) return true;
             if (this.map[mapY][mapX] === this.tileTypes.WALL) return true;
         }
