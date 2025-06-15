@@ -9,6 +9,22 @@
 This project is a browser-based dungeon crawler. It lets players explore levels, battle enemies and gather loot directly in the browser.
 포켓몬스터처럼 적을 죽이고 자신의 편으로 만드는 재미가 있다.
 
+## 개발 원칙
+
+이 프로젝트는 확장성과 유지보수성을 높이기 위해 다음과 같은 원칙을 따릅니다.
+
+1.  **단일 책임 원칙 (Single Responsibility Principle)**
+    * 모든 자바스크립트 파일과 클래스는 단 하나의 명확한 책임을 가집니다.
+    * 예: `map.js`는 맵 데이터 생성 및 관리를, `entities.js`는 플레이어/몬스터 등 개체의 기본 설계를, `managers.js`는 게임의 주요 로직 관리를 담당합니다.
+
+2.  **관리자 패턴 (Manager Pattern)**
+    * 게임의 복잡한 로직(맵, 몬스터, UI, 시각 효과 등)은 각각의 '매니저(Manager)' 클래스가 전담하여 처리합니다.
+    * 이를 통해 `main.js`는 각 매니저에게 지시만 내리는 '사령부' 역할을 하여 코드 구조를 단순하게 유지합니다.
+
+3.  **파일 분리 원칙**
+    * 하나의 파일이 너무 길어지면 AI(코덱스)가 수정하거나 전체 내용을 덮어쓰기 어려워집니다.
+    * 이를 방지하기 위해, 새로운 기능이나 책임이 생기면 파일을 적극적으로 분리하여 각 파일의 코드 길이를 적절하게 유지합니다.
+
 ## Playing
 
 Open `index.html` in a modern web browser to start the game. 
