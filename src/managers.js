@@ -12,12 +12,11 @@ export class MonsterManager {
     _spawnMonsters(count) {
         for (let i = 0; i < count; i++) {
             let size = {w: 1, h: 1};
-            if (Math.random() < 0.25) { // 에픽 몬스터 생성 확률 25%로 조정
+            if (Math.random() < 0.25) {
                 size = {w: 2, h: 2};
             }
             
             let pos;
-            // 에픽 몬스터는 방 안에만 생성
             if (size.w > 1) {
                 if (this.mapManager.rooms.length > 0) {
                     const room = this.mapManager.rooms[Math.floor(Math.random() * this.mapManager.rooms.length)];
@@ -27,7 +26,6 @@ export class MonsterManager {
                     };
                 }
             } 
-            // 일반 몬스터는 아무 복도에나 생성
             else {
                 pos = this.mapManager.getRandomFloorPosition(size);
             }
@@ -37,10 +35,60 @@ export class MonsterManager {
             }
         }
     }
-    
-    // ... (나머지 handleAttackOnMonster, getMonsterAt, update, render 메서드는 변경 없음) ...
+
+    handleAttackOnMonster(monsterId, damage) {
+        const monster = this.monsters.find(m => m.id === monsterId);
+        if (monster) {
+            monster.takeDamage(damage);
+            if (monster.hp <= 0) {
+                this.monsters = this.monsters.filter(m => m.id !== monsterId);
+            }
+        }
+    }
+
+    getMonsterAt(x, y) {
+        for (const monster of this.monsters) {
+            if (x >= monster.x && x < monster.x + monster.width &&
+                y >= monster.y && y < monster.y + monster.height) {
+                return monster;
+            }
+        }
+        return null;
+    }
+
+    update(player, onPlayerAttack) {
+        for (const monster of this.monsters) {
+            monster.update(player, this.mapManager, onPlayerAttack);
+        }
+    }
+
+    render(ctx) {
+        for (const monster of this.monsters) {
+            monster.render(ctx);
+        }
+    }
 }
 
 export class VisualEffectManager {
-    // ... (VisualEffectManager 코드는 변경 없음) ...
+    render(ctx, player, monsters) {
+        this._drawHpBar(ctx, player);
+        for (const monster of monsters) {
+            this._drawHpBar(ctx, monster);
+        }
+    }
+
+    _drawHpBar(ctx, entity) {
+        if (entity.hp <= 0 || entity.hp === entity.maxHp) {
+            return;
+        }
+        const barWidth = entity.width;
+        const barHeight = 5;
+        const x = entity.x;
+        const y = entity.y - 10;
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(x, y, barWidth, barHeight);
+        const hpRatio = entity.hp / entity.maxHp;
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
+    }
 }
