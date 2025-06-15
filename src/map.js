@@ -1,5 +1,3 @@
-import { Monster } from './entities.js';
-
 const TILE_TYPES = {
     FLOOR: 0,
     WALL: 1,
@@ -12,8 +10,6 @@ export class MapManager {
         this.tileSize = 48;
         this.tileTypes = TILE_TYPES;
         this.map = this._generateMaze();
-        this.monsters = [];
-        this._spawnMonsters(5);
     }
 
     _generateMaze() {
@@ -51,18 +47,17 @@ export class MapManager {
         return map;
     }
 
-    _spawnMonsters(count) {
-        let spawned = 0;
-        while (spawned < count) {
-            const randX = Math.floor(Math.random() * this.width);
-            const randY = Math.floor(Math.random() * this.height);
-            if (this.map[randY][randX] === this.tileTypes.FLOOR && (randX > 2 || randY > 2)) {
-                const monsterX = randX * this.tileSize + (this.tileSize / 4);
-                const monsterY = randY * this.tileSize + (this.tileSize / 4);
-                this.monsters.push(new Monster(monsterX, monsterY, this.tileSize));
-                spawned++;
-            }
-        }
+    getRandomFloorPosition() {
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * this.width);
+            y = Math.floor(Math.random() * this.height);
+        } while (this.map[y][x] !== this.tileTypes.FLOOR || (x <= 1 && y <= 1));
+
+        return {
+            x: x * this.tileSize + (this.tileSize / 4),
+            y: y * this.tileSize + (this.tileSize / 4)
+        };
     }
 
     isWallAt(worldX, worldY) {
@@ -80,9 +75,6 @@ export class MapManager {
                 ctx.fillStyle = (this.map[y][x] === this.tileTypes.WALL) ? '#555' : '#222';
                 ctx.fillRect(x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
             }
-        }
-        for (const monster of this.monsters) {
-            monster.render(ctx);
         }
     }
 }
