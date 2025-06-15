@@ -31,6 +31,33 @@ export class MonsterManager {
             monster.render(ctx);
         }
     }
+
+    /**
+     * Return the monster whose bounds contain the given world coordinates.
+     * If no monster occupies the position, `undefined` is returned.
+     */
+    getMonsterAt(x, y) {
+        return this.monsters.find(
+            (m) =>
+                x >= m.x &&
+                x <= m.x + m.width &&
+                y >= m.y &&
+                y <= m.y + m.height
+        );
+    }
+
+    /**
+     * Update all monsters.
+     *
+     * @param {Object} player Player object
+     * @param {Function} onPlayerAttack Callback invoked when the player is
+     *                                  attacked by a monster.
+     */
+    update(player, onPlayerAttack) {
+        for (const monster of this.monsters) {
+            monster.update(player, this.mapManager, onPlayerAttack);
+        }
+    }
 }
 
 // === 아래 클래스를 새로 추가 ===
