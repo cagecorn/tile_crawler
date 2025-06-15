@@ -1,5 +1,5 @@
-// window.onload는 웹페이지의 모든 요소(이미지, 스타일시트 등)가
-// 완전히 로드된 후에 안의 코드를 실행하도록 보장해 줍니다.
+// main.js
+
 import { generateMap, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, TILE_TYPES } from './src/map.js';
 
 window.onload = function() {
@@ -7,59 +7,79 @@ window.onload = function() {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // 캔버스 크기를 맵 크기에 맞게 설정
-    canvas.width = MAP_WIDTH * TILE_SIZE;
-    canvas.height = MAP_HEIGHT * TILE_SIZE;
+    // 브라우저 창 크기가 변경될 때마다 캔버스 크기를 다시 맞추는 함수
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     // 2. 게임 상태(Game State) 정의
     const gameState = {
         player: {
-            // 플레이어를 맵의 두 번째 타일 위치에 생성합니다.
-            x: TILE_SIZE, 
-            y: TILE_SIZE, 
-            width: TILE_SIZE / 2, // 플레이어 크기를 타일의 절반으로
+            x: TILE_SIZE * 1.5, // 플레이어 시작 위치 (타일 중앙)
+            y: TILE_SIZE * 1.5,
+            width: TILE_SIZE / 2,
             height: TILE_SIZE / 2,
             color: 'blue',
             speed: 5
         },
-        // generateMap 함수를 호출하여 생성된 맵을 저장합니다.
-        map: generateMap() 
+        map: generateMap(),
+        camera: { // 카메라 객체 추가
+            x: 0,
+            y: 0
+        }
     };
 
-    // 3. 렌더링 함수 정의
+    // 3. 렌더링 함수 정의 (카메라 로직 적용)
     function render() {
-        // 캔버스를 깨끗하게 지웁니다.
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // --- 카메라 위치 계산 ---
+        const camera = gameState.camera;
+        const player = gameState.player;
+        
+        // 카메라가 플레이어를 화면 중앙에 위치시키도록 목표 위치를 계산합니다.
+        let targetCameraX = player.x - canvas.width / 2;
+        let targetCameraY = player.y - canvas.height / 2;
 
-        // 맵 그리기
+        // 카메라가 맵 경계를 벗어나지 않도록 위치를 고정(clamp)합니다.
+        const mapPixelWidth = MAP_WIDTH * TILE_SIZE;
+        const mapPixelHeight = MAP_HEIGHT * TILE_SIZE;
+        camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width));
+        camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height));
+
+        // --- 렌더링 시작 ---
+        ctx.save(); // 현재 캔버스 상태 저장
+
+        // 캔버스의 원점을 카메라 위치만큼 이동시킵니다.
+        ctx.translate(-camera.x, -camera.y);
+
+        // 맵 그리기 (이제 카메라의 시야에 들어오는 부분만 그려도 되지만, 일단 전체를 그립니다)
         const map = gameState.map;
         for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
-                // 타일 종류에 따라 색상을 다르게 설정합니다.
-                ctx.fillStyle = (map[y][x] === TILE_TYPES.WALL) ? 'grey' : 'black';
-                // 타일 위치에 사각형을 그립니다.
+                ctx.fillStyle = (map[y][x] === TILE_TYPES.WALL) ? '#555' : '#222'; // 색상 약간 변경
                 ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
 
         // 플레이어 그리기
-        const player = gameState.player;
         ctx.fillStyle = player.color;
-        // 플레이어를 타일 중앙에 예쁘게 위치시키기 위해 약간의 오프셋을 줍니다.
-        ctx.fillRect(player.x + player.width / 2, player.y + player.height / 2, player.width, player.height);
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+
+        ctx.restore(); // 저장했던 캔버스 상태 복원 (translate 효과 제거)
     }
 
-    // 4. 키보드 입력 처리
+    // 4. 키보드 입력 처리 (변경 없음)
     const keysPressed = {};
     document.addEventListener('keydown', function(event) { keysPressed[event.key] = true; });
     document.addEventListener('keyup', function(event) { delete keysPressed[event.key]; });
 
-    // 5. 게임 상태 업데이트 함수 정의 (충돌 처리 로직 추가)
+    // 5. 게임 상태 업데이트 함수 정의 (충돌 처리 로직 좌표 수정)
     function update() {
         const player = gameState.player;
         const map = gameState.map;
         
-        // 이동할 새로운 위치를 먼저 계산합니다.
         let newX = player.x;
         let newY = player.y;
 
@@ -68,15 +88,12 @@ window.onload = function() {
         if ('ArrowLeft' in keysPressed) newX -= player.speed;
         if ('ArrowRight' in keysPressed) newX += player.speed;
 
-        // 충돌 감지: 플레이어의 네 모서리가 이동할 위치에서 벽과 겹치는지 확인
-        
-        // 맵 좌표로 변환
+        // 충돌 감지: 플레이어의 월드 좌표를 기준으로 충돌을 확인합니다.
         const nextGridX1 = Math.floor(newX / TILE_SIZE);
         const nextGridY1 = Math.floor(newY / TILE_SIZE);
         const nextGridX2 = Math.floor((newX + player.width) / TILE_SIZE);
         const nextGridY2 = Math.floor((newY + player.height) / TILE_SIZE);
 
-        // 이동할 위치가 벽이 아닐 경우에만 플레이어의 실제 좌표를 업데이트합니다.
         if (map[nextGridY1] && map[nextGridY1][nextGridX1] === TILE_TYPES.FLOOR &&
             map[nextGridY1] && map[nextGridY1][nextGridX2] === TILE_TYPES.FLOOR &&
             map[nextGridY2] && map[nextGridY2][nextGridX1] === TILE_TYPES.FLOOR &&
@@ -95,6 +112,5 @@ window.onload = function() {
     }
 
     // 7. 게임 시작
-    console.log("맵 생성 완료! 플레이어가 벽을 통과하는지 확인해보세요.");
     gameLoop();
 };
