@@ -1,7 +1,7 @@
 // 맵의 크기를 정의합니다. (홀수로 설정해야 미로가 예쁘게 나옵니다)
 const MAP_WIDTH = 21; // 가로 타일 21개
 const MAP_HEIGHT = 17; // 세로 타일 17개
-const TILE_SIZE = 40; // 각 타일의 크기 (40x40 픽셀)
+const TILE_SIZE = 48; // 각 타일의 크기 (40x40 픽셀)
 
 // 맵 타일의 종류를 상수로 정의합니다. (0: 복도, 1: 벽)
 const TILE_TYPES = {
