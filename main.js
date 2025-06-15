@@ -1,91 +1,100 @@
 // window.onload는 웹페이지의 모든 요소(이미지, 스타일시트 등)가
 // 완전히 로드된 후에 안의 코드를 실행하도록 보장해 줍니다.
+import { generateMap, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, TILE_TYPES } from './src/map.js';
+
 window.onload = function() {
     // 1. 캔버스 설정
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // 브라우저 창 크기가 변경될 때마다 캔버스 크기를 다시 맞추는 함수
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    // 페이지 로드 시, 그리고 창 크기가 바뀔 때마다 캔버스 크기 조정
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // 첫 로드 시에도 크기 맞춰주기
+    // 캔버스 크기를 맵 크기에 맞게 설정
+    canvas.width = MAP_WIDTH * TILE_SIZE;
+    canvas.height = MAP_HEIGHT * TILE_SIZE;
 
     // 2. 게임 상태(Game State) 정의
-    // 게임의 모든 데이터를 이 객체 안에서 관리하게 됩니다.
     const gameState = {
         player: {
-            x: 100, // 플레이어의 x 좌표
-            y: 100, // 플레이어의 y 좌표
-            width: 50, // 플레이어 사각형의 너비
-            height: 50, // 플레이어 사각형의 높이
-            color: 'blue', // 플레이어 사각형의 색상
-            speed: 5 // 플레이어의 이동 속도
-        }
+            // 플레이어를 맵의 두 번째 타일 위치에 생성합니다.
+            x: TILE_SIZE, 
+            y: TILE_SIZE, 
+            width: TILE_SIZE / 2, // 플레이어 크기를 타일의 절반으로
+            height: TILE_SIZE / 2,
+            color: 'blue',
+            speed: 5
+        },
+        // generateMap 함수를 호출하여 생성된 맵을 저장합니다.
+        map: generateMap() 
     };
 
     // 3. 렌더링 함수 정의
-    // 화면에 게임 요소를 그리는 모든 코드는 이곳에 들어갑니다.
     function render() {
-        // 매 프레임마다 캔버스를 깨끗하게 지웁니다.
+        // 캔버스를 깨끗하게 지웁니다.
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // gameState에서 플레이어 정보를 가져와 사각형을 그립니다.
+        // 맵 그리기
+        const map = gameState.map;
+        for (let y = 0; y < MAP_HEIGHT; y++) {
+            for (let x = 0; x < MAP_WIDTH; x++) {
+                // 타일 종류에 따라 색상을 다르게 설정합니다.
+                ctx.fillStyle = (map[y][x] === TILE_TYPES.WALL) ? 'grey' : 'black';
+                // 타일 위치에 사각형을 그립니다.
+                ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            }
+        }
+
+        // 플레이어 그리기
         const player = gameState.player;
         ctx.fillStyle = player.color;
-        ctx.fillRect(player.x, player.y, player.width, player.height);
+        // 플레이어를 타일 중앙에 예쁘게 위치시키기 위해 약간의 오프셋을 줍니다.
+        ctx.fillRect(player.x + player.width / 2, player.y + player.height / 2, player.width, player.height);
     }
 
     // 4. 키보드 입력 처리
-    // 어떤 키가 눌렸는지 상태를 저장하는 객체
     const keysPressed = {};
+    document.addEventListener('keydown', function(event) { keysPressed[event.key] = true; });
+    document.addEventListener('keyup', function(event) { delete keysPressed[event.key]; });
 
-    // 키를 누르면 keysPressed 객체에 해당 키의 상태를 true로 설정
-    document.addEventListener('keydown', function(event) {
-        keysPressed[event.key] = true;
-    });
-
-    // 키에서 손을 떼면 keysPressed 객체에서 해당 키를 삭제
-    document.addEventListener('keyup', function(event) {
-        delete keysPressed[event.key];
-    });
-
-    // 5. 게임 상태 업데이트 함수 정의
-    // 모든 계산 및 로직 처리는 이곳에서 이루어집니다.
+    // 5. 게임 상태 업데이트 함수 정의 (충돌 처리 로직 추가)
     function update() {
         const player = gameState.player;
+        const map = gameState.map;
         
-        // 눌린 키에 따라 플레이어의 좌표를 변경합니다.
-        if ('ArrowUp' in keysPressed) {
-            player.y -= player.speed;
-        }
-        if ('ArrowDown' in keysPressed) {
-            player.y += player.speed;
-        }
-        if ('ArrowLeft' in keysPressed) {
-            player.x -= player.speed;
-        }
-        if ('ArrowRight' in keysPressed) {
-            player.x += player.speed;
+        // 이동할 새로운 위치를 먼저 계산합니다.
+        let newX = player.x;
+        let newY = player.y;
+
+        if ('ArrowUp' in keysPressed) newY -= player.speed;
+        if ('ArrowDown' in keysPressed) newY += player.speed;
+        if ('ArrowLeft' in keysPressed) newX -= player.speed;
+        if ('ArrowRight' in keysPressed) newX += player.speed;
+
+        // 충돌 감지: 플레이어의 네 모서리가 이동할 위치에서 벽과 겹치는지 확인
+        
+        // 맵 좌표로 변환
+        const nextGridX1 = Math.floor(newX / TILE_SIZE);
+        const nextGridY1 = Math.floor(newY / TILE_SIZE);
+        const nextGridX2 = Math.floor((newX + player.width) / TILE_SIZE);
+        const nextGridY2 = Math.floor((newY + player.height) / TILE_SIZE);
+
+        // 이동할 위치가 벽이 아닐 경우에만 플레이어의 실제 좌표를 업데이트합니다.
+        if (map[nextGridY1] && map[nextGridY1][nextGridX1] === TILE_TYPES.FLOOR &&
+            map[nextGridY1] && map[nextGridY1][nextGridX2] === TILE_TYPES.FLOOR &&
+            map[nextGridY2] && map[nextGridY2][nextGridX1] === TILE_TYPES.FLOOR &&
+            map[nextGridY2] && map[nextGridY2][nextGridX2] === TILE_TYPES.FLOOR) {
+            
+            player.x = newX;
+            player.y = newY;
         }
     }
 
     // 6. 게임 루프(Game Loop) 정의
-    // 게임의 심장과 같은 부분입니다.
     function gameLoop() {
-        // 로직 업데이트
         update();
-        // 화면 그리기
         render();
-
-        // 브라우저에게 다음 프레임에 gameLoop 함수를 다시 실행해달라고 요청합니다.
         requestAnimationFrame(gameLoop);
     }
 
     // 7. 게임 시작
-    console.log("게임 시작! 방향키로 파란색 사각형을 움직여보세요.");
+    console.log("맵 생성 완료! 플레이어가 벽을 통과하는지 확인해보세요.");
     gameLoop();
 };
