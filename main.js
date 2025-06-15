@@ -113,10 +113,7 @@ window.onload = function() {
     }
 
     function checkWallCollision(x, y, width, height) {
-        return mapManager.isWallAt(x, y) ||
-               mapManager.isWallAt(x + width, y) ||
-               mapManager.isWallAt(x, y + height) ||
-               mapManager.isWallAt(x + width, y + height);
+        return mapManager.isWallAt(x, y, width, height);
     }
 
     function gameLoop() {
