@@ -60,13 +60,36 @@ export class MapManager {
         };
     }
 
-    isWallAt(worldX, worldY) {
-        const mapX = Math.floor(worldX / this.tileSize);
-        const mapY = Math.floor(worldY / this.tileSize);
-        if (mapX < 0 || mapX >= this.width || mapY < 0 || mapY >= this.height) {
-            return true;
+    /**
+     * Check whether the given position collides with a wall.
+     *
+     * When `width` and `height` are provided the check will be performed for
+     * all four corners of the bounding box defined by `(worldX, worldY)` and
+     * `(width, height)`. This allows callers to test sprite bounds in a single
+     * call.
+     */
+    isWallAt(worldX, worldY, width = 0, height = 0) {
+        const points = [
+            { x: worldX, y: worldY },
+            { x: worldX + width, y: worldY },
+            { x: worldX, y: worldY + height },
+            { x: worldX + width, y: worldY + height }
+        ];
+
+        for (const p of points) {
+            const mapX = Math.floor(p.x / this.tileSize);
+            const mapY = Math.floor(p.y / this.tileSize);
+            if (
+                mapX < 0 ||
+                mapX >= this.width ||
+                mapY < 0 ||
+                mapY >= this.height ||
+                this.map[mapY][mapX] === this.tileTypes.WALL
+            ) {
+                return true;
+            }
         }
-        return this.map[mapY][mapX] === this.tileTypes.WALL;
+        return false;
     }
 
     render(ctx) {
