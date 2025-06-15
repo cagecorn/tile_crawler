@@ -14,8 +14,8 @@ window.onload = function() {
 
     const gameState = {
         player: {
-            x: mapManager.tileSize * 1.5,
-            y: mapManager.tileSize * 1.5,
+            x: mapManager.tileSize * 1.25,
+            y: mapManager.tileSize * 1.25,
             width: mapManager.tileSize / 2,
             height: mapManager.tileSize / 2,
             color: 'blue',
