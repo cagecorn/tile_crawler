@@ -1,7 +1,7 @@
 // main.js
 
 import { MapManager } from './src/map.js';
-import { MonsterManager, VisualEffectManager } from './src/managers.js';
+import { MonsterManager, UIManager } from './src/managers.js';
 
 window.onload = function() {
     const canvas = document.getElementById('game-canvas');
@@ -15,7 +15,7 @@ window.onload = function() {
     
     const mapManager = new MapManager();
     const monsterManager = new MonsterManager(7, mapManager);
-    const visualEffectManager = new VisualEffectManager();
+    const uiManager = new UIManager();
 
     const gameState = {
         player: {
@@ -47,7 +47,10 @@ window.onload = function() {
         monsterManager.render(ctx);
         ctx.fillStyle = player.color;
         ctx.fillRect(player.x, player.y, player.width, player.height);
-        visualEffectManager.render(ctx, gameState.player, monsterManager.monsters);
+        uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
+
+        // UI 패널 업데이트
+        uiManager.updatePlayerStats(gameState.player);
         
         ctx.restore();
     }
