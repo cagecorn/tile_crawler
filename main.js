@@ -16,8 +16,8 @@ window.onload = function() {
     
     // 매니저 인스턴스 생성
     const mapManager = new MapManager();
-    const monsterManager = new MonsterManager(5, mapManager);
-    const visualEffectManager = new VisualEffectManager(); // 시각효과 매니저 생성
+    const monsterManager = new MonsterManager(7, mapManager); // 몬스터 7마리로 늘림
+    const visualEffectManager = new VisualEffectManager();
 
     const gameState = {
         player: {
@@ -28,11 +28,12 @@ window.onload = function() {
             color: 'blue',
             speed: 5,
             hp: 10,
-            maxHp: 10, // 플레이어 최대 체력 추가
+            maxHp: 10,
             attackPower: 1,
             attackCooldown: 0
         },
-        camera: { x: 0, y: 0 }
+        camera: { x: 0, y: 0 },
+        isGameOver: false
     };
 
     function render() {
@@ -66,63 +67,54 @@ window.onload = function() {
     document.addEventListener('keyup', (event) => { delete keysPressed[event.key]; });
 
     function update() {
+        if (gameState.isGameOver) return;
         const player = gameState.player;
-        if (player.attackCooldown > 0) {
-            player.attackCooldown--;
-        }
-        let moveX = 0;
-        let moveY = 0;
+        if (player.attackCooldown > 0) { player.attackCooldown--; }
+
+        let moveX = 0, moveY = 0;
         if ('ArrowUp' in keysPressed) moveY -= player.speed;
         if ('ArrowDown' in keysPressed) moveY += player.speed;
         if ('ArrowLeft' in keysPressed) moveX -= player.speed;
         if ('ArrowRight' in keysPressed) moveX += player.speed;
-        if (moveX !== 0) {
-            const newX = player.x + moveX;
-            if (!checkWallCollision(newX, player.y, player.width, player.height)) {
-                handleMovement(newX, player.y);
-            }
+
+        let targetX = player.x + moveX;
+        let targetY = player.y + moveY;
+
+        const monsterToAttack = monsterManager.getMonsterAt(
+            targetX + player.width / 2,
+            targetY + player.height / 2
+        );
+        if (monsterToAttack && player.attackCooldown === 0) {
+            monsterManager.handleAttackOnMonster(monsterToAttack.id, player.attackPower);
+            player.attackCooldown = 30;
+        } else if (!checkWallCollision(targetX, targetY, player.width, player.height)) {
+            player.x = targetX;
+            player.y = targetY;
         }
-        if (moveY !== 0) {
-            const newY = player.y + moveY;
-            if (!checkWallCollision(player.x, newY, player.width, player.height)) {
-                handleMovement(player.x, newY);
-            }
+
+        monsterManager.update(gameState.player, handlePlayerAttacked);
+    }
+
+    function handlePlayerAttacked(damage) {
+        gameState.player.hp -= damage;
+        if (gameState.player.hp <= 0) {
+            gameState.isGameOver = true;
         }
     }
     
-    function handleMovement(newX, newY) {
-        const player = gameState.player;
-        let attacked = false;
-        for (const monster of monsterManager.monsters) {
-            if (newX < monster.x + monster.width &&
-                newX + player.width > monster.x &&
-                newY < monster.y + monster.height &&
-                newY + player.height > monster.y) {
-                if (player.attackCooldown === 0) {
-                    monsterManager.handleAttackOnMonster(monster.id, player.attackPower);
-                    player.attackCooldown = 30;
-                }
-                attacked = true;
-                break;
-            }
-        }
-        if (!attacked) {
-            player.x = newX;
-            player.y = newY;
-        }
-    }
+    // 이동 처리 로직은 update 함수에서 수행되므로 이 함수는 더 이상 사용되지 않습니다.
+    function handleMovement() {}
 
     function checkWallCollision(x, y, width, height) {
-        return mapManager.isWallAt(x, y) ||
-               mapManager.isWallAt(x + width, y) ||
-               mapManager.isWallAt(x, y + height) ||
-               mapManager.isWallAt(x + width, y + height);
+        return mapManager.isWallAt(x, y, width, height);
     }
 
-    function gameLoop() {
+    resizeCanvas();
+    function gameLoop_inner() {
         update();
         render();
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop_inner);
     }
+    function gameLoop() { gameLoop_inner(); }
     gameLoop();
 };
