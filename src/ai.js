@@ -13,9 +13,7 @@ export class IdleState {
         if (distance < monster.visionRange) {
             // 몬스터의 상태를 '추격' 상태로 변경
             monster.state = new ChasingState();
-            console.log(`몬스터(ID: ${monster.id})가 플레이어를 발견! 추격을 시작합니다.`);
         }
-        // 그 외에는 아무것도 하지 않음 (경로 계산 X)
     }
 }
 
