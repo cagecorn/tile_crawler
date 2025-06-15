@@ -2,29 +2,34 @@
 
 import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager } from './src/managers.js';
+import { Player } from './src/entities.js'; // Player 클래스를 불러옵니다.
 
 window.onload = function() {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     
+    // 매니저 인스턴스 생성
     const mapManager = new MapManager();
     const monsterManager = new MonsterManager(7, mapManager);
-    const uiManager = new UIManager();
+    const uiManager = new UIManager(); // UIManager 생성
 
+    // '기본 전사' 라는 직업 객체를 정의 (전직 시스템의 기초)
+    const warriorJob = {
+        maxHp: 20,
+        attackPower: 2,
+    };
+
+    // gameState에서 player 객체를 Player 클래스의 인스턴스로 생성
     const gameState = {
-        player: {
-            x: mapManager.tileSize * 1.25, y: mapManager.tileSize * 1.25,
-            width: mapManager.tileSize / 2, height: mapManager.tileSize / 2,
-            color: 'blue', speed: 5,
-            hp: 10, maxHp: 10,
-            attackPower: 1, attackCooldown: 0
-        },
+        player: new Player(
+            mapManager.tileSize * 1.25, 
+            mapManager.tileSize * 1.25, 
+            mapManager.tileSize,
+            warriorJob // 직업 객체를 전달
+        ),
         camera: { x: 0, y: 0 },
         isGameOver: false
     };
@@ -33,6 +38,7 @@ window.onload = function() {
         if (gameState.isGameOver) return;
         const camera = gameState.camera;
         const player = gameState.player;
+        
         let targetCameraX = player.x - canvas.width / 2;
         let targetCameraY = player.y - canvas.height / 2;
         const mapPixelWidth = mapManager.width * mapManager.tileSize;
@@ -45,14 +51,13 @@ window.onload = function() {
 
         mapManager.render(ctx);
         monsterManager.render(ctx);
-        ctx.fillStyle = player.color;
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-        uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
-
-        // UI 패널 업데이트
-        uiManager.updatePlayerStats(gameState.player);
+        player.render(ctx); // player의 render 메서드 호출
+        uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters); // HP 바 그리기
         
         ctx.restore();
+
+        // 캔버스와 별개로 HTML UI를 업데이트
+        uiManager.updatePlayerStats(gameState.player);
     }
 
     const keysPressed = {};
@@ -61,7 +66,6 @@ window.onload = function() {
 
     function update() {
         if (gameState.isGameOver) return;
-
         const player = gameState.player;
         if (player.attackCooldown > 0) { player.attackCooldown--; }
         
@@ -75,11 +79,10 @@ window.onload = function() {
         let targetY = player.y + moveY;
         
         const monsterToAttack = monsterManager.getMonsterAt(targetX + player.width / 2, targetY + player.height / 2);
-
         if (monsterToAttack && player.attackCooldown === 0) {
             monsterManager.handleAttackOnMonster(monsterToAttack.id, player.attackPower);
             player.attackCooldown = 30;
-        } else if (!checkWallCollision(targetX, targetY, player.width, player.height)) {
+        } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
             player.x = targetX;
             player.y = targetY;
         }
@@ -88,16 +91,11 @@ window.onload = function() {
     }
     
     function handlePlayerAttacked(damage) {
-        gameState.player.hp -= damage;
+        gameState.player.takeDamage(damage); // player의 takeDamage 메서드 호출
         if (gameState.player.hp <= 0) {
-            gameState.player.hp = 0;
             gameState.isGameOver = true;
             alert("게임 오버!");
         }
-    }
-
-    function checkWallCollision(x, y, width, height) {
-        return mapManager.isWallAt(x, y, width, height);
     }
     
     function gameLoop() {
@@ -107,3 +105,4 @@ window.onload = function() {
     }
     gameLoop();
 };
+
