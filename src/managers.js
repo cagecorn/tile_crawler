@@ -9,20 +9,44 @@ export class MonsterManager {
 
     _spawnMonsters(count) {
         for (let i = 0; i < count; i++) {
-            const pos = this.mapManager.getRandomFloorPosition();
-            this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize));
+            let size = {w: 1, h: 1};
+            // 20% 확률로 에픽 몬스터 생성
+            if (Math.random() < 0.2) {
+                size = {w: 2, h: 2};
+            }
+
+            const pos = this.mapManager.getRandomFloorPosition(size);
+            if (pos) {
+                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, size));
+            }
         }
     }
 
-    // 몬스터가 공격받았을 때 처리하는 함수
     handleAttackOnMonster(monsterId, damage) {
         const monster = this.monsters.find(m => m.id === monsterId);
         if (monster) {
             monster.takeDamage(damage);
+            console.log(`몬스터(ID: ${monster.id}) HP: ${monster.hp}/${monster.maxHp}`);
             if (monster.hp <= 0) {
-                // 몬스터의 HP가 0 이하면 배열에서 제거
                 this.monsters = this.monsters.filter(m => m.id !== monsterId);
             }
+        }
+    }
+
+    // 지정된 좌표에 있는 몬스터를 찾는 함수 (다중 타일 지원)
+    getMonsterAt(x, y) {
+        for (const monster of this.monsters) {
+            if (x >= monster.x && x < monster.x + monster.width &&
+                y >= monster.y && y < monster.y + monster.height) {
+                return monster;
+            }
+        }
+        return null;
+    }
+
+    update(player, onPlayerAttack) {
+        for (const monster of this.monsters) {
+            monster.update(player, this.mapManager, onPlayerAttack);
         }
     }
 
