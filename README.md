@@ -12,23 +12,41 @@ Open `index.html` in a modern web browser to start the game.
 
 이 게임은 매우 복잡한 로직이 필요하기 때문에 코드의 경제성을 위해서 여러가지 시스템 매니저를 코드로 구현한다.(패치하며 매니저를 더하고 뺄 것임))
 
-총괄 매니저(전체적인 틀) - 현재 층의 오라 버프, 지도 버프, 여러 속성등을 관리하고 단계적으로 배치, 기억, 계산한다.
-이벤트 매니저 - 모든 유닛의 트리거 매니저.
-버프 매니저 - 모든 유닛의 버프 카운트.
-디버프 매니저 - 모든 유닛의 디버프 카운트.
-오라 매니저 - 모든 유닛의 오라 카운트.
-지형지물 매니저(맵형성) - 다양한 맵 환경을 조성하고 알고리즘을 짠다.
-시각효과 매니저 - 현재 유닛들의 도트 이미지 위나 아래에 입힐 효과를 짠다.
-오브젝트 매니저 - 현재 층에 배치될 여러가지 오브젝트를 구현, 계산한다.
-전투로그 매니저(순서, 중복 중요) - 각종 전투 메시지를 편집 관리한다.
-전투 외적 카운트 매니저 - 전투 외적으로 카운트될 숫자들을 관리한다.(알의 부화 카운트 등)
-타일 매니저 - 유닛이 장비한 타일을 관리하고, 전체적인 타일 시스템을 관리한다.
-동선 관리 매니저 - 모든 유닛의 동선을 효율적으로 관리, 계산한다.
-이동속도 매니저 - 모든 유닛의 이동 속도에 따른 차등을 계산한다.
+-총괄 매니저(전체적인 틀) - 현재 층의 오라 버프, 지도 버프, 여러 속성등을 관리하고 단계적으로 배치, 기억, 계산한다.
+-이벤트 매니저 - 모든 유닛의 트리거 매니저.
+-버프 매니저 - 모든 유닛의 버프 카운트.
+-디버프 매니저 - 모든 유닛의 디버프 카운트.
+-오라 매니저 - 모든 유닛의 오라 카운트.
+-지형지물 매니저(맵형성) - 다양한 맵 환경을 조성하고 알고리즘을 짠다.
+-시각효과 매니저 - 현재 유닛들의 도트 이미지 위나 아래에 입힐 효과를 짠다.
+-오브젝트 매니저 - 현재 층에 배치될 여러가지 오브젝트를 구현, 계산한다.
+-전투로그 매니저(순서, 중복 중요) - 각종 전투 메시지를 편집 관리한다.
+-전투 외적 카운트 매니저 - 전투 외적으로 카운트될 숫자들을 관리한다.(알의 부화, 호감도, 배부름, 농사사 카운트 등)
+-타일 매니저 - 유닛이 장비한 타일을 관리하고, 전체적인 타일 시스템을 관리한다.
+-동선 관리 매니저 - 모든 유닛의 동선을 효율적으로 관리, 계산한다.
+-이동속도 매니저 - 모든 유닛의 이동 속도에 따른 차등을 계산한다.
 
 ### Dungeon Generation
-Each floor is carved from a depth-first search maze. Corridors span seven tiles,
+Each floor is carved from a depth-first search maze. Corridors span seven~10 tiles,
 and the exit is placed on a randomly chosen cell that the algorithm visited.
+
+## 스킬 풀
+
+각 유닛은 각자의 카테고리에 맞는 스킬을 랜덤으로 스킬풀에서 가져온다.
+
+-용병 스킬
+-몬스터 스킬
+-오라 스킬
+-버프 스킬
+-디버프 스킬
+
+## 유닛의 종류
+- 용병 : 용병 스킬 풀에서 한 개의 스킬을 랜덤으로 가져온다.
+- 몬스터 : 몬스터 '특성'이라는 몬스터 고유의 일반 공격 능력과 몬스터 '스킬'을 가져온다.
+- 엘리트 몬스터 : 특성, 오라를 가져온다.
+- 슈페리어 몬스터 : 용병의 스킬과 오라를 가져온다.(스킬 보유 두 개)
+-
+
 
 ### Monster Progression
 
@@ -72,11 +90,11 @@ When tests run under jsdom, audio initialization is skipped so no sound plays.
 
 ### Hiring Mercenaries
 
-Click the buttons in the *Hire Mercenary* panel to recruit warriors, archers, healers or wizards. Each mercenary costs gold and appears near the player. You may have up to five mercenaries at a time; when full you will be prompted to replace an existing ally.
+Click the buttons in the *Hire Mercenary* panel to recruit warriors, archers, healers or wizards, bard. Each mercenary costs gold and appears near the player. You may have up to five mercenaries at a time; when full you will be prompted to replace an existing ally.
 
 ### Shop and Skill System
 
-Spend collected gold in the shop to purchase items. Bought gear is placed in your inventory and can boost your stats when equipped. All skills are unlocked from the start and can be assigned to the **Skill1** and **Skill2** slots.
+Spend collected gold in the shop to purchase items. Bought gear is placed in your inventory and can boost your stats when equipped.
 When defining skills, include a numeric `cooldown` property. Passive or always-available skills should set it to `0`.
 
 ### Mercenary Skills
@@ -102,7 +120,7 @@ activated, letting you know their protective or offensive effects are in play.
 
 ### Mercenary Traits
 
-*This system has been removed.* Mercenaries no longer receive random traits or related bonuses.
+차후 구현 가능성 있음.
 
 ### Mercenary Affinity (호감도 시스템)
 
@@ -178,32 +196,6 @@ Dungeon floors contain several interactive tiles:
 
 Map items occasionally drop from monsters and chests. Each map lists a modifier that alters the next floor, such as boosting treasure or increasing monster spawns. Every five floors a glowing map altar appears in the dungeon. Stand on the altar and activate a map from your inventory to apply its modifier – maps only work when used while positioned on these altars.
 
-## Development
-
-Install dependencies with:
-
-```bash
-npm install
-```
-
-The core `gameState` object used throughout the game is created in
-[`src/state.js`](src/state.js) and is attached to the global object so
-other modules such as `src/mechanics.js` can access it directly.
-
-## Testing
-
-The test suite relies on development dependencies such as **jsdom**. Ensure they
-are installed by running:
-
-```bash
-npm install
-```
-
-You can simply run `npm test` as well – the `pretest` script in
-`package.json` automatically installs all dependencies before executing the test
-runner. After installation the test runner
-automatically locates all files ending with `*.test.js` in the `tests` folder
-and executes them sequentially.
 
 ## License
 
