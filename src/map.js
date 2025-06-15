@@ -16,7 +16,6 @@ export class MapManager {
     }
 
     _generateMaze() {
-        // --- 1. DFS로 기본 미로 생성 (이전과 동일) ---
         const map = [];
         for (let y = 0; y < this.height; y++) {
             map.push(Array(this.width).fill(this.tileTypes.WALL));
@@ -49,29 +48,69 @@ export class MapManager {
             }
         }
 
-        // --- 2. 여러 개의 방 추가로 생성 ---
-        const roomCount = 4; // 4개의 방을 생성
+        const roomCount = 4;
         for (let i = 0; i < roomCount; i++) {
-            // 방의 크기는 3x3 ~ 5x5 사이로 무작위 결정
             const roomWidth = Math.floor(Math.random() * 3) + 3;
             const roomHeight = Math.floor(Math.random() * 3) + 3;
-            
-            // 방의 위치를 무작위로 결정 (홀수 좌표에 위치해야 복도와 연결됨)
             const roomX = Math.floor(Math.random() * (this.width - roomWidth - 1) / 2) * 2 + 1;
             const roomY = Math.floor(Math.random() * (this.height - roomHeight - 1) / 2) * 2 + 1;
-            
-            // 방 내부를 복도로 만듦
             for (let y = roomY; y < roomY + roomHeight; y++) {
                 for (let x = roomX; x < roomX + roomWidth; x++) {
                     map[y][x] = this.tileTypes.FLOOR;
                 }
             }
-            // 생성된 방의 정보를 저장
             this.rooms.push({ x: roomX, y: roomY, width: roomWidth, height: roomHeight });
         }
         
         return map;
     }
     
-    // ... (getRandomFloorPosition, isWallAt, render 메서드는 변경 없음) ...
+    getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
+        let attempts = 0;
+        while (attempts < 50) {
+            const x = Math.floor(Math.random() * (this.width - sizeInTiles.w));
+            const y = Math.floor(Math.random() * (this.height - sizeInTiles.h));
+            let canPlace = true;
+            for (let i = 0; i < sizeInTiles.w; i++) {
+                for (let j = 0; j < sizeInTiles.h; j++) {
+                    if (this.map[y + j][x + i] !== this.tileTypes.FLOOR) {
+                        canPlace = false;
+                        break;
+                    }
+                }
+                if (!canPlace) break;
+            }
+            if (canPlace) {
+                return {
+                    x: x * this.tileSize + (this.tileSize / 4),
+                    y: y * this.tileSize + (this.tileSize / 4)
+                };
+            }
+            attempts++;
+        }
+        return null;
+    }
+
+    isWallAt(worldX, worldY, entityWidth = 0, entityHeight = 0) {
+        const checkPoints = [
+            {x: worldX, y: worldY}, {x: worldX + entityWidth, y: worldY},
+            {x: worldX, y: worldY + entityHeight}, {x: worldX + entityWidth, y: worldY + entityHeight},
+        ];
+        for (const point of checkPoints) {
+            const mapX = Math.floor(point.x / this.tileSize);
+            const mapY = Math.floor(point.y / this.tileSize);
+            if (mapX < 0 || mapX >= this.width || mapY < 0 || mapY >= this.height) return true;
+            if (this.map[mapY][mapX] === this.tileTypes.WALL) return true;
+        }
+        return false;
+    }
+
+    render(ctx) {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                ctx.fillStyle = (this.map[y][x] === this.tileTypes.WALL) ? '#555' : '#222';
+                ctx.fillRect(x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
+            }
+        }
+    }
 }
