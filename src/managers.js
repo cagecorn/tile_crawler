@@ -51,11 +51,12 @@ export class MonsterManager {
             monster.takeDamage(damage);
             if (monster.hp <= 0) {
                 const exp = monster.expValue;
+                const name = monster.constructor.name;
                 this.monsters = this.monsters.filter(m => m.id !== monsterId);
-                return exp;
+                return { gainedExp: exp, victimName: name };
             }
         }
-        return 0;
+        return { gainedExp: 0, victimName: null };
     }
 
     getMonsterAt(x, y) {
@@ -244,10 +245,13 @@ export class UIManager {
     }
 
     // HP 바를 그리는 메서드 (이전과 동일)
-    renderHpBars(ctx, player, monsters) {
+    renderHpBars(ctx, player, monsters, mercenaries) {
         // this._drawHpBar(ctx, player); // 플레이어 HP바는 이제 HTML UI로 옮겼으므로 주석 처리
         for (const monster of monsters) {
             this._drawHpBar(ctx, monster);
+        }
+        for (const merc of mercenaries) {
+            this._drawHpBar(ctx, merc);
         }
     }
 
