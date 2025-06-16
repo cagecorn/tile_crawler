@@ -56,13 +56,16 @@ export class StatManager {
     }
 
     addExp(amount) {
-        this.derivedStats.exp += amount;
+        // 경험치는 기본 스탯에 누적한 뒤 즉시 재계산하여 UI와 레벨업 체크에 반영
+        this._baseStats.exp += amount;
+        this.recalculate();
     }
 
     levelUp() {
-        this.derivedStats.level++;
-        this.derivedStats.exp -= this.derivedStats.expNeeded;
-        this.derivedStats.expNeeded = Math.floor(this.derivedStats.expNeeded * 1.5);
+        // 레벨 관련 수치를 기본 스탯에 반영해 recalculate 이후에도 유지한다
+        this._baseStats.level++;
+        this._baseStats.exp -= this._baseStats.expNeeded;
+        this._baseStats.expNeeded = Math.floor(this._baseStats.expNeeded * 1.5);
         // 레벨업 시 기본 스탯 상승 (예시: 체력, 힘)
         this.increaseBaseStat('endurance', 1);
         this.increaseBaseStat('strength', 1);
