@@ -18,11 +18,6 @@ export class Player {
         this._maxHpBonus = 0;
         this._attackPowerBonus = 0;
 
-        // --- 레벨 및 경험치 속성 ---
-        this.level = 1;
-        this.exp = 0;
-        this.expNeeded = 20; // 다음 레벨까지 필요한 경험치
-
         this.attackCooldown = 0;
     }
 
@@ -51,6 +46,19 @@ export class Player {
 
     set maxHp(value) {
         this._maxHpBonus = value - this.stats.get('maxHp');
+    }
+
+    // 레벨과 경험치를 StatManager에서 조회하기 위한 게터
+    get level() {
+        return this.stats.get('level');
+    }
+
+    get exp() {
+        return this.stats.get('exp');
+    }
+
+    get expNeeded() {
+        return this.stats.get('expNeeded');
     }
 
     takeDamage(damage) {

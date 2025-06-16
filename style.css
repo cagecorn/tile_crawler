@@ -107,6 +107,11 @@ body, html {
     color: #fff;
 }
 
+.stat-plus {
+    margin-left: 4px;
+    cursor: pointer;
+}
+
 /* ===== 인벤토리 UI 스타일 ===== */
 
 #inventory-section {

@@ -67,6 +67,8 @@ window.onload = function() {
             }
         }
 
+        uiManager.setStatUpCallback(handleStatUp);
+
         const keysPressed = {};
         document.addEventListener('keydown', e => {
             keysPressed[e.key] = true;
@@ -110,16 +112,13 @@ window.onload = function() {
         }
 
         function checkForLevelUp() {
-            const player = gameState.player;
-            while (player.exp >= player.expNeeded) {
-                player.exp -= player.expNeeded;
-                player.level++;
-                player.expNeeded = Math.floor(player.expNeeded * 1.5);
-                player.maxHp += 5;
-                player.hp = player.maxHp;
-                player.attackPower += 1;
+            const stats = gameState.player.stats;
+            while (stats.get('exp') >= stats.get('expNeeded')) {
+                stats.levelUp();
+                stats.recalculate();
+                gameState.player.hp = gameState.player.maxHp;
                 gameState.statPoints += 5;
-                console.log(`레벨 업! LV ${player.level} 달성!`);
+                console.log(`레벨 업! LV ${stats.get('level')} 달성!`);
             }
         }
 
@@ -150,8 +149,8 @@ window.onload = function() {
                 );
 
                 if (gainedExp > 0) {
-                    player.exp += gainedExp;
-                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.exp}`);
+                    player.stats.addExp(gainedExp);
+                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.stats.get('exp')}`);
                     checkForLevelUp();
                 }
                 player.attackCooldown = 30;

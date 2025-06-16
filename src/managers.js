@@ -93,8 +93,31 @@ export class UIManager {
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
 
+        this.plusButtons = {
+            strength: document.getElementById('btn-plus-strength'),
+            agility: document.getElementById('btn-plus-agility'),
+            endurance: document.getElementById('btn-plus-endurance'),
+            focus: document.getElementById('btn-plus-focus'),
+            intelligence: document.getElementById('btn-plus-intelligence'),
+            movement: document.getElementById('btn-plus-movement'),
+        };
+
+        this._statUpCallback = null;
+
+        for (const [stat, btn] of Object.entries(this.plusButtons)) {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    if (this._statUpCallback) this._statUpCallback(stat);
+                });
+            }
+        }
+
         // 현재 인벤토리 상태 저장용 배열 (UI 빈번한 재생성 방지)
         this._lastInventory = [];
+    }
+
+    setStatUpCallback(cb) {
+        this._statUpCallback = cb;
     }
 
     updateUI(gameState) {
@@ -122,9 +145,14 @@ export class UIManager {
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
 
         // 경험치 바 업데이트
-        const expRatio = player.exp / player.expNeeded;
+        const expRatio = stats.get('exp') / stats.get('expNeeded');
         this.expBarFillElement.style.width = `${expRatio * 100}%`;
-        this.expTextElement.textContent = `${player.exp} / ${player.expNeeded}`;
+        this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
+
+        const showPlus = gameState.statPoints > 0;
+        for (const btn of Object.values(this.plusButtons)) {
+            if (btn) btn.style.display = showPlus ? 'inline' : 'none';
+        }
 
         // 인벤토리 내용이 변경된 경우에만 DOM을 갱신하여 클릭 이벤트 손실을 방지
         if (this._hasInventoryChanged(gameState.inventory)) {
