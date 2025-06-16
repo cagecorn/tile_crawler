@@ -64,6 +64,14 @@ window.onload = function() {
         };
         playerGroup.addMember(gameState.player);
 
+        function handleMonsterAttacked(monsterId, damage) {
+            const { gainedExp, victimName } = monsterManager.handleAttackOnMonster(monsterId, damage);
+            if (gainedExp > 0) {
+                eventManager.publish('entity_death', { attacker: this, victimName: victimName, exp: gainedExp });
+                metaAIManager.getGroup('dungeon_monsters').removeMember(monsterId);
+            }
+        }
+
         document.getElementById('hire-mercenary').onclick = () => {
             if (gameState.gold >= 50) {
                 gameState.gold -= 50;
@@ -81,17 +89,32 @@ window.onload = function() {
             }
         });
 
-        eventManager.subscribe('entity_death', ({ attacker, victim }) => {
-            logManager.add(`${victim.constructor.name}가 쓰러졌습니다.`);
-            if (!victim.isFriendly) {
-                monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== victim.id);
-                monsterGroup.removeMember(victim.id);
-                attacker.stats.addExp(victim.expValue);
-                logManager.add(`${victim.expValue}의 경험치를 획득했습니다.`);
-                eventManager.publish('exp_gained', { player: attacker });
-            } else if (victim.isPlayer) {
-                gameState.isGameOver = true;
-                alert('게임 오버!');
+        eventManager.subscribe('entity_death', (payload) => {
+            if (payload.victim) {
+                const { attacker, victim } = payload;
+                logManager.add(`${victim.constructor.name}가 쓰러졌습니다.`);
+                if (!victim.isFriendly) {
+                    monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== victim.id);
+                    monsterGroup.removeMember(victim.id);
+                    attacker.stats.addExp(victim.expValue);
+                    logManager.add(`${victim.expValue}의 경험치를 획득했습니다.`);
+                    eventManager.publish('exp_gained', { player: attacker });
+                } else if (victim.isPlayer) {
+                    gameState.isGameOver = true;
+                    alert('게임 오버!');
+                }
+            } else {
+                const { attacker, victimName, exp } = payload;
+                logManager.add(`${victimName}가 쓰러졌습니다.`);
+                if (exp && attacker) {
+                    attacker.stats.addExp(exp);
+                    logManager.add(`${exp}의 경험치를 획득했습니다.`);
+                    eventManager.publish('exp_gained', { player: attacker });
+                }
+                if (victimName === 'Player') {
+                    gameState.isGameOver = true;
+                    alert('게임 오버!');
+                }
             }
         });
 
@@ -133,7 +156,7 @@ window.onload = function() {
             monsterManager.render(ctx);
             mercenaryManager.render(ctx);
             gameState.player.render(ctx);
-            uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
+            uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
             ctx.restore();
 
             uiManager.updateUI(gameState);
@@ -196,17 +219,7 @@ window.onload = function() {
                     }
                 },
                 onMonsterAttacked: (monsterId, damage) => {
-                    const monster = monsterManager.monsters.find(m => m.id === monsterId);
-                    if (monster) {
-                        monster.takeDamage(damage);
-                        if (monster.hp <= 0) {
-                            monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== monsterId);
-                            monsterGroup.removeMember(monsterId);
-                            player.stats.addExp(monster.expValue);
-                            logManager.add(`${monster.expValue}의 경험치를 획득했습니다.`);
-                            eventManager.publish('exp_gained', { player });
-                        }
-                    }
+                    handleMonsterAttacked.call(player, monsterId, damage);
                 }
             };
             metaAIManager.update(context);
