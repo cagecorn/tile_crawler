@@ -82,20 +82,13 @@ export class UIManager {
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
 
-        // 게임 상태를 나중에 주입받기 위한 변수
-        this.gameState = null;
     }
 
-    // main.js에서 게임 상태를 받아오기 위한 초기화 함수
-    init(gameState) {
-        this.gameState = gameState;
-    }
+    // gameState를 인자로 받도록 수정
+    updateUI(gameState) {
+        if (!gameState) return;
 
-    // 전체 UI를 업데이트하는 메서드
-    updateUI() {
-        if (!this.gameState) return;
-
-        const player = this.gameState.player;
+        const player = gameState.player;
 
         // 기본 능력치 표시
         this.hpElement.textContent = player.hp;
@@ -106,20 +99,20 @@ export class UIManager {
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
 
         // 골드 UI 업데이트
-        this.goldElement.textContent = this.gameState.gold;
+        this.goldElement.textContent = gameState.gold;
 
         // 인벤토리 UI 업데이트
         this.inventorySlotsElement.innerHTML = '';
-        this.gameState.inventory.forEach((item, index) => {
+        gameState.inventory.forEach((item, index) => {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
             const img = document.createElement('img');
             img.src = item.image.src;
             img.alt = item.name;
 
-            // 아이템 사용을 위한 클릭 이벤트
+            // 클릭 이벤트가 gameState를 함께 전달하도록 수정
             slot.onclick = () => {
-                this.useItem(index);
+                this.useItem(index, gameState);
             };
 
             slot.appendChild(img);
@@ -128,9 +121,10 @@ export class UIManager {
     }
 
     // 인벤토리 아이템 사용 로직
-    useItem(itemIndex) {
-        const player = this.gameState.player;
-        const item = this.gameState.inventory[itemIndex];
+    // useItem도 gameState를 인자로 받도록 수정
+    useItem(itemIndex, gameState) {
+        const player = gameState.player;
+        const item = gameState.inventory[itemIndex];
 
         if (item.name === 'potion') {
             player.hp = Math.min(player.maxHp, player.hp + 5);
@@ -138,10 +132,10 @@ export class UIManager {
         }
 
         // 사용한 아이템을 제거
-        this.gameState.inventory.splice(itemIndex, 1);
+        gameState.inventory.splice(itemIndex, 1);
 
-        // 변경 사항을 즉시 반영
-        this.updateUI();
+        // UI를 다시 그려서 변경사항을 즉시 반영
+        this.updateUI(gameState);
     }
 
     // HP 바를 그리는 메서드 (이전과 동일)
