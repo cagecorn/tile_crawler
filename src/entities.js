@@ -14,6 +14,12 @@ export class Player {
         this.hp = job.maxHp;
         this.maxHp = job.maxHp;
         this.attackPower = job.attackPower;
+
+        // --- 레벨 및 경험치 속성 추가 ---
+        this.level = 1;
+        this.exp = 0;
+        this.expNeeded = 20; // 다음 레벨까지 필요한 경험치
+
         this.attackCooldown = 0;
     }
 
@@ -43,6 +49,9 @@ export class Monster {
 
         this.hp = (sizeInTiles.w > 1) ? 10 : 3;
         this.maxHp = this.hp;
+
+        // --- 처치 시 얻는 경험치 추가 ---
+        this.expValue = (sizeInTiles.w > 1) ? 15 : 5; // 에픽은 15, 일반은 5
         this.speed = 2;
         this.attackPower = (sizeInTiles.w > 1) ? 3 : 1;
         this.attackRange = tileSize;
