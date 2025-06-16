@@ -7,7 +7,7 @@ const TILE_TYPES = {
 
 export class MapManager {
     constructor() {
-        this.width = 41; // 미로 크기를 더 키워서 넓은 통로를 확보
+        this.width = 41;
         this.height = 31;
         this.tileSize = 192;
         this.tileTypes = TILE_TYPES;
@@ -16,34 +16,22 @@ export class MapManager {
     }
 
     _generateMaze() {
-        const corridorWidth = 3; // 통로를 조금 더 넓혀 이동 공간 확보 (3타일 너비)
+        const map = Array.from({ length: this.height }, () => Array(this.width).fill(this.tileTypes.WALL));
 
-        // 1. 모든 타일을 벽으로 초기화
-        const map = [];
-        for (let y = 0; y < this.height; y++) {
-            map.push(Array(this.width).fill(this.tileTypes.WALL));
-        }
-
-        // 2. 방 먼저 생성하기
-        const roomCount = 12; // 방 개수를 늘려 보다 개방된 지형 생성
-        const minRoomSize = 4;
-        const maxRoomSize = 6;
-
+        // 1. 방 생성
+        const roomCount = 10;
+        const minRoomSize = 3;
+        const maxRoomSize = 7;
         for (let i = 0; i < roomCount; i++) {
             let roomW = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
             let roomH = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
             let roomX = Math.floor(Math.random() * (this.width - roomW - 2)) + 1;
             let roomY = Math.floor(Math.random() * (this.height - roomH - 2)) + 1;
 
-            // 방끼리 겹치지 않게 하기 (간단한 방식)
-            let overlaps = false;
-            for (const room of this.rooms) {
-                if (roomX < room.x + room.width && roomX + roomW > room.x &&
-                    roomY < room.y + room.height && roomY + roomH > room.y) {
-                    overlaps = true;
-                    break;
-                }
-            }
+            let overlaps = this.rooms.some(room =>
+                roomX < room.x + room.width && roomX + roomW > room.x &&
+                roomY < room.y + room.height && roomY + roomH > room.y
+            );
             if (overlaps) continue;
 
             for (let y = roomY; y < roomY + roomH; y++) {
@@ -51,46 +39,92 @@ export class MapManager {
                     map[y][x] = this.tileTypes.FLOOR;
                 }
             }
-            this.rooms.push({ x: roomX, y: roomY, width: roomW, height: roomH });
+            this.rooms.push({ x: roomX, y: roomY, width: roomW, height: roomH, connected: false });
+        }
+
+        // 2. 미로 생성 (방이 없는 공간만)
+        for (let y = 1; y < this.height; y += 2) {
+            for (let x = 1; x < this.width; x += 2) {
+                if (map[y][x] === this.tileTypes.WALL) {
+                    this._carveMazeFrom(x, y, map);
+                }
+            }
         }
         
-        // 3. 방과 방 사이를 넓은 통로로 잇기
-        for (let i = 0; i < this.rooms.length - 1; i++) {
-            const start = this.rooms[i];
-            const end = this.rooms[i + 1];
-
-            const startX = Math.floor(start.x + start.width / 2);
-            const startY = Math.floor(start.y + start.height / 2);
-            const endX = Math.floor(end.x + end.width / 2);
-            const endY = Math.floor(end.y + end.height / 2);
-
-            this._carvePassage(map, startX, startY, endX, startY, corridorWidth);
-            this._carvePassage(map, endX, startY, endX, endY, corridorWidth);
-        }
+        // 3. 방과 미로 연결
+        this._connectRoomsAndMazes(map);
+        
+        // 4. 막다른 길 일부 제거 (선택적)
+        this._removeDeadEnds(map, 0.4); // 40%의 막다른 길을 제거
 
         return map;
     }
 
-    // 두 지점 사이에 넓은 통로를 만드는 헬퍼 함수
-    _carvePassage(map, x1, y1, x2, y2, width) {
-        const minX = Math.min(x1, x2);
-        const maxX = Math.max(x1, x2);
-        const minY = Math.min(y1, y2);
-        const maxY = Math.max(y1, y2);
-
-        // 가로 통로
-        if (minY === maxY) {
-            for (let x = minX; x <= maxX; x++) {
-                for (let w = 0; w < width; w++) {
-                    if (map[minY + w]) map[minY + w][x] = this.tileTypes.FLOOR;
+    _carveMazeFrom(startX, startY, map) {
+        const stack = [{ x: startX, y: startY }];
+        map[startY][startX] = this.tileTypes.FLOOR;
+        
+        while (stack.length > 0) {
+            const current = stack[stack.length - 1];
+            const directions = [{ x: 0, y: -2 }, { x: 0, y: 2 }, { x: -2, y: 0 }, { x: 2, y: 0 }];
+            directions.sort(() => Math.random() - 0.5);
+            
+            let moved = false;
+            for (const dir of directions) {
+                const nx = current.x + dir.x;
+                const ny = current.y + dir.y;
+                if (nx > 0 && nx < this.width && ny > 0 && ny < this.height && map[ny][nx] === this.tileTypes.WALL) {
+                    map[ny - dir.y / 2][nx - dir.x / 2] = this.tileTypes.FLOOR;
+                    map[ny][nx] = this.tileTypes.FLOOR;
+                    stack.push({ x: nx, y: ny });
+                    moved = true;
+                    break;
                 }
             }
+            if (!moved) {
+                stack.pop();
+            }
         }
-        // 세로 통로
-        else if (minX === maxX) {
-            for (let y = minY; y <= maxY; y++) {
-                for (let w = 0; w < width; w++) {
-                    if (map[y][minX + w]) map[y][minX + w] = this.tileTypes.FLOOR;
+    }
+    
+    _connectRoomsAndMazes(map) {
+        for (const room of this.rooms) {
+            const potentialConnectors = [];
+            for (let x = room.x - 1; x < room.x + room.width + 1; x++) {
+                if (map[room.y - 2] && map[room.y - 2][x] === this.tileTypes.FLOOR) potentialConnectors.push({x, y: room.y - 1});
+                if (map[room.y + room.height + 1] && map[room.y + room.height + 1][x] === this.tileTypes.FLOOR) potentialConnectors.push({x, y: room.y + room.height});
+            }
+            for (let y = room.y - 1; y < room.y + room.height + 1; y++) {
+                if (map[y][room.x - 2] === this.tileTypes.FLOOR) potentialConnectors.push({x: room.x - 1, y});
+                if (map[y][room.x + room.width + 1] === this.tileTypes.FLOOR) potentialConnectors.push({x: room.x + room.width, y});
+            }
+            if (potentialConnectors.length > 0) {
+                const connector = potentialConnectors[Math.floor(Math.random() * potentialConnectors.length)];
+                map[connector.y][connector.x] = this.tileTypes.FLOOR;
+            }
+        }
+    }
+    
+    _removeDeadEnds(map, chance) {
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                if (map[y][x] === this.tileTypes.FLOOR) {
+                    let wallCount = 0;
+                    if (map[y - 1][x] === this.tileTypes.WALL) wallCount++;
+                    if (map[y + 1][x] === this.tileTypes.WALL) wallCount++;
+                    if (map[y][x - 1] === this.tileTypes.WALL) wallCount++;
+                    if (map[y][x + 1] === this.tileTypes.WALL) wallCount++;
+                    
+                    if (wallCount >= 3 && Math.random() < chance) {
+                        const directions = [{x:0,y:-1}, {x:0,y:1}, {x:-1,y:0}, {x:1,y:0}];
+                        directions.sort(() => Math.random() - 0.5);
+                        for(const dir of directions) {
+                            if(map[y + dir.y][x + dir.x] === this.tileTypes.WALL) {
+                                map[y + dir.y][x + dir.x] = this.tileTypes.FLOOR;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -150,4 +184,3 @@ export class MapManager {
         }
     }
 }
-
