@@ -16,6 +16,7 @@ export class MapManager {
     }
 
     _generateMaze() {
+        // --- 1. DFS로 기본 미로 생성 (기존 로직) ---
         const map = [];
         for (let y = 0; y < this.height; y++) {
             map.push(Array(this.width).fill(this.tileTypes.WALL));
@@ -48,6 +49,30 @@ export class MapManager {
             }
         }
 
+        // --- 2. 생성된 통로를 넓히는 작업 ---
+        const newMap = JSON.parse(JSON.stringify(map));
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                if (map[y][x] === this.tileTypes.FLOOR) {
+                    let wallCount = 0;
+                    if (map[y - 1][x] === this.tileTypes.WALL) wallCount++;
+                    if (map[y + 1][x] === this.tileTypes.WALL) wallCount++;
+                    if (map[y][x - 1] === this.tileTypes.WALL) wallCount++;
+                    if (map[y][x + 1] === this.tileTypes.WALL) wallCount++;
+
+                    if (wallCount >= 2) {
+                        if (Math.random() < 0.5) {
+                            if (newMap[y - 1][x] === this.tileTypes.WALL) newMap[y - 1][x] = this.tileTypes.FLOOR;
+                            if (newMap[y + 1][x] === this.tileTypes.WALL) newMap[y + 1][x] = this.tileTypes.FLOOR;
+                            if (newMap[y][x - 1] === this.tileTypes.WALL) newMap[y][x - 1] = this.tileTypes.FLOOR;
+                            if (newMap[y][x + 1] === this.tileTypes.WALL) newMap[y][x + 1] = this.tileTypes.FLOOR;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 3. 방 추가 로직은 넓혀진 맵을 기준으로 실행 ---
         const roomCount = 4;
         for (let i = 0; i < roomCount; i++) {
             const roomWidth = Math.floor(Math.random() * 3) + 3;
@@ -56,13 +81,13 @@ export class MapManager {
             const roomY = Math.floor(Math.random() * (this.height - roomHeight - 1) / 2) * 2 + 1;
             for (let y = roomY; y < roomY + roomHeight; y++) {
                 for (let x = roomX; x < roomX + roomWidth; x++) {
-                    map[y][x] = this.tileTypes.FLOOR;
+                    newMap[y][x] = this.tileTypes.FLOOR;
                 }
             }
             this.rooms.push({ x: roomX, y: roomY, width: roomWidth, height: roomHeight });
         }
-        
-        return map;
+
+        return newMap;
     }
     
     getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
