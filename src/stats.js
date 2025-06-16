@@ -1,19 +1,22 @@
 // src/stats.js
 
 export class StatManager {
-    constructor(config) {
+    constructor(config = {}) {
         // 1. 유닛의 기본 스탯 (직업, 몬스터 종류 등에 따라 결정)
-        this._baseStats = {
-            level: config.level || 1,
-            exp: config.exp || 0,
-            expNeeded: config.expNeeded || 20,
-            strength: config.strength || 1,
-            agility: config.agility || 1,
-            endurance: config.endurance || 1,
-            focus: config.focus || 1,
-            intelligence: config.intelligence || 1,
-            movement: config.movement || 3,
+        const defaults = {
+            level: 1,
+            exp: 0,
+            expNeeded: 20,
+            strength: 1,
+            agility: 1,
+            endurance: 1,
+            focus: 1,
+            intelligence: 1,
+            movement: 3,
         };
+
+        // config 객체에 추가로 전달된 값은 그대로 저장하여 활용할 수 있도록 한다
+        this._baseStats = { ...defaults, ...config };
         // 2. 플레이어가 직접 투자한 스탯
         this._pointsAllocated = {
             strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0

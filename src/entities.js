@@ -4,47 +4,53 @@ import { MeleeAI } from './ai.js';
 import { StatManager } from './stats.js';
 
 class Entity {
-    constructor(x, y, tileSize, image, groupId) {
+    constructor(x, y, tileSize, image, groupId, statsConfig = {}) {
         this.id = Math.random().toString(36).substr(2, 9);
         this.groupId = groupId;
         this.x = x;
         this.y = y;
-        this.width = tileSize;
-        this.height = tileSize;
         this.image = image;
-        this._speed = 4; // 기본 이동 속도 통일
+
+        // --- StatManager를 부모가 가장 먼저 생성! ---
+        this.stats = new StatManager(statsConfig);
+
+        this.width = (this.stats.get('sizeInTiles_w') || 1) * tileSize;
+        this.height = (this.stats.get('sizeInTiles_h') || 1) * tileSize;
+
+        this.hp = this.stats.get('maxHp');
         this.attackCooldown = 0;
-        this.hp = 1; this.maxHp = 1;
+
         this.isPlayer = false;
         this.isFriendly = false;
+        this.ai = null;
+
+        // 스탯에서 바로 불러올 수 있는 값들은 미리 설정
+        this.visionRange = this.stats.get('visionRange');
+        this.attackRange = this.stats.get('attackRange');
     }
-    get speed() {
-        return this._speed;
-    }
-    set speed(value) {
-        this._speed = value;
-    }
+
+    get speed() { return this.stats.get('movementSpeed'); }
+    get attackPower() { return this.stats.get('attackPower'); }
+
     render(ctx) {
         if (this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
     }
-    takeDamage(amount) {
-        this.hp -= amount;
+
+    takeDamage(damage) {
+        this.hp -= damage;
+        if (this.hp < 0) this.hp = 0;
     }
 }
 
 export class Player extends Entity {
-    constructor(x, y, tileSize, job, image, groupId) {
-        super(x, y, tileSize, image, groupId);
+    constructor(x, y, tileSize, image, groupId, job = {}) {
+        // 직업(job) 정보를 스탯 설정으로 전달
+        super(x, y, tileSize, image, groupId, job);
         this.isPlayer = true;
         this.isFriendly = true;
-        // 플레이어는 직접 조종하므로 AI가 없음
-        this.ai = null;
-
-        // StatManager 를 사용하여 스탯 관리
-        this.stats = new StatManager(job);
-        this.hp = this.stats.get('maxHp');
+        this.ai = null; // 플레이어는 직접 조종
         this._maxHpBonus = 0;
         this._attackPowerBonus = 0;
     }
@@ -54,67 +60,38 @@ export class Player extends Entity {
         this.stats.recalculate();
     }
 
-    get speed() {
-        return this.stats.get('movementSpeed');
-    }
-
+    get speed() { return this.stats.get('movementSpeed'); }
     set speed(value) {
-        // StatManager는 직접 값을 설정하는 메서드가 없으므로 기본 스탯을 수정
         this.stats._baseStats.movement = value;
         this.stats.recalculate();
     }
 
-    get attackPower() {
-        return this.stats.get('attackPower') + this._attackPowerBonus;
-    }
-
+    get attackPower() { return this.stats.get('attackPower') + this._attackPowerBonus; }
     set attackPower(value) {
         this._attackPowerBonus = value - this.stats.get('attackPower');
     }
 
-    get maxHp() {
-        return this.stats.get('maxHp') + this._maxHpBonus;
-    }
-
+    get maxHp() { return this.stats.get('maxHp') + this._maxHpBonus; }
     set maxHp(value) {
         this._maxHpBonus = value - this.stats.get('maxHp');
     }
 }
 
 export class Mercenary extends Entity {
-    constructor(x, y, tileSize, image, groupId) {
-        super(x, y, tileSize, image, groupId);
+    constructor(x, y, tileSize, image, groupId, job = {}) {
+        super(x, y, tileSize, image, groupId, job);
         this.isFriendly = true;
-        this.color = 'green';
-        this.hp = 15; this.maxHp = 15;
-        this.attackPower = 1;
-        this.visionRange = 192 * 4;
-        this.attackRange = 192 * 0.8;
-        // 이 용병은 '전사형 AI'를 사용
         this.ai = new MeleeAI();
     }
-    render(ctx) { /* ... Entity의 render를 사용, 필요시 재정의 ... */ }
 }
 
 export class Monster extends Entity {
-    constructor(x, y, tileSize, image, groupId, sizeInTiles = { w: 1, h: 1 }) {
-        super(x, y, tileSize, image, groupId);
+    constructor(x, y, tileSize, image, groupId, config = {}) {
+        super(x, y, tileSize, image, groupId, config);
         this.isFriendly = false;
-        this.sizeInTiles = sizeInTiles;
-        this.width = sizeInTiles.w * tileSize;
-        this.height = sizeInTiles.h * tileSize;
-
-        this.color = sizeInTiles.w > 1 ? 'purple' : 'red';
-        this.hp = sizeInTiles.w > 1 ? 10 : 3;
-        this.maxHp = this.hp;
-        this.attackPower = sizeInTiles.w > 1 ? 3 : 1;
-        this.expValue = sizeInTiles.w > 1 ? 15 : 5;
-        this.visionRange = 192 * 5;
-        this.attackRange = 192;
-        // 이 몬스터는 '전사형 AI'를 사용
         this.ai = new MeleeAI();
     }
-    render(ctx) { /* ... Entity의 render를 사용, 필요시 재정의 ... */ }
+    get expValue() { return this.stats.get('expValue'); }
 }
 
 export class Item { /* ... 변경 없음 ... */ }

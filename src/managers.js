@@ -31,7 +31,16 @@ export class MonsterManager {
             }
 
             if (pos) {
-                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 0, size));
+                const config = {
+                    sizeInTiles_w: size.w,
+                    sizeInTiles_h: size.h,
+                    strength: size.w > 1 ? 2 : 1,
+                    endurance: size.w > 1 ? 2 : 0,
+                    visionRange: 192 * 5,
+                    attackRange: 192,
+                    expValue: size.w > 1 ? 15 : 5
+                };
+                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 0, config));
             }
         }
     }
@@ -79,7 +88,15 @@ export class MercenaryManager {
     }
 
     hireMercenary(x, y, tileSize, groupId) {
-        const newMerc = new Mercenary(x, y, tileSize, this.assets.mercenary, groupId);
+        const job = {
+            strength: 2,
+            agility: 2,
+            endurance: 2,
+            movement: 4,
+            visionRange: 192 * 4,
+            attackRange: 192 * 0.8
+        };
+        const newMerc = new Mercenary(x, y, tileSize, this.assets.mercenary, groupId, job);
         this.mercenaries.push(newMerc);
         return newMerc;
     }
