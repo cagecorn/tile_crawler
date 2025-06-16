@@ -55,4 +55,21 @@ export class Monster extends Entity {
     }
 }
 
-export class Item { /* ... 변경 없음 ... */ }
+// 간단한 아이템 클래스 구현
+export class Item {
+    constructor(x, y, tileSize, name, image) {
+        this.id = Math.random().toString(36).substr(2, 9);
+        this.x = x;
+        this.y = y;
+        this.name = name;
+        this.image = image;
+        this.width = tileSize;
+        this.height = tileSize;
+    }
+
+    render(ctx) {
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+}

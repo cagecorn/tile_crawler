@@ -31,6 +31,7 @@ window.onload = function() {
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
         const mercenaryManager = new MercenaryManager(assets);
+        const itemManager = new ItemManager(20, mapManager, assets); // 아이템 20개 생성
         const uiManager = new UIManager();
         const metaAIManager = new MetaAIManager();
 
@@ -84,6 +85,7 @@ window.onload = function() {
             ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
+            itemManager.render(ctx); // 아이템을 그립니다.
             monsterManager.render(ctx);
             mercenaryManager.render(ctx);
             gameState.player.render(ctx);
@@ -119,6 +121,20 @@ window.onload = function() {
                 } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                     player.x = targetX;
                     player.y = targetY;
+
+                    // 아이템 줍기 로직
+                    const itemToPick = itemManager.items.find(item =>
+                        player.x < item.x + item.width &&
+                        player.x + player.width > item.x &&
+                        player.y < item.y + item.height &&
+                        player.y + player.height > item.y
+                    );
+
+                    if (itemToPick) {
+                        gameState.inventory.push(itemToPick); // 인벤토리에 추가
+                        itemManager.removeItem(itemToPick);   // 맵에서 제거
+                        console.log(`${itemToPick.name}을(를) 주웠습니다!`);
+                    }
                 }
             }
 
