@@ -1,6 +1,7 @@
 // src/managers.js
 
 import { Monster } from './entities.js';
+import { Item } from './entities.js'; // Item 클래스를 불러옵니다.
 
 export class MonsterManager {
     constructor(monsterCount, mapManager, assets) {
@@ -112,5 +113,36 @@ export class UIManager {
         ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
         ctx.strokeStyle = 'white';
         ctx.strokeRect(x, y, barWidth, barHeight);
+    }
+}
+
+// === 아래 ItemManager 클래스를 파일 맨 아래에 새로 추가 ===
+export class ItemManager {
+    constructor(itemCount, mapManager, assets) {
+        this.items = [];
+        this.mapManager = mapManager;
+        this.assets = assets;
+        this._spawnItems(itemCount);
+    }
+
+    _spawnItems(count) {
+        for (let i = 0; i < count; i++) {
+            const pos = this.mapManager.getRandomFloorPosition();
+            if (pos) {
+                // 지금은 'gold' 아이템만 생성
+                this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold));
+            }
+        }
+    }
+
+    // 특정 아이템을 맵에서 제거하는 함수
+    removeItem(itemToRemove) {
+        this.items = this.items.filter(item => item !== itemToRemove);
+    }
+
+    render(ctx) {
+        for (const item of this.items) {
+            item.render(ctx);
+        }
     }
 }
