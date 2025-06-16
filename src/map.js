@@ -82,8 +82,8 @@ export class MapManager {
             }
             if (canPlace) {
                 return {
-                    x: x * this.tileSize + (this.tileSize / 4),
-                    y: y * this.tileSize + (this.tileSize / 4)
+                    x: x * this.tileSize,
+                    y: y * this.tileSize
                 };
             }
             attempts++;
