@@ -176,13 +176,16 @@ window.onload = function() {
             }
         }
         
+        // 기존 checkForLevelUp 함수를 삭제하고 아래 코드로 교체해주세요.
         function checkForLevelUp() {
             const stats = gameState.player.stats;
+            // 현재 경험치가 필요 경험치보다 많거나 같은 동안 계속 반복
             while (stats.get('exp') >= stats.get('expNeeded')) {
-                stats.levelUp();
-                stats.recalculate();
-                gameState.player.hp = stats.get('maxHp');
-                gameState.statPoints += 5;
+                stats.levelUp(); // StatManager에 있는 levelUp 함수 호출
+                stats.recalculate(); // 스탯 재계산
+                gameState.player.hp = stats.get('maxHp'); // 체력을 최대로 회복
+                gameState.statPoints += 5; // 레벨업 시 스탯 포인트 5 지급
+                console.log("레벨 업! 현재 레벨: ", stats.get('level')); // 개발자 확인용 로그
             }
         }
         
