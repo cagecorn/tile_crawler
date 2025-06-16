@@ -5,14 +5,16 @@
 // '가만히 있는' 상태
 export class IdleState {
     update(monster, strategy, player) {
-        // 플레이어가 몬스터의 시야 안에 들어오면
-        const dx = player.x - monster.x;
-        const dy = player.y - monster.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        // 전략이 'aggressive'일 때만 플레이어 발견 시 추격 상태로 변경
+        if (strategy === 'aggressive') {
+            const dx = player.x - monster.x;
+            const dy = player.y - monster.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < monster.visionRange) {
-            // 몬스터의 상태를 '추격' 상태로 변경
-            monster.state = new ChasingState();
+            if (distance < monster.visionRange) {
+                // 몬스터의 상태를 '추격' 상태로 변경
+                monster.state = new ChasingState();
+            }
         }
     }
 }
