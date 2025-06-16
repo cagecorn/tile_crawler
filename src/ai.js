@@ -29,8 +29,8 @@ export class ChasingState {
         const dy = player.y - monster.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // 공격 범위 안에 있으면 공격
-        if (distance < monster.attackRange) {
+        // 공격 범위 안에 있으면 공격 (거리 포함)
+        if (distance <= monster.attackRange) {
             if (monster.attackCooldown === 0) {
                 onPlayerAttack(monster.attackPower);
                 monster.attackCooldown = 60; // 1초 쿨다운
