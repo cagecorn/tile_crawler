@@ -66,3 +66,21 @@ export class Monster {
         }
     }
 }
+
+// === 아래 Item 클래스를 파일 맨 아래에 새로 추가 ===
+export class Item {
+    constructor(x, y, tileSize, name, image) {
+        this.x = x;
+        this.y = y;
+        this.width = tileSize;
+        this.height = tileSize;
+        this.name = name;
+        this.image = image;
+    }
+
+    render(ctx) {
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+}
