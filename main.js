@@ -43,7 +43,7 @@ window.onload = function () {
             ),
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.25, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
+            zoomLevel: 0.5, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
         };
 
         // --- 3. 게임 루프와 로직 ---
