@@ -3,6 +3,7 @@
 import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager } from './src/managers.js';
 import { Player } from './src/entities.js'; // Player 클래스를 불러옵니다.
+import { AssetLoader } from './src/assetLoader.js';
 
 window.onload = function() {
     const canvas = document.getElementById('game-canvas');
@@ -10,29 +11,34 @@ window.onload = function() {
     function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    
-    // 매니저 인스턴스 생성
-    const mapManager = new MapManager();
-    const monsterManager = new MonsterManager(7, mapManager);
-    const uiManager = new UIManager(); // UIManager 생성
 
-    // '기본 전사' 라는 직업 객체를 정의 (전직 시스템의 기초)
-    const warriorJob = {
-        maxHp: 20,
-        attackPower: 2,
-    };
+    const loader = new AssetLoader();
+    loader.loadImage('floor', 'assets/images/metal.png');
+    loader.loadImage('wall', 'assets/images/wall-tile.png');
+    loader.loadImage('player', 'assets/images/player.png');
 
-    // gameState에서 player 객체를 Player 클래스의 인스턴스로 생성
-    const gameState = {
-        player: new Player(
-            mapManager.tileSize * 1.25, 
-            mapManager.tileSize * 1.25, 
-            mapManager.tileSize,
-            warriorJob // 직업 객체를 전달
-        ),
-        camera: { x: 0, y: 0 },
-        isGameOver: false
-    };
+    loader.onReady((assets) => {
+        // 매니저 인스턴스 생성
+        const mapManager = new MapManager();
+        const monsterManager = new MonsterManager(7, mapManager);
+        const uiManager = new UIManager();
+
+        const warriorJob = {
+            maxHp: 20,
+            attackPower: 2,
+        };
+
+        const gameState = {
+            player: new Player(
+                mapManager.tileSize * 1.25,
+                mapManager.tileSize * 1.25,
+                mapManager.tileSize,
+                warriorJob,
+                assets.player
+            ),
+            camera: { x: 0, y: 0 },
+            isGameOver: false
+        };
 
     function render() {
         if (gameState.isGameOver) return;
@@ -49,7 +55,7 @@ window.onload = function() {
         ctx.save();
         ctx.translate(-camera.x, -camera.y);
 
-        mapManager.render(ctx);
+        mapManager.render(ctx, assets);
         monsterManager.render(ctx);
         player.render(ctx); // player의 render 메서드 호출
         uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters); // HP 바 그리기
@@ -104,5 +110,6 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
     gameLoop();
+    });
 };
 
