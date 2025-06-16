@@ -77,12 +77,6 @@ export class UIManager {
         // UI 요소들 찾아두기
         this.levelElement = document.getElementById('ui-player-level');
         this.statPointsElement = document.getElementById('ui-player-statPoints');
-        this.strengthElement = document.getElementById('ui-player-strength');
-        this.agilityElement = document.getElementById('ui-player-agility');
-        this.enduranceElement = document.getElementById('ui-player-endurance');
-        this.focusElement = document.getElementById('ui-player-focus');
-        this.intelligenceElement = document.getElementById('ui-player-intelligence');
-        this.movementElement = document.getElementById('ui-player-movement');
         this.movementSpeedElement = document.getElementById('ui-player-movementSpeed');
         this.hpElement = document.getElementById('ui-player-hp');
         this.maxHpElement = document.getElementById('ui-player-maxHp');
@@ -93,31 +87,37 @@ export class UIManager {
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
 
-        this.plusButtons = {
-            strength: document.getElementById('btn-plus-strength'),
-            agility: document.getElementById('btn-plus-agility'),
-            endurance: document.getElementById('btn-plus-endurance'),
-            focus: document.getElementById('btn-plus-focus'),
-            intelligence: document.getElementById('btn-plus-intelligence'),
-            movement: document.getElementById('btn-plus-movement'),
-        };
-
-        this._statUpCallback = null;
-
-        for (const [stat, btn] of Object.entries(this.plusButtons)) {
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    if (this._statUpCallback) this._statUpCallback(stat);
-                });
-            }
-        }
+        // 버튼 이벤트 위임을 위해 부모 컨테이너를 저장
+        this.statUpButtonsContainer = document.getElementById('player-stats-container');
 
         // 현재 인벤토리 상태 저장용 배열 (UI 빈번한 재생성 방지)
         this._lastInventory = [];
+
+        this._statUpCallback = null;
+        this._isInitialized = false;
+    }
+
+    init(onStatUp) {
+        if (this._isInitialized) return;
+        this._statUpCallback = onStatUp;
+        if (this.statUpButtonsContainer) {
+            this.statUpButtonsContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('stat-up-btn') || event.target.classList.contains('stat-plus')) {
+                    let stat = event.target.dataset.stat;
+                    if (!stat && event.target.id && event.target.id.startsWith('btn-plus-')) {
+                        stat = event.target.id.replace('btn-plus-', '');
+                    }
+                    if (stat && this._statUpCallback) {
+                        this._statUpCallback(stat);
+                    }
+                }
+            });
+        }
+        this._isInitialized = true;
     }
 
     setStatUpCallback(cb) {
-        this._statUpCallback = cb;
+        this.init(cb);
     }
 
     updateUI(gameState) {
@@ -127,12 +127,16 @@ export class UIManager {
         // 스탯 업데이트 - StatManager에서 값을 읽어옴
         this.levelElement.textContent = stats.get('level');
         this.statPointsElement.textContent = gameState.statPoints;
-        this.strengthElement.textContent = stats.get('strength');
-        this.agilityElement.textContent = stats.get('agility');
-        this.enduranceElement.textContent = stats.get('endurance');
-        this.focusElement.textContent = stats.get('focus');
-        this.intelligenceElement.textContent = stats.get('intelligence');
-        this.movementElement.textContent = stats.get('movement');
+
+        const primaryStats = ['strength', 'agility', 'endurance', 'focus', 'intelligence', 'movement'];
+        primaryStats.forEach(stat => {
+            const valueElement = document.getElementById(`ui-player-${stat}`);
+            const buttonElement = valueElement ? valueElement.nextElementSibling : null;
+            if (valueElement) valueElement.textContent = stats.get(stat);
+            if (buttonElement) {
+                buttonElement.style.display = gameState.statPoints > 0 ? 'inline-block' : 'none';
+            }
+        });
 
         this.hpElement.textContent = Math.ceil(player.hp);
         this.maxHpElement.textContent = stats.get('maxHp');
@@ -149,10 +153,7 @@ export class UIManager {
         this.expBarFillElement.style.width = `${expRatio * 100}%`;
         this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
 
-        const showPlus = gameState.statPoints > 0;
-        for (const btn of Object.values(this.plusButtons)) {
-            if (btn) btn.style.display = showPlus ? 'inline' : 'none';
-        }
+
 
         // 인벤토리 내용이 변경된 경우에만 DOM을 갱신하여 클릭 이벤트 손실을 방지
         if (this._hasInventoryChanged(gameState.inventory)) {
