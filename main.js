@@ -43,6 +43,7 @@ window.onload = function () {
             ),
             camera: { x: 0, y: 0 },
             isGameOver: false,
+            zoomLevel: 0.25, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
         };
 
         // --- 3. 게임 루프와 로직 ---
@@ -50,15 +51,22 @@ window.onload = function () {
             if (gameState.isGameOver) return;
             const camera = gameState.camera;
             const player = gameState.player;
+            const zoom = gameState.zoomLevel;
 
-            let targetCameraX = player.x - canvas.width / 2;
-            let targetCameraY = player.y - canvas.height / 2;
+            // 줌 레벨에 맞춰 카메라 위치를 다시 계산
+            let targetCameraX = player.x - (canvas.width / 2) / zoom;
+            let targetCameraY = player.y - (canvas.height / 2) / zoom;
+
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
-            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width));
-            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height));
+
+            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
+            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
 
             ctx.save();
+
+            // --- 줌 기능 적용 ---
+            ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
             monsterManager.render(ctx);
