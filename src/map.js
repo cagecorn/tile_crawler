@@ -105,11 +105,16 @@ export class MapManager {
         return false;
     }
 
-    render(ctx) {
+    render(ctx, assets) {
+        const wallImage = assets.wall;
+        const floorImage = assets.floor;
+
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                ctx.fillStyle = (this.map[y][x] === this.tileTypes.WALL) ? '#555' : '#222';
-                ctx.fillRect(x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
+                const imageToDraw = (this.map[y][x] === this.tileTypes.WALL) ? wallImage : floorImage;
+                if (imageToDraw) {
+                    ctx.drawImage(imageToDraw, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
+                }
             }
         }
     }
