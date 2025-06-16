@@ -78,3 +78,38 @@ body, html {
     border-radius: 2px;
     transition: width 0.2s ease-in-out; /* HP\uac00 \ubd80\ub4dc\ub7ec\uc6b4 \ubc29\uc2dd\uc73c\ub85c \ubcc0\ud3ec \ucd94\uac00 */
 }
+
+/* ===== 인벤토리 UI 스타일 ===== */
+
+#inventory-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#inventory-section h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+#inventory-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 5px;
+    min-height: 48px; /* 인벤토리가 비어있어도 최소 높이 유지 */
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.inventory-slot {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #777;
+    background-color: #333;
+}
+
+.inventory-slot img {
+    width: 100%;
+    height: 100%;
+}
