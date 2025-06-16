@@ -3,35 +3,34 @@
 import { Monster } from './entities.js';
 
 export class MonsterManager {
-    constructor(monsterCount, mapManager) {
+    constructor(monsterCount, mapManager, assets) {
         this.monsters = [];
         this.mapManager = mapManager;
+        this.assets = assets;
         this._spawnMonsters(monsterCount);
     }
 
     _spawnMonsters(count) {
         for (let i = 0; i < count; i++) {
-            let size = {w: 1, h: 1};
+            let size = { w: 1, h: 1 };
+            let image = this.assets.monster;
             if (Math.random() < 0.25) {
-                size = {w: 2, h: 2};
+                size = { w: 2, h: 2 };
+                image = this.assets.epic_monster;
             }
-            
+
             let pos;
             if (size.w > 1) {
                 if (this.mapManager.rooms.length > 0) {
                     const room = this.mapManager.rooms[Math.floor(Math.random() * this.mapManager.rooms.length)];
-                    pos = {
-                        x: room.x * this.mapManager.tileSize,
-                        y: room.y * this.mapManager.tileSize
-                    };
+                    pos = { x: room.x * this.mapManager.tileSize, y: room.y * this.mapManager.tileSize };
                 }
-            } 
-            else {
+            } else {
                 pos = this.mapManager.getRandomFloorPosition(size);
             }
-            
+
             if (pos) {
-                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, size));
+                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, size));
             }
         }
     }
@@ -101,17 +100,19 @@ export class UIManager {
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp <= 0 || entity.hp === entity.maxHp) {
-            return;
-        }
+        if (entity.hp <= 0 || entity.hp === entity.maxHp) return;
         const barWidth = entity.width;
-        const barHeight = 5;
+        const barHeight = 8;
         const x = entity.x;
-        const y = entity.y - 10;
-        ctx.fillStyle = '#ff0000';
+        const y = entity.y - barHeight - 5;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(x, y, barWidth, barHeight);
+
         const hpRatio = entity.hp / entity.maxHp;
-        ctx.fillStyle = '#00ff00';
+        ctx.fillStyle = hpRatio > 0.5 ? '#00ff00' : hpRatio > 0.2 ? '#ffff00' : '#ff0000';
         ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
+        ctx.strokeStyle = 'white';
+        ctx.strokeRect(x, y, barWidth, barHeight);
     }
 }
