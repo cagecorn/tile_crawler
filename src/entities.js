@@ -94,4 +94,20 @@ export class Monster extends Entity {
     get expValue() { return this.stats.get('expValue'); }
 }
 
-export class Item { /* ... 변경 없음 ... */ }
+// 간단한 아이템 객체
+export class Item {
+    constructor(x, y, tileSize, name, image) {
+        this.x = x;
+        this.y = y;
+        this.name = name;
+        this.image = image;
+        this.width = tileSize;
+        this.height = tileSize;
+    }
+
+    render(ctx) {
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+}
