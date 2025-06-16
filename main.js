@@ -51,6 +51,8 @@ window.onload = function () {
             zoomLevel: 0.5, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
         };
 
+        uiManager.init(gameState);
+
         // --- 3. 게임 루프와 로직 ---
         function render() {
             if (gameState.isGameOver) return;
@@ -80,7 +82,7 @@ window.onload = function () {
             uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
             ctx.restore();
 
-            uiManager.updatePlayerStats(gameState);
+            uiManager.updateUI();
         }
 
         const keysPressed = {};
