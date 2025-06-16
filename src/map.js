@@ -9,7 +9,7 @@ export class MapManager {
     constructor() {
         this.width = 21;
         this.height = 17;
-        this.tileSize = 48;
+        this.tileSize = 192;
         this.tileTypes = TILE_TYPES;
         this.rooms = []; // 생성된 방의 정보를 저장할 배열
         this.map = this._generateMaze();
