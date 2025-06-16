@@ -1,6 +1,7 @@
 // src/entities.js
 
 import { IdleState } from './ai.js';
+import { StatManager } from './stats.js'; // StatManager를 불러옵니다.
 
 export class Player {
     constructor(x, y, tileSize, job, image) {
@@ -8,19 +9,48 @@ export class Player {
         this.y = y;
         this.width = tileSize;
         this.height = tileSize;
-        this.image = image; // 'color' 대신 'image' 사용
-        this.speed = 5;
+        this.image = image;
 
-        this.hp = job.maxHp;
-        this.maxHp = job.maxHp;
-        this.attackPower = job.attackPower;
+        // --- StatManager를 생성하고 플레이어의 모든 스탯을 위임 ---
+        this.stats = new StatManager(job);
 
-        // --- 레벨 및 경험치 속성 추가 ---
+        this.hp = this.stats.get('maxHp'); // 현재 HP
+        this._maxHpBonus = 0;
+        this._attackPowerBonus = 0;
+
+        // --- 레벨 및 경험치 속성 ---
         this.level = 1;
         this.exp = 0;
         this.expNeeded = 20; // 다음 레벨까지 필요한 경험치
 
         this.attackCooldown = 0;
+    }
+
+    // 스탯이 오르면 StatManager에 알리고 재계산
+    allocateStatPoint(stat) {
+        this.stats.increaseBaseStat(stat, 1);
+        this.stats.recalculate();
+    }
+
+    // 파생 스탯이 필요할 땐 StatManager에 요청
+    get speed() {
+        return this.stats.get('movementSpeed');
+    }
+
+    get attackPower() {
+        return this.stats.get('attackPower') + this._attackPowerBonus;
+    }
+
+    set attackPower(value) {
+        this._attackPowerBonus = value - this.stats.get('attackPower');
+    }
+
+    get maxHp() {
+        return this.stats.get('maxHp') + this._maxHpBonus;
+    }
+
+    set maxHp(value) {
+        this._maxHpBonus = value - this.stats.get('maxHp');
     }
 
     takeDamage(damage) {
