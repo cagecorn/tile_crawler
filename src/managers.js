@@ -72,41 +72,44 @@ export class MonsterManager {
 // === UIManager 클래스 전체 수정 ===
 export class UIManager {
     constructor() {
-        // UI의 각 부분을 미리 찾아 변수에 저장
+        // 플레이어 정보 표시 영역과 인벤토리 영역 요소를 미리 찾아 둔다
+        this.statsContainer = document.getElementById('player-stats-container');
+        this.goldElement = document.getElementById('ui-player-gold');
+        this.inventorySlotsElement = document.getElementById('inventory-slots');
+
+        // HP, 공격력 등 기존 스탯 요소들도 저장해 둔다
         this.hpElement = document.getElementById('ui-player-hp');
         this.maxHpElement = document.getElementById('ui-player-maxHp');
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
-        this.goldElement = document.getElementById('ui-player-gold');
-        this.inventorySlotsElement = document.getElementById('inventory-slots');
     }
 
     // 플레이어 정보창을 업데이트하는 메서드
     updatePlayerStats(gameState) {
         const player = gameState.player;
-        // 각 요소의 텍스트와 스타일을 직접 업데이트
+
+        // 기본 능력치 표시
         this.hpElement.textContent = player.hp;
         this.maxHpElement.textContent = player.maxHp;
         this.attackPowerElement.textContent = player.attackPower;
-        this.goldElement.textContent = gameState.gold;
 
         const hpRatio = player.hp / player.maxHp;
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
 
+        // 골드 UI 업데이트
+        this.goldElement.textContent = gameState.gold;
+
         // 인벤토리 UI 업데이트
-        if (this.inventorySlotsElement) {
-            this.inventorySlotsElement.innerHTML = '';
-            for (const item of gameState.inventory) {
-                const slot = document.createElement('div');
-                slot.className = 'inventory-slot';
-                if (item.image) {
-                    const img = document.createElement('img');
-                    img.src = item.image.src;
-                    slot.appendChild(img);
-                }
-                this.inventorySlotsElement.appendChild(slot);
-            }
-        }
+        this.inventorySlotsElement.innerHTML = '';
+        gameState.inventory.forEach(item => {
+            const slot = document.createElement('div');
+            slot.className = 'inventory-slot';
+            const img = document.createElement('img');
+            img.src = item.image.src;
+            img.alt = item.name;
+            slot.appendChild(img);
+            this.inventorySlotsElement.appendChild(slot);
+        });
     }
 
     // HP 바를 그리는 메서드 (이전과 동일)
