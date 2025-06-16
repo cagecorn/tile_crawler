@@ -4,12 +4,13 @@ import { IdleState } from './ai.js';
 import { StatManager } from './stats.js'; // StatManager를 불러옵니다.
 
 export class Player {
-    constructor(x, y, tileSize, job, image) {
+    constructor(x, y, tileSize, job, image, groupId) {
         this.x = x;
         this.y = y;
         this.width = tileSize;
         this.height = tileSize;
         this.image = image;
+        this.groupId = groupId;
 
         // --- StatManager를 생성하고 플레이어의 모든 스탯을 위임 ---
         this.stats = new StatManager(job);
@@ -75,10 +76,11 @@ export class Player {
 }
 
 export class Monster {
-    constructor(x, y, tileSize, image, sizeInTiles = {w: 1, h: 1}) {
+    constructor(x, y, tileSize, image, groupId, sizeInTiles = {w: 1, h: 1}) {
         this.id = Math.random().toString(36).substr(2, 9);
         this.x = x;
         this.y = y;
+        this.groupId = groupId;
         this.sizeInTiles = sizeInTiles;
         // 픽셀 크기 계산을 조금 더 정확하게 수정
         this.width = sizeInTiles.w * tileSize;
@@ -98,8 +100,8 @@ export class Monster {
         this.state = new IdleState();
     }
 
-    update(player, mapManager, onPlayerAttack) {
-        this.state.update(this, player, mapManager, onPlayerAttack);
+    update(strategy, player, mapManager, onPlayerAttack) {
+        this.state.update(this, strategy, player, mapManager, onPlayerAttack);
     }
 
     takeDamage(amount) {

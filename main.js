@@ -50,7 +50,8 @@ window.onload = function() {
                 startPos.y,
                 mapManager.tileSize,
                 warriorJob,
-                assets.player
+                assets.player,
+                0
             ),
             inventory: [],
             gold: 0,
