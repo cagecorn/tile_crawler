@@ -1,16 +1,20 @@
 // src/entities.js
 
-import { IdleState } from './ai.js';
+import { MeleeAI } from './ai.js';
 import { StatManager } from './stats.js'; // StatManager를 불러옵니다.
 
 export class Player {
     constructor(x, y, tileSize, job, image, groupId) {
         this.x = x;
         this.y = y;
+        this.tileSize = tileSize;
         this.width = tileSize;
         this.height = tileSize;
         this.image = image;
         this.groupId = groupId;
+
+        this.isPlayer = true;
+        this.isFriendly = true;
 
         // --- StatManager를 생성하고 플레이어의 모든 스탯을 위임 ---
         this.stats = new StatManager(job);
@@ -86,6 +90,10 @@ export class Monster {
         this.width = sizeInTiles.w * tileSize;
         this.height = sizeInTiles.h * tileSize;
         this.image = image;
+        this.tileSize = tileSize;
+
+        this.isPlayer = false;
+        this.isFriendly = false;
 
         this.hp = (sizeInTiles.w > 1) ? 10 : 3;
         this.maxHp = this.hp;
@@ -97,11 +105,41 @@ export class Monster {
         this.attackRange = tileSize;
         this.visionRange = tileSize * 5;
         this.attackCooldown = 0;
-        this.state = new IdleState();
+        this.ai = new MeleeAI();
     }
 
-    update(strategy, player, mapManager, onPlayerAttack) {
-        this.state.update(this, strategy, player, mapManager, onPlayerAttack);
+    update(context) {
+        if (this.attackCooldown > 0) this.attackCooldown--;
+        const action = this.ai.decideAction(this, context);
+        const { mapManager } = context;
+
+        if (action.type === 'move' && action.target) {
+            const dx = action.target.x - this.x;
+            const dy = action.target.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance > 0) {
+                const moveX = (dx / distance) * this.speed;
+                const moveY = (dy / distance) * this.speed;
+                const newX = this.x + moveX;
+                const newY = this.y + moveY;
+                if (!mapManager.isWallAt(newX, newY, this.width, this.height)) {
+                    this.x = newX;
+                    this.y = newY;
+                }
+            }
+        } else if (action.type === 'attack' && action.target) {
+            if (this.attackCooldown === 0) {
+                if (action.target.isPlayer && context.onPlayerAttack) {
+                    context.onPlayerAttack(this.attackPower);
+                } else if (context.monsterManager && !action.target.isFriendly) {
+                    const gained = context.monsterManager.handleAttackOnMonster(action.target.id, this.attackPower);
+                    if (gained > 0 && context.onGainExp) context.onGainExp(gained);
+                } else {
+                    action.target.takeDamage(this.attackPower);
+                }
+                this.attackCooldown = 60;
+            }
+        }
     }
 
     takeDamage(amount) {
@@ -110,6 +148,73 @@ export class Monster {
 
     render(ctx) {
         // fillRect 대신 drawImage 사용
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+}
+
+export class Mercenary {
+    constructor(x, y, tileSize, image, groupId) {
+        this.id = Math.random().toString(36).substr(2, 9);
+        this.x = x;
+        this.y = y;
+        this.tileSize = tileSize;
+        this.width = tileSize;
+        this.height = tileSize;
+        this.image = image;
+        this.groupId = groupId;
+
+        this.isPlayer = false;
+        this.isFriendly = true;
+
+        this.hp = 5;
+        this.maxHp = 5;
+        this.speed = 2;
+        this.attackPower = 2;
+        this.attackRange = tileSize;
+        this.visionRange = tileSize * 5;
+        this.attackCooldown = 0;
+        this.ai = new MeleeAI();
+    }
+
+    update(context) {
+        if (this.attackCooldown > 0) this.attackCooldown--;
+        const action = this.ai.decideAction(this, context);
+        const { mapManager } = context;
+
+        if (action.type === 'move' && action.target) {
+            const dx = action.target.x - this.x;
+            const dy = action.target.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance > 0) {
+                const moveX = (dx / distance) * this.speed;
+                const moveY = (dy / distance) * this.speed;
+                const newX = this.x + moveX;
+                const newY = this.y + moveY;
+                if (!mapManager.isWallAt(newX, newY, this.width, this.height)) {
+                    this.x = newX;
+                    this.y = newY;
+                }
+            }
+        } else if (action.type === 'attack' && action.target) {
+            if (this.attackCooldown === 0) {
+                if (!action.target.isFriendly && context.monsterManager) {
+                    const gained = context.monsterManager.handleAttackOnMonster(action.target.id, this.attackPower);
+                    if (gained > 0 && context.onGainExp) context.onGainExp(gained);
+                } else {
+                    action.target.takeDamage(this.attackPower);
+                }
+                this.attackCooldown = 30;
+            }
+        }
+    }
+
+    takeDamage(amount) {
+        this.hp -= amount;
+    }
+
+    render(ctx) {
         if (this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }

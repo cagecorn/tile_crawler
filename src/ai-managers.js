@@ -44,14 +44,48 @@ export class MetaAIManager {
         }
     }
 
-    // 모든 그룹의 AI를 업데이트
-    update(player, mapManager, onPlayerAttack) {
+    // 특정 엔티티를 그룹에서 제거
+    removeEntity(entity) {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
-            for (const member of group.members) {
-                // member가 update 메서드를 가질 때만 호출합니다.
+            group.members = group.members.filter(m => m !== entity);
+        }
+    }
+
+    // 모든 그룹의 AI를 업데이트
+    update(player, mapManager, monsterManager, onPlayerAttack, onGainExp) {
+        const playerGroup = this.groups['player_party'];
+        const monsterGroup = this.groups['dungeon_monsters'];
+
+        if (playerGroup) {
+            for (const member of playerGroup.members) {
+                if (member.isPlayer) continue; // 플레이어는 직접 제어
                 if (typeof member.update === 'function') {
-                    member.update(group.strategy, player, mapManager, onPlayerAttack);
+                    member.update({
+                        player,
+                        allies: playerGroup.members,
+                        enemies: monsterGroup ? monsterGroup.members : [],
+                        mapManager,
+                        monsterManager,
+                        onGainExp
+                    });
+                    if (member.hp <= 0) this.removeEntity(member);
+                }
+            }
+        }
+
+        if (monsterGroup) {
+            for (const member of monsterGroup.members) {
+                if (typeof member.update === 'function') {
+                    member.update({
+                        player,
+                        allies: monsterGroup.members,
+                        enemies: playerGroup ? playerGroup.members : [],
+                        mapManager,
+                        onPlayerAttack,
+                        monsterManager
+                    });
+                    if (member.hp <= 0) this.removeEntity(member);
                 }
             }
         }
