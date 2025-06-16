@@ -49,9 +49,7 @@ Open `index.html` in a modern web browser to start the game.
 
 ### Dungeon Generation
 Each floor is carved from a depth-first search maze. Corridors span seven~10 tiles,
-and the exit is placed on a randomly chosen cell that the algorithm visited. The
-maze generator now creates more rooms and slightly wider passages so the player
-won't start trapped in a wall.
+and the exit is placed on a randomly chosen cell that the algorithm visited.
 
 ## 스킬 풀
 
