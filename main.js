@@ -136,14 +136,11 @@ window.onload = function() {
                 if (itemToPick.name === 'gold') {
                     gameState.gold += 10; // 예시: 골드 10씩 증가
                     console.log(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
-                } else if (itemToPick.name === 'potion') {
-                    player.hp = Math.min(player.stats.get('maxHp'), player.hp + 5);
-                    console.log(`포션을 주워 바로 사용했습니다! HP +5`);
+                } else {
+                    // 포션을 포함한 다른 아이템은 인벤토리에 저장
+                    gameState.inventory.push(itemToPick);
+                    console.log(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
                 }
-                // 다른 아이템은 추후에 여기에 추가할 수 있습니다.
-                // else {
-                //    gameState.inventory.push(itemToPick); // 골드, 포션 외 다른 아이템은 인벤토리에 추가
-                // }
 
                 itemManager.removeItem(itemToPick); // 맵에서 아이템 제거
             }
