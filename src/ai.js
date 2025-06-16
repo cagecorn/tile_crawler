@@ -4,7 +4,7 @@
 
 // '가만히 있는' 상태
 export class IdleState {
-    update(monster, player) {
+    update(monster, strategy, player) {
         // 플레이어가 몬스터의 시야 안에 들어오면
         const dx = player.x - monster.x;
         const dy = player.y - monster.y;
@@ -19,7 +19,7 @@ export class IdleState {
 
 // '추격하는' 상태
 export class ChasingState {
-    update(monster, player, mapManager, onPlayerAttack) {
+    update(monster, strategy, player, mapManager, onPlayerAttack) {
         // 공격 쿨다운 감소
         if (monster.attackCooldown > 0) {
             monster.attackCooldown--;

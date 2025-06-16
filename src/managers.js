@@ -31,7 +31,7 @@ export class MonsterManager {
             }
 
             if (pos) {
-                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, size));
+                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 0, size));
             }
         }
     }
@@ -60,7 +60,7 @@ export class MonsterManager {
 
     update(player, onPlayerAttack) {
         for (const monster of this.monsters) {
-            monster.update(player, this.mapManager, onPlayerAttack);
+            monster.update('aggressive', player, this.mapManager, onPlayerAttack);
         }
     }
 
