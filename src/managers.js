@@ -1,7 +1,7 @@
 // src/managers.js
 
-import { Monster } from './entities.js';
-import { Item } from './entities.js'; // Item 클래스를 불러옵니다.
+import { Monster, Item, Mercenary } from './entities.js'; // Mercenary 추가
+import { MetaAIManager as BaseMetaAI } from './ai-managers.js'; // 이름 충돌 방지
 
 export class MonsterManager {
     constructor(monsterCount, mapManager, assets) {
@@ -67,6 +67,26 @@ export class MonsterManager {
     render(ctx) {
         for (const monster of this.monsters) {
             monster.render(ctx);
+        }
+    }
+}
+
+// === MercenaryManager 새로 추가 ===
+export class MercenaryManager {
+    constructor(assets) {
+        this.mercenaries = [];
+        this.assets = assets;
+    }
+
+    hireMercenary(x, y, tileSize, groupId) {
+        const newMerc = new Mercenary(x, y, tileSize, this.assets.mercenary, groupId);
+        this.mercenaries.push(newMerc);
+        return newMerc;
+    }
+
+    render(ctx) {
+        for (const merc of this.mercenaries) {
+            merc.render(ctx);
         }
     }
 }
@@ -266,6 +286,60 @@ export class ItemManager {
     render(ctx) {
         for (const item of this.items) {
             item.render(ctx);
+        }
+    }
+}
+
+// === MetaAIManager 로직 수정 ===
+export class MetaAIManager extends BaseMetaAI {
+    // 유닛의 행동을 실제로 실행하는 함수
+    executeAction(entity, action, context) {
+        if (!action) return;
+
+        const { player, mapManager, onPlayerAttack, onMonsterAttacked } = context;
+
+        switch (action.type) {
+            case 'attack':
+                if (entity.attackCooldown === 0) {
+                    if (entity.isFriendly) {
+                        onMonsterAttacked(action.target.id, entity.attackPower);
+                    } else {
+                        onPlayerAttack(entity.attackPower);
+                    }
+                    entity.attackCooldown = 60;
+                }
+                break;
+            case 'move':
+                const dx = action.target.x - entity.x;
+                const dy = action.target.y - entity.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 1) {
+                    let moveX = (dx / distance) * entity.speed;
+                    let moveY = (dy / distance) * entity.speed;
+                    const newX = entity.x + moveX;
+                    const newY = entity.y + moveY;
+                    if (!mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
+                        entity.x = newX;
+                        entity.y = newY;
+                    }
+                }
+                break;
+            case 'idle':
+            default:
+                break;
+        }
+    }
+
+    update(context) {
+        for (const groupId in this.groups) {
+            const group = this.groups[groupId];
+            for (const member of group.members) {
+                if (member.attackCooldown > 0) member.attackCooldown--;
+                if (member.ai) {
+                    const action = member.ai.decideAction(member, context);
+                    this.executeAction(member, action, context);
+                }
+            }
         }
     }
 }
