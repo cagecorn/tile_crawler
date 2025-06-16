@@ -168,17 +168,18 @@ window.onload = function() {
             const camera = gameState.camera;
             const player = gameState.player;
 
-            let targetCameraX = player.x - canvas.width / 2;
-            let targetCameraY = player.y - canvas.height / 2;
+            const zoom = gameState.zoomLevel; // zoomLevel 값을 가져옴
+
+            let targetCameraX = player.x - canvas.width / (2 * zoom);
+            let targetCameraY = player.y - canvas.height / (2 * zoom);
 
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
 
-            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width));
-            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height));
+            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
+            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
 
             ctx.save();
-            const zoom = gameState.zoomLevel; // zoomLevel 값을 가져옴
             ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
