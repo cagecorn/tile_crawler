@@ -2,6 +2,7 @@
 
 export class StatManager {
     constructor(config) {
+        // 1. 유닛의 기본 스탯
         this._baseStats = {
             level: config.level || 1,
             exp: config.exp || 0,
@@ -15,15 +16,16 @@ export class StatManager {
             expValue: config.expValue || 0,
             sizeInTiles_w: config.sizeInTiles_w || 1,
             sizeInTiles_h: config.sizeInTiles_h || 1,
+            visionRange: config.visionRange || 192 * 4,
+            attackRange: config.attackRange || 192,
         };
+        // 2. 플레이어가 직접 투자한 스탯
         this._pointsAllocated = {
-            strength: 0,
-            agility: 0,
-            endurance: 0,
-            focus: 0,
-            intelligence: 0,
+            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0
         };
+        // 3. 최종 계산된 파생 스탯
         this.derivedStats = {};
+
         this.recalculate();
     }
 
@@ -35,17 +37,17 @@ export class StatManager {
 
     recalculate() {
         const final = { ...this._baseStats };
+        // --- 수정된 부분: 포인트로 올린 스탯을 정확하게 합산 ---
         for (const stat in this._pointsAllocated) {
-            final[stat] += this._pointsAllocated[stat];
+            final[stat] = (this._baseStats[stat] || 0) + this._pointsAllocated[stat];
         }
 
         // --- 파생 스탯 계산 ---
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = 1 + final.strength * 2;
         // === 누락되었던 이동속도 계산 로직 추가 ===
-        final.movementSpeed = final.movement; // 지금은 무게가 없으므로 기본 이동속도와 동일하게 설정
+        final.movementSpeed = final.movement;
 
-        // 모든 계산된 스탯을 derivedStats에 저장
         this.derivedStats = final;
     }
 
