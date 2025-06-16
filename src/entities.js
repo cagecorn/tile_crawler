@@ -2,21 +2,18 @@
 
 import { IdleState } from './ai.js';
 
-// --- Player 클래스 새로 추가 ---
 export class Player {
-    constructor(x, y, tileSize, job) {
+    constructor(x, y, tileSize, job, image) {
         this.x = x;
         this.y = y;
         this.width = tileSize / 2;
         this.height = tileSize / 2;
-        this.color = 'blue';
+        this.image = image; // 'color' 대신 'image' 사용
         this.speed = 5;
 
-        // 직업(job) 객체로부터 능력치를 설정
         this.hp = job.maxHp;
         this.maxHp = job.maxHp;
         this.attackPower = job.attackPower;
-
         this.attackCooldown = 0;
     }
 
@@ -26,32 +23,31 @@ export class Player {
     }
 
     render(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        // fillRect 대신 drawImage 사용
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
     }
 }
 
 export class Monster {
-    constructor(x, y, tileSize, sizeInTiles = {w: 1, h: 1}) {
+    constructor(x, y, tileSize, image, sizeInTiles = {w: 1, h: 1}) {
         this.id = Math.random().toString(36).substr(2, 9);
         this.x = x;
         this.y = y;
-        
         this.sizeInTiles = sizeInTiles;
-        this.width = sizeInTiles.w * tileSize - (tileSize / 2);
-        this.height = sizeInTiles.h * tileSize - (tileSize / 2);
+        // 픽셀 크기 계산을 조금 더 정확하게 수정
+        this.width = sizeInTiles.w * tileSize;
+        this.height = sizeInTiles.h * tileSize;
+        this.image = image;
 
-        this.color = (sizeInTiles.w > 1) ? 'purple' : 'red';
-        
         this.hp = (sizeInTiles.w > 1) ? 10 : 3;
         this.maxHp = this.hp;
-
         this.speed = 2;
         this.attackPower = (sizeInTiles.w > 1) ? 3 : 1;
-        this.attackRange = tileSize * 0.8;
+        this.attackRange = tileSize;
         this.visionRange = tileSize * 5;
         this.attackCooldown = 0;
-
         this.state = new IdleState();
     }
 
@@ -64,7 +60,9 @@ export class Monster {
     }
 
     render(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        // fillRect 대신 drawImage 사용
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
     }
 }
