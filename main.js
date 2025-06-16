@@ -112,8 +112,20 @@ window.onload = function () {
                 targetY + player.height / 2
             );
             if (monsterToAttack && player.attackCooldown === 0) {
-                monsterManager.handleAttackOnMonster(monsterToAttack.id, player.attackPower);
+                // handleAttackOnMonster가 반환하는 경험치를 받음
+                const gainedExp = monsterManager.handleAttackOnMonster(
+                    monsterToAttack.id,
+                    player.attackPower
+                );
+
+                // 경험치를 얻었다면 (몬스터가 죽었다면)
+                if (gainedExp > 0) {
+                    player.exp += gainedExp;
+                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.exp}`);
+                    checkForLevelUp(); // 레벨업 확인
+                }
                 player.attackCooldown = 30;
+
             } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                 player.x = targetX;
                 player.y = targetY;
@@ -121,6 +133,23 @@ window.onload = function () {
 
             handleItemCollision();
             monsterManager.update(gameState.player, handlePlayerAttacked);
+        }
+
+        // === 레벨업 확인 함수 새로 추가 ===
+        function checkForLevelUp() {
+            const player = gameState.player;
+            // 현재 경험치가 필요 경험치보다 많거나 같으면 레벨업
+            while (player.exp >= player.expNeeded) {
+                player.exp -= player.expNeeded; // 현재 경험치에서 필요 경험치를 뺌
+                player.level++;
+                player.expNeeded = Math.floor(player.expNeeded * 1.5); // 다음 필요 경험치는 1.5배 증가
+                player.maxHp += 5; // 최대 HP 5 증가
+                player.hp = player.maxHp; // 체력을 모두 회복
+                player.attackPower += 1; // 공격력 1 증가
+
+                console.log(`레벨 업! LV ${player.level} 달성!`);
+                // 여기에 레벨업 시각/음향 효과 등을 추가할 수 있음
+            }
         }
 
         function handlePlayerAttacked(damage) {
