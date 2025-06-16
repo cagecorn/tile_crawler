@@ -13,7 +13,7 @@ class AIArchetype {
 export class MeleeAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, enemies, mapManager } = context;
-        const targetList = self.isFriendly ? enemies : allies;
+        const targetList = enemies;
 
         // 1. 가장 가까운 적 찾기
         let nearestTarget = null;
