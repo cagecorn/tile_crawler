@@ -149,9 +149,9 @@ window.onload = function() {
 
         function handleMonsterAttacked(monsterId, damage) {
             const gainedExp = monsterManager.handleAttackOnMonster(monsterId, damage);
-            if (gainedExp > 0) {
-                gameState.player.stats.addExp(gainedExp);
-                checkForLevelUp();
+            if (gainedExp > 0) { // 몬스터가 죽어서 경험치를 얻었다면
+                gameState.player.stats.addExp(gainedExp); // 플레이어에게 경험치 추가
+                checkForLevelUp(); // 레벨업 체크!
             }
         }
         
