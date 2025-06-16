@@ -17,6 +17,7 @@ window.onload = function () {
     loader.loadImage('floor', 'assets/floor.png');
     loader.loadImage('wall', 'assets/wall.png');
     loader.loadImage('gold', 'assets/gold.png');
+    loader.loadImage('potion', 'assets/potion.png');
 
     // 모든 에셋 로딩이 끝나면 게임을 초기화하고 시작합니다.
     loader.onReady((assets) => {
@@ -30,7 +31,7 @@ window.onload = function () {
 
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
-        const itemManager = new ItemManager(5, mapManager, assets);
+        const itemManager = new ItemManager(10, mapManager, assets);
         const uiManager = new UIManager();
 
         const warriorJob = { maxHp: 20, attackPower: 2 };
@@ -143,6 +144,11 @@ window.onload = function () {
                         gameState.gold += 10;
                         console.log(`골드 10 획득! 현재 골드: ${gameState.gold}`);
                         itemManager.removeItem(item);
+                    } else if (item.name === 'potion') {
+                        if (gameState.inventory.length < 10) {
+                            gameState.inventory.push(item);
+                            itemManager.removeItem(item);
+                        }
                     } else {
                         gameState.inventory.push(item);
                         itemManager.removeItem(item);
