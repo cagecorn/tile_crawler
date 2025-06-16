@@ -1,8 +1,8 @@
 // main.js
 
 import { MapManager } from './src/map.js';
-import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
-import { Player, Mercenary } from './src/entities.js';
+import { MonsterManager, UIManager, ItemManager, MercenaryManager } from './src/managers.js';
+import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 
@@ -15,6 +15,7 @@ window.onload = function() {
     loader.loadImage('wall', 'assets/wall.png');
     loader.loadImage('gold', 'assets/gold.png');
     loader.loadImage('potion', 'assets/potion.png');
+    loader.loadImage('mercenary', 'assets/images/warrior.png');
 
     loader.onReady(assets => {
         const canvas = document.getElementById('game-canvas');
@@ -30,6 +31,7 @@ window.onload = function() {
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
         const itemManager = new ItemManager(10, mapManager, assets);
+        const mercenaryManager = new MercenaryManager(assets);
         const uiManager = new UIManager();
         const metaAIManager = new MetaAIManager();
 
@@ -72,21 +74,26 @@ window.onload = function() {
         };
         playerGroup.addMember(gameState.player);
 
-        function hireWarrior() {
+        function hireMercenary() {
             if (gameState.gold < 50) {
                 console.log('골드가 부족합니다.');
                 return;
             }
             const spawnX = gameState.player.x + mapManager.tileSize;
             const spawnY = gameState.player.y;
-            const warrior = new Mercenary(spawnX, spawnY, mapManager.tileSize, assets.player, playerGroup.id);
+            const newMercenary = mercenaryManager.hireMercenary(
+                spawnX,
+                spawnY,
+                mapManager.tileSize,
+                playerGroup.id
+            );
             gameState.gold -= 50;
-            gameState.allies.push(warrior);
-            playerGroup.addMember(warrior);
+            gameState.allies.push(newMercenary);
+            playerGroup.addMember(newMercenary);
         }
 
-        const hireBtn = document.getElementById('btn-hire-warrior');
-        if (hireBtn) hireBtn.onclick = hireWarrior;
+        const hireBtn = document.getElementById('hire-mercenary');
+        if (hireBtn) hireBtn.onclick = hireMercenary;
 
         function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
@@ -195,7 +202,19 @@ window.onload = function() {
             }
 
             handleItemCollision();
-            metaAIManager.update(gameState.player, mapManager, monsterManager, handlePlayerAttacked, handleGainExp);
+            const context = {
+                player: gameState.player,
+                mapManager,
+                monsterManager,
+                onPlayerAttack: handlePlayerAttacked,
+                onMonsterAttacked: (id, damage) => {
+                    const gained = monsterManager.handleAttackOnMonster(id, damage);
+                    if (gained > 0) {
+                        handleGainExp(gained);
+                    }
+                }
+            };
+            metaAIManager.update(context);
         }
 
         function render() {
