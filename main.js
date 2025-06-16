@@ -6,9 +6,6 @@ import { Player, Item } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 
 window.onload = function () {
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-
     // --- 1. 에셋 로딩 시작 ---
     const loader = new AssetLoader();
     loader.loadImage('player', 'assets/player.png');
@@ -22,6 +19,8 @@ window.onload = function () {
     // 모든 에셋 로딩이 끝나면 게임을 초기화하고 시작합니다.
     loader.onReady((assets) => {
         // --- 2. 게임 초기화 (로딩 완료 후) ---
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
