@@ -84,6 +84,9 @@ export class UIManager {
         this.expBarFillElement = document.getElementById('ui-exp-bar-fill');
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
+
+        // 현재 인벤토리 상태 저장용 배열 (UI 빈번한 재생성 방지)
+        this._lastInventory = [];
     }
 
     updateUI(gameState) {
@@ -105,22 +108,36 @@ export class UIManager {
         this.expBarFillElement.style.width = `${expRatio * 100}%`;
         this.expTextElement.textContent = `${player.exp} / ${player.expNeeded}`;
 
-        // 인벤토리 업데이트
-        this.inventorySlotsElement.innerHTML = '';
-        gameState.inventory.forEach((item, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'inventory-slot';
-            const img = document.createElement('img');
-            img.src = item.image.src;
-            img.alt = item.name;
+        // 인벤토리 내용이 변경된 경우에만 DOM을 갱신하여 클릭 이벤트 손실을 방지
+        if (this._hasInventoryChanged(gameState.inventory)) {
+            this.inventorySlotsElement.innerHTML = '';
+            gameState.inventory.forEach((item, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                const img = document.createElement('img');
+                img.src = item.image.src;
+                img.alt = item.name;
 
-            slot.onclick = () => {
-                this.useItem(index, gameState);
-            };
+                slot.onclick = () => {
+                    this.useItem(index, gameState);
+                };
 
-            slot.appendChild(img);
-            this.inventorySlotsElement.appendChild(slot);
-        });
+                slot.appendChild(img);
+                this.inventorySlotsElement.appendChild(slot);
+            });
+
+            // 변화된 인벤토리 상태 저장
+            this._lastInventory = [...gameState.inventory];
+        }
+    }
+
+    // 현재 인벤토리가 마지막으로 렌더링한 인벤토리와 다른지 확인
+    _hasInventoryChanged(current) {
+        if (current.length !== this._lastInventory.length) return true;
+        for (let i = 0; i < current.length; i++) {
+            if (current[i] !== this._lastInventory[i]) return true;
+        }
+        return false;
     }
 
     // 인벤토리 아이템 사용 로직
