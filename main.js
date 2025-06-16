@@ -1,5 +1,8 @@
 // main.js
 
+import { EventManager } from './src/eventManager.js';
+import { LogManager } from './src/logManager.js';
+import { CombatCalculator } from './src/combat.js';
 import { MapManager } from './src/map.js';
 import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/managers.js';
 import { Player } from './src/entities.js';
@@ -28,10 +31,13 @@ window.onload = function() {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        const eventManager = new EventManager();
+        const logManager = new LogManager();
+        const combatCalculator = new CombatCalculator();
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
         const mercenaryManager = new MercenaryManager(assets);
-        const itemManager = new ItemManager(20, mapManager, assets); // 아이템 20개 생성
+        const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
         const metaAIManager = new MetaAIManager();
 
@@ -49,18 +55,56 @@ window.onload = function() {
         const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
         const gameState = {
             player: new Player(startPos.x, startPos.y, mapManager.tileSize, assets.player, playerGroup.id, warriorJob),
-            inventory: [], gold: 100, statPoints: 5,
-            camera: { x: 0, y: 0 }, isGameOver: false, zoomLevel: 0.5
+            inventory: [],
+            gold: 100,
+            statPoints: 5,
+            camera: { x: 0, y: 0 },
+            isGameOver: false,
+            zoomLevel: 0.5
         };
         playerGroup.addMember(gameState.player);
 
         document.getElementById('hire-mercenary').onclick = () => {
             if (gameState.gold >= 50) {
                 gameState.gold -= 50;
-                const newMerc = mercenaryManager.hireMercenary(gameState.player.x, gameState.player.y, mapManager.tileSize, 'player_party');
+                const newMerc = mercenaryManager.hireMercenary(gameState.player.x, gameState.player.y, mapManager.tileSize, playerGroup.id);
                 playerGroup.addMember(newMerc);
             }
         };
+
+        eventManager.subscribe('entity_attack', ({ attacker, defender }) => {
+            const damage = combatCalculator.calculateDamage(attacker, defender);
+            defender.takeDamage(damage);
+            logManager.add(`${attacker.constructor.name}가 ${defender.constructor.name}을(를) 공격하여 ${damage}의 피해를 입혔습니다.`);
+            if (defender.hp <= 0) {
+                eventManager.publish('entity_death', { attacker, victim: defender });
+            }
+        });
+
+        eventManager.subscribe('entity_death', ({ attacker, victim }) => {
+            logManager.add(`${victim.constructor.name}가 쓰러졌습니다.`);
+            if (!victim.isFriendly) {
+                monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== victim.id);
+                monsterGroup.removeMember(victim.id);
+                attacker.stats.addExp(victim.expValue);
+                logManager.add(`${victim.expValue}의 경험치를 획득했습니다.`);
+                eventManager.publish('exp_gained', { player: attacker });
+            } else if (victim.isPlayer) {
+                gameState.isGameOver = true;
+                alert('게임 오버!');
+            }
+        });
+
+        eventManager.subscribe('exp_gained', ({ player }) => {
+            const stats = player.stats;
+            while (stats.get('exp') >= stats.get('expNeeded')) {
+                stats.levelUp();
+                stats.recalculate();
+                player.hp = player.maxHp;
+                if (player.isPlayer) gameState.statPoints += 5;
+                logManager.add(`레벨 업! LV ${stats.get('level')} 달성!`);
+            }
+        });
 
         const keysPressed = {};
         document.addEventListener('keydown', e => { keysPressed[e.key] = true; });
@@ -72,8 +116,8 @@ window.onload = function() {
             const player = gameState.player;
 
             const zoom = gameState.zoomLevel;
-            let targetCameraX = player.x - canvas.width / (2 * zoom);
-            let targetCameraY = player.y - canvas.height / (2 * zoom);
+            const targetCameraX = player.x - canvas.width / (2 * zoom);
+            const targetCameraY = player.y - canvas.height / (2 * zoom);
 
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
@@ -85,7 +129,7 @@ window.onload = function() {
             ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
-            itemManager.render(ctx); // 아이템을 그립니다.
+            itemManager.render(ctx);
             monsterManager.render(ctx);
             mercenaryManager.render(ctx);
             gameState.player.render(ctx);
@@ -116,7 +160,7 @@ window.onload = function() {
                 );
 
                 if (monsterToAttack && player.attackCooldown === 0) {
-                    handleMonsterAttacked(monsterToAttack.id, player.attackPower);
+                    eventManager.publish('entity_attack', { attacker: player, defender: monsterToAttack });
                     player.attackCooldown = 30;
                 } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                     player.x = targetX;
@@ -124,7 +168,6 @@ window.onload = function() {
                 }
             }
 
-            // [수정] 아이템 줍기 로직 전체를 아래 코드로 교체해주세요.
             const itemToPick = itemManager.items.find(item =>
                 player.x < item.x + mapManager.tileSize &&
                 player.x + player.width > item.x &&
@@ -134,73 +177,55 @@ window.onload = function() {
 
             if (itemToPick) {
                 if (itemToPick.name === 'gold') {
-                    gameState.gold += 10; // 예시: 골드 10씩 증가
-                    console.log(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
+                    gameState.gold += 10;
+                    logManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
                 } else {
-                    // 포션을 포함한 다른 아이템은 인벤토리에 저장
                     gameState.inventory.push(itemToPick);
-                    console.log(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
+                    logManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
                 }
-
-                itemManager.removeItem(itemToPick); // 맵에서 아이템 제거
+                itemManager.removeItem(itemToPick);
             }
 
             const context = {
                 player,
                 mapManager,
-                onPlayerAttacked: (damage, target) => handlePlayerAttacked(damage, target),
-                onMonsterAttacked: handleMonsterAttacked,
+                onPlayerAttacked: (damage, target) => {
+                    target.takeDamage(damage);
+                    if (target.hp <= 0) {
+                        eventManager.publish('entity_death', { attacker: null, victim: target });
+                    }
+                },
+                onMonsterAttacked: (monsterId, damage) => {
+                    const monster = monsterManager.monsters.find(m => m.id === monsterId);
+                    if (monster) {
+                        monster.takeDamage(damage);
+                        if (monster.hp <= 0) {
+                            monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== monsterId);
+                            monsterGroup.removeMember(monsterId);
+                            player.stats.addExp(monster.expValue);
+                            logManager.add(`${monster.expValue}의 경험치를 획득했습니다.`);
+                            eventManager.publish('exp_gained', { player });
+                        }
+                    }
+                }
             };
             metaAIManager.update(context);
         }
 
-        function handleMonsterAttacked(monsterId, damage) {
-            const gainedExp = monsterManager.handleAttackOnMonster(monsterId, damage);
-            if (gainedExp > 0) { // 몬스터가 죽어서 경험치를 얻었다면
-                gameState.player.stats.addExp(gainedExp); // 플레이어에게 경험치 추가
-                checkForLevelUp(); // 레벨업 체크!
-            }
-        }
-        
-        function handlePlayerAttacked(damage, target) {
-            target.takeDamage(damage);
-            if (target.hp <= 0) {
-                if(target.isPlayer) {
-                    gameState.isGameOver = true;
-                    alert('게임 오버!');
-                } else {
-                    // 용병 사망 처리
-                }
-            }
-        }
-        
-        function handleStatUp(stat) {
+        uiManager.init(stat => {
             if (gameState.statPoints > 0) {
-                gameState.statPoints--; // 포인트 1 감소
-                gameState.player.stats.allocatePoint(stat); // 해당 스탯에 포인트 투자
-                gameState.player.stats.recalculate(); // 투자된 포인트에 맞춰 능력치 재계산
+                gameState.statPoints--;
+                gameState.player.stats.allocatePoint(stat);
+                gameState.player.stats.recalculate();
             }
-        }
-        
-        // 기존 checkForLevelUp 함수를 삭제하고 아래 코드로 교체해주세요.
-        function checkForLevelUp() {
-            const stats = gameState.player.stats;
-            // 현재 경험치가 필요 경험치보다 많거나 같은 동안 계속 반복
-            while (stats.get('exp') >= stats.get('expNeeded')) {
-                stats.levelUp(); // StatManager에 있는 levelUp 함수 호출
-                stats.recalculate(); // 스탯 재계산
-                gameState.player.hp = stats.get('maxHp'); // 체력을 최대로 회복
-                gameState.statPoints += 5; // 레벨업 시 스탯 포인트 5 지급
-                console.log("레벨 업! 현재 레벨: ", stats.get('level')); // 개발자 확인용 로그
-            }
-        }
-        
+        });
+
         function gameLoop() {
             update();
             render();
             requestAnimationFrame(gameLoop);
         }
-        uiManager.init(handleStatUp);
+
         gameLoop();
     });
 };
