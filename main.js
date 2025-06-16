@@ -2,11 +2,11 @@
 
 import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
-import { Player, Item } from './src/entities.js';
+import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
+import { StatManager } from './src/stats.js'; // StatManager import
 
-window.onload = function () {
-    // --- 1. 에셋 로딩 시작 ---
+window.onload = function() {
     const loader = new AssetLoader();
     loader.loadImage('player', 'assets/player.png');
     loader.loadImage('monster', 'assets/monster.png');
@@ -16,11 +16,10 @@ window.onload = function () {
     loader.loadImage('gold', 'assets/gold.png');
     loader.loadImage('potion', 'assets/potion.png');
 
-    // 모든 에셋 로딩이 끝나면 게임을 초기화하고 시작합니다.
-    loader.onReady((assets) => {
-        // --- 2. 게임 초기화 (로딩 완료 후) ---
+    loader.onReady(assets => {
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
+
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -33,124 +32,48 @@ window.onload = function () {
         const itemManager = new ItemManager(10, mapManager, assets);
         const uiManager = new UIManager();
 
-        const warriorJob = { maxHp: 20, attackPower: 2 };
+        // 새 기본 스탯을 사용하는 직업 객체
+        const warriorJob = {
+            strength: 5,
+            agility: 3,
+            endurance: 4,
+            focus: 1,
+            intelligence: 1,
+            movement: 5,
+        };
 
-        const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
+        const startPos = mapManager.getRandomFloorPosition() || {
+            x: mapManager.tileSize,
+            y: mapManager.tileSize,
+        };
+
         const gameState = {
-            player: new Player(
-                startPos.x,
-                startPos.y,
-                mapManager.tileSize,
-                warriorJob,
-                assets.player
-            ),
+            player: new Player(startPos.x, startPos.y, mapManager.tileSize, warriorJob, assets.player),
             inventory: [],
             gold: 0,
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.5, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
+            zoomLevel: 0.5,
+            statPoints: 5,
         };
 
-
-        // --- 3. 게임 루프와 로직 ---
-        function render() {
-            if (gameState.isGameOver) return;
-            const camera = gameState.camera;
-            const player = gameState.player;
-            const zoom = gameState.zoomLevel;
-
-            // 줌 레벨에 맞춰 카메라 위치를 다시 계산
-            let targetCameraX = player.x - (canvas.width / 2) / zoom;
-            let targetCameraY = player.y - (canvas.height / 2) / zoom;
-
-            const mapPixelWidth = mapManager.width * mapManager.tileSize;
-            const mapPixelHeight = mapManager.height * mapManager.tileSize;
-
-            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
-            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
-
-            ctx.save();
-
-            // --- 줌 기능 적용 ---
-            ctx.scale(zoom, zoom);
-            ctx.translate(-camera.x, -camera.y);
-            mapManager.render(ctx, assets);
-            monsterManager.render(ctx);
-            itemManager.render(ctx);
-            player.render(ctx);
-            uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
-            ctx.restore();
-
-            uiManager.updateUI(gameState);
+        // 스탯 포인트 분배 함수
+        function handleStatUp(stat) {
+            if (gameState.statPoints > 0) {
+                gameState.statPoints--;
+                gameState.player.allocateStatPoint(stat);
+            } else {
+                console.log('스탯 포인트가 부족합니다.');
+            }
         }
 
         const keysPressed = {};
-        document.addEventListener('keydown', (event) => {
-            keysPressed[event.key] = true;
+        document.addEventListener('keydown', e => {
+            keysPressed[e.key] = true;
         });
-        document.addEventListener('keyup', (event) => {
-            delete keysPressed[event.key];
+        document.addEventListener('keyup', e => {
+            delete keysPressed[e.key];
         });
-
-        function update() {
-            if (gameState.isGameOver) return;
-            const player = gameState.player;
-            if (player.attackCooldown > 0) player.attackCooldown--;
-
-            let moveX = 0,
-                moveY = 0;
-            if ('ArrowUp' in keysPressed) moveY -= player.speed;
-            if ('ArrowDown' in keysPressed) moveY += player.speed;
-            if ('ArrowLeft' in keysPressed) moveX -= player.speed;
-            if ('ArrowRight' in keysPressed) moveX += player.speed;
-
-            let targetX = player.x + moveX;
-            let targetY = player.y + moveY;
-
-            const monsterToAttack = monsterManager.getMonsterAt(
-                targetX + player.width / 2,
-                targetY + player.height / 2
-            );
-            if (monsterToAttack && player.attackCooldown === 0) {
-                // handleAttackOnMonster가 반환하는 경험치를 받음
-                const gainedExp = monsterManager.handleAttackOnMonster(
-                    monsterToAttack.id,
-                    player.attackPower
-                );
-
-                // 경험치를 얻었다면 (몬스터가 죽었다면)
-                if (gainedExp > 0) {
-                    player.exp += gainedExp;
-                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.exp}`);
-                    checkForLevelUp(); // 레벨업 확인
-                }
-                player.attackCooldown = 30;
-
-            } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
-                player.x = targetX;
-                player.y = targetY;
-            }
-
-            handleItemCollision();
-            monsterManager.update(gameState.player, handlePlayerAttacked);
-        }
-
-        // === 레벨업 확인 함수 새로 추가 ===
-        function checkForLevelUp() {
-            const player = gameState.player;
-            // 현재 경험치가 필요 경험치보다 많거나 같으면 레벨업
-            while (player.exp >= player.expNeeded) {
-                player.exp -= player.expNeeded; // 현재 경험치에서 필요 경험치를 뺌
-                player.level++;
-                player.expNeeded = Math.floor(player.expNeeded * 1.5); // 다음 필요 경험치는 1.5배 증가
-                player.maxHp += 5; // 최대 HP 5 증가
-                player.hp = player.maxHp; // 체력을 모두 회복
-                player.attackPower += 1; // 공격력 1 증가
-
-                console.log(`레벨 업! LV ${player.level} 달성!`);
-                // 여기에 레벨업 시각/음향 효과 등을 추가할 수 있음
-            }
-        }
 
         function handlePlayerAttacked(damage) {
             gameState.player.takeDamage(damage);
@@ -160,7 +83,6 @@ window.onload = function () {
             }
         }
 
-        // 아이템 충돌을 처리하는 함수
         function handleItemCollision() {
             const player = gameState.player;
             for (const item of [...itemManager.items]) {
@@ -187,13 +109,96 @@ window.onload = function () {
             }
         }
 
+        function checkForLevelUp() {
+            const player = gameState.player;
+            while (player.exp >= player.expNeeded) {
+                player.exp -= player.expNeeded;
+                player.level++;
+                player.expNeeded = Math.floor(player.expNeeded * 1.5);
+                player.maxHp += 5;
+                player.hp = player.maxHp;
+                player.attackPower += 1;
+                gameState.statPoints += 5;
+                console.log(`레벨 업! LV ${player.level} 달성!`);
+            }
+        }
+
+        function update() {
+            if (gameState.isGameOver) return;
+            const player = gameState.player;
+            if (player.attackCooldown > 0) player.attackCooldown--;
+
+            let moveX = 0;
+            let moveY = 0;
+            if ('ArrowUp' in keysPressed) moveY -= player.speed;
+            if ('ArrowDown' in keysPressed) moveY += player.speed;
+            if ('ArrowLeft' in keysPressed) moveX -= player.speed;
+            if ('ArrowRight' in keysPressed) moveX += player.speed;
+
+            const targetX = player.x + moveX;
+            const targetY = player.y + moveY;
+
+            const monsterToAttack = monsterManager.getMonsterAt(
+                targetX + player.width / 2,
+                targetY + player.height / 2,
+            );
+
+            if (monsterToAttack && player.attackCooldown === 0) {
+                const gainedExp = monsterManager.handleAttackOnMonster(
+                    monsterToAttack.id,
+                    player.attackPower,
+                );
+
+                if (gainedExp > 0) {
+                    player.exp += gainedExp;
+                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.exp}`);
+                    checkForLevelUp();
+                }
+                player.attackCooldown = 30;
+            } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
+                player.x = targetX;
+                player.y = targetY;
+            }
+
+            handleItemCollision();
+            monsterManager.update(gameState.player, handlePlayerAttacked);
+        }
+
+        function render() {
+            if (gameState.isGameOver) return;
+            const camera = gameState.camera;
+            const player = gameState.player;
+            const zoom = gameState.zoomLevel;
+
+            let targetCameraX = player.x - canvas.width / 2 / zoom;
+            let targetCameraY = player.y - canvas.height / 2 / zoom;
+
+            const mapPixelWidth = mapManager.width * mapManager.tileSize;
+            const mapPixelHeight = mapManager.height * mapManager.tileSize;
+
+            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
+            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
+
+            ctx.save();
+            ctx.scale(zoom, zoom);
+            ctx.translate(-camera.x, -camera.y);
+            mapManager.render(ctx, assets);
+            monsterManager.render(ctx);
+            itemManager.render(ctx);
+            player.render(ctx);
+            uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
+            ctx.restore();
+
+            uiManager.updateUI(gameState);
+        }
+
         function gameLoop() {
             update();
             render();
             requestAnimationFrame(gameLoop);
         }
 
-        // --- 4. 게임 시작 ---
+        uiManager.updateUI(gameState);
         gameLoop();
     });
 };
