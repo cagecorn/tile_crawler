@@ -68,47 +68,45 @@ export class MonsterManager {
     }
 }
 
-// --- VisualEffectManager를 UIManager로 변경하고 내용 수정 ---
+// === UIManager 클래스 전체 수정 ===
 export class UIManager {
     constructor() {
-        // UI 요소를 미리 찾아 저장해 둡니다.
-        this.statsContainer = document.getElementById('player-stats-container');
+        // UI의 각 부분을 미리 찾아 변수에 저장
+        this.hpElement = document.getElementById('ui-player-hp');
+        this.maxHpElement = document.getElementById('ui-player-maxHp');
+        this.attackPowerElement = document.getElementById('ui-player-attackPower');
+        this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
     }
 
     // 플레이어 정보창을 업데이트하는 메서드
     updatePlayerStats(player) {
-        // 표시할 스탯 목록 (나중에 이 배열에 'mp', 'stamina' 등을 추가하기만 하면 됨)
-        const statsToDisplay = ['hp', 'maxHp', 'attackPower'];
+        // 각 요소의 텍스트와 스타일을 직접 업데이트
+        this.hpElement.textContent = player.hp;
+        this.maxHpElement.textContent = player.maxHp;
+        this.attackPowerElement.textContent = player.attackPower;
 
-        // 컨테이너를 비웁니다.
-        this.statsContainer.innerHTML = '';
-
-        // 목록에 있는 각 스탯을 동적으로 생성하여 UI에 추가
-        statsToDisplay.forEach(stat => {
-            const statDiv = document.createElement('div');
-            statDiv.textContent = `${stat}: ${player[stat]}`;
-            this.statsContainer.appendChild(statDiv);
-        });
+        const hpRatio = player.hp / player.maxHp;
+        this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
     }
 
-    // HP 바를 그리는 메서드 (이전 VisualEffectManager의 기능)
+    // HP 바를 그리는 메서드 (이전과 동일)
     renderHpBars(ctx, player, monsters) {
-        this._drawHpBar(ctx, player);
+        // this._drawHpBar(ctx, player); // 플레이어 HP바는 이제 HTML UI로 옮겼으므로 주석 처리
         for (const monster of monsters) {
             this._drawHpBar(ctx, monster);
         }
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp <= 0 || entity.hp === entity.maxHp) return;
+        if (entity.hp <= 0 || entity.hp === entity.maxHp) {
+            return;
+        }
         const barWidth = entity.width;
         const barHeight = 8;
         const x = entity.x;
         const y = entity.y - barHeight - 5;
-
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(x, y, barWidth, barHeight);
-
         const hpRatio = entity.hp / entity.maxHp;
         ctx.fillStyle = hpRatio > 0.5 ? '#00ff00' : hpRatio > 0.2 ? '#ffff00' : '#ff0000';
         ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
