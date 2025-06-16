@@ -121,21 +121,31 @@ window.onload = function() {
                 } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                     player.x = targetX;
                     player.y = targetY;
-
-                    // 아이템 줍기 로직
-                    const itemToPick = itemManager.items.find(item =>
-                        player.x < item.x + item.width &&
-                        player.x + player.width > item.x &&
-                        player.y < item.y + item.height &&
-                        player.y + player.height > item.y
-                    );
-
-                    if (itemToPick) {
-                        gameState.inventory.push(itemToPick); // 인벤토리에 추가
-                        itemManager.removeItem(itemToPick);   // 맵에서 제거
-                        console.log(`${itemToPick.name}을(를) 주웠습니다!`);
-                    }
                 }
+            }
+
+            // [수정] 아이템 줍기 로직 전체를 아래 코드로 교체해주세요.
+            const itemToPick = itemManager.items.find(item =>
+                player.x < item.x + mapManager.tileSize &&
+                player.x + player.width > item.x &&
+                player.y < item.y + mapManager.tileSize &&
+                player.y + player.height > item.y
+            );
+
+            if (itemToPick) {
+                if (itemToPick.name === 'gold') {
+                    gameState.gold += 10; // 예시: 골드 10씩 증가
+                    console.log(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
+                } else if (itemToPick.name === 'potion') {
+                    player.hp = Math.min(player.stats.get('maxHp'), player.hp + 5);
+                    console.log(`포션을 주워 바로 사용했습니다! HP +5`);
+                }
+                // 다른 아이템은 추후에 여기에 추가할 수 있습니다.
+                // else {
+                //    gameState.inventory.push(itemToPick); // 골드, 포션 외 다른 아이템은 인벤토리에 추가
+                // }
+
+                itemManager.removeItem(itemToPick); // 맵에서 아이템 제거
             }
 
             const context = {
