@@ -52,6 +52,12 @@ export class Player extends Entity {
         return this.stats.get('movementSpeed');
     }
 
+    set speed(value) {
+        const current = this.stats.get('movement');
+        this.stats.increaseBaseStat('movement', value - current);
+        this.stats.recalculate();
+    }
+
     get attackPower() {
         return this.stats.get('attackPower') + this._attackPowerBonus;
     }
