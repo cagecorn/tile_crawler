@@ -172,7 +172,6 @@ window.onload = function() {
                 gameState.statPoints--; // 포인트 1 감소
                 gameState.player.stats.allocatePoint(stat); // 해당 스탯에 포인트 투자
                 gameState.player.stats.recalculate(); // 투자된 포인트에 맞춰 능력치 재계산
-                gameState.player.hp = gameState.player.stats.get('maxHp'); // 체력을 최대로 회복
             }
         }
         
