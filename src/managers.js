@@ -42,8 +42,10 @@ export class MonsterManager {
             monster.takeDamage(damage);
             if (monster.hp <= 0) {
                 this.monsters = this.monsters.filter(m => m.id !== monsterId);
+                return monster.expValue; // 몬스터 처치 시 경험치 반환
             }
         }
+        return 0; // 몬스터가 죽지 않았으면 경험치 0 반환
     }
 
     getMonsterAt(x, y) {
@@ -72,67 +74,53 @@ export class MonsterManager {
 // === UIManager 클래스 전체 수정 ===
 export class UIManager {
     constructor() {
-        this.statsContainer = document.getElementById('player-stats-container');
-        this.goldElement = document.getElementById('ui-player-gold');
-        this.inventorySlotsElement = document.getElementById('inventory-slots');
-
-        // HP, 공격력 등 스탯 관련 요소
+        // UI 요소들 찾아두기
+        this.levelElement = document.getElementById('ui-player-level');
         this.hpElement = document.getElementById('ui-player-hp');
         this.maxHpElement = document.getElementById('ui-player-maxHp');
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
+        this.goldElement = document.getElementById('ui-player-gold');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
-
-        // 인벤토리 변화를 감지하기 위한 이전 상태 저장
-        this._lastInventory = [];
-
+        this.expBarFillElement = document.getElementById('ui-exp-bar-fill');
+        this.expTextElement = document.getElementById('ui-exp-text');
+        this.inventorySlotsElement = document.getElementById('inventory-slots');
     }
 
-    // gameState를 인자로 받도록 수정
     updateUI(gameState) {
-        if (!gameState) return;
-
         const player = gameState.player;
 
-        // 기본 능력치 표시
-        this.hpElement.textContent = player.hp;
+        // 스탯 업데이트
+        this.levelElement.textContent = player.level;
+        this.hpElement.textContent = Math.ceil(player.hp);
         this.maxHpElement.textContent = player.maxHp;
         this.attackPowerElement.textContent = player.attackPower;
+        this.goldElement.textContent = gameState.gold;
 
+        // HP 바 업데이트
         const hpRatio = player.hp / player.maxHp;
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
 
-        // 골드 UI 업데이트
-        this.goldElement.textContent = gameState.gold;
+        // 경험치 바 업데이트
+        const expRatio = player.exp / player.expNeeded;
+        this.expBarFillElement.style.width = `${expRatio * 100}%`;
+        this.expTextElement.textContent = `${player.exp} / ${player.expNeeded}`;
 
-        // 인벤토리 내용이 변경된 경우에만 DOM을 갱신
-        if (this._hasInventoryChanged(gameState.inventory)) {
-            this.inventorySlotsElement.innerHTML = '';
-            gameState.inventory.forEach((item, index) => {
-                const slot = document.createElement('div');
-                slot.className = 'inventory-slot';
-                const img = document.createElement('img');
-                img.src = item.image.src;
-                img.alt = item.name;
+        // 인벤토리 업데이트
+        this.inventorySlotsElement.innerHTML = '';
+        gameState.inventory.forEach((item, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'inventory-slot';
+            const img = document.createElement('img');
+            img.src = item.image.src;
+            img.alt = item.name;
 
-                slot.onclick = () => {
-                    this.useItem(index, gameState);
-                };
+            slot.onclick = () => {
+                this.useItem(index, gameState);
+            };
 
-                slot.appendChild(img);
-                this.inventorySlotsElement.appendChild(slot);
-            });
-
-            // 현재 인벤토리 상태 저장
-            this._lastInventory = [...gameState.inventory];
-        }
-    }
-
-    _hasInventoryChanged(current) {
-        if (current.length !== this._lastInventory.length) return true;
-        for (let i = 0; i < current.length; i++) {
-            if (current[i] !== this._lastInventory[i]) return true;
-        }
-        return false;
+            slot.appendChild(img);
+            this.inventorySlotsElement.appendChild(slot);
+        });
     }
 
     // 인벤토리 아이템 사용 로직
