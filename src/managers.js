@@ -77,17 +77,36 @@ export class UIManager {
         this.maxHpElement = document.getElementById('ui-player-maxHp');
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
+        this.goldElement = document.getElementById('ui-player-gold');
+        this.inventorySlotsElement = document.getElementById('inventory-slots');
     }
 
     // 플레이어 정보창을 업데이트하는 메서드
-    updatePlayerStats(player) {
+    updatePlayerStats(gameState) {
+        const player = gameState.player;
         // 각 요소의 텍스트와 스타일을 직접 업데이트
         this.hpElement.textContent = player.hp;
         this.maxHpElement.textContent = player.maxHp;
         this.attackPowerElement.textContent = player.attackPower;
+        this.goldElement.textContent = gameState.gold;
 
         const hpRatio = player.hp / player.maxHp;
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
+
+        // 인벤토리 UI 업데이트
+        if (this.inventorySlotsElement) {
+            this.inventorySlotsElement.innerHTML = '';
+            for (const item of gameState.inventory) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image.src;
+                    slot.appendChild(img);
+                }
+                this.inventorySlotsElement.appendChild(slot);
+            }
+        }
     }
 
     // HP 바를 그리는 메서드 (이전과 동일)
