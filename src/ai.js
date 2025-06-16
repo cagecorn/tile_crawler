@@ -1,54 +1,56 @@
 // src/ai.js
 
-// --- 몬스터의 행동 상태들 ---
+// --- AI 유형(Archetype)의 기반이 될 부모 클래스 ---
+class AIArchetype {
+    // action은 { type: 'move', target: {x, y} } 또는 { type: 'attack', target: entity } 같은 객체
+    decideAction(self, context) {
+        // 기본적으로는 아무것도 하지 않음 (자식 클래스에서 재정의)
+        return { type: 'idle' };
+    }
+}
 
-// '가만히 있는' 상태
-export class IdleState {
-    update(monster, strategy, player) {
-        // 전략이 'aggressive'일 때만 플레이어 발견 시 추격 상태로 변경
-        if (strategy === 'aggressive') {
-            const dx = player.x - monster.x;
-            const dy = player.y - monster.y;
+// --- 전사형 AI ---
+export class MeleeAI extends AIArchetype {
+    decideAction(self, context) {
+        const { player, allies, enemies, mapManager } = context;
+        const targetList = self.isFriendly ? enemies : allies;
+
+        // 1. 가장 가까운 적 찾기
+        let nearestTarget = null;
+        let minDistance = Infinity;
+        for (const target of targetList) {
+            const dx = target.x - self.x;
+            const dy = target.y - self.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < monster.visionRange) {
-                // 몬스터의 상태를 '추격' 상태로 변경
-                monster.state = new ChasingState();
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestTarget = target;
             }
         }
+
+        // 2. 행동 결정
+        if (nearestTarget && minDistance < self.visionRange) {
+            // 적이 시야 안에 있을 경우
+            if (minDistance < self.attackRange) {
+                // 공격 범위 안에 있으면 공격
+                return { type: 'attack', target: nearestTarget };
+            } else {
+                // 공격 범위 밖에 있으면 추격
+                return { type: 'move', target: nearestTarget };
+            }
+        } else if (self.isFriendly && !self.isPlayer) {
+            // 아군이고, 적이 없으면 플레이어를 따라다님
+            const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
+            if (playerDistance > self.tileSize * 2) { // 플레이어와 2타일 이상 멀어지면
+                return { type: 'move', target: player };
+            }
+        }
+        
+        // 기본 상태는 대기
+        return { type: 'idle' };
     }
 }
 
-// '추격하는' 상태
-export class ChasingState {
-    update(monster, strategy, player, mapManager, onPlayerAttack) {
-        // 공격 쿨다운 감소
-        if (monster.attackCooldown > 0) {
-            monster.attackCooldown--;
-        }
-
-        const dx = player.x - monster.x;
-        const dy = player.y - monster.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // 공격 범위 안에 있으면 공격 (거리 포함)
-        if (distance <= monster.attackRange) {
-            if (monster.attackCooldown === 0) {
-                onPlayerAttack(monster.attackPower);
-                monster.attackCooldown = 60; // 1초 쿨다운
-            }
-        } 
-        // 그렇지 않으면 추격
-        else {
-            let moveX = (dx / distance) * monster.speed;
-            let moveY = (dy / distance) * monster.speed;
-            const newX = monster.x + moveX;
-            const newY = monster.y + moveY;
-
-            if (!mapManager.isWallAt(newX, newY, monster.width, monster.height)) {
-                monster.x = newX;
-                monster.y = newY;
-            }
-        }
-    }
-}
+// --- 앞으로 만들 AI 유형들을 위한 [여백 구멍] ---
+export class HealerAI extends AIArchetype { /* 나중에 구현 */ }
+export class RangedAI extends AIArchetype { /* 나중에 구현 */ }

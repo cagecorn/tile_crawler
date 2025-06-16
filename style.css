@@ -147,6 +147,16 @@ body, html {
     height: 100%;
 }
 
+#mercenary-controls {
+    margin-top: 10px;
+}
+
+.hire-button {
+    width: 100%;
+    padding: 4px 0;
+    margin-top: 5px;
+}
+
 /* 경험치 바 스타일 */
 .exp-bar-container {
     width: 100%;

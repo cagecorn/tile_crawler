@@ -2,7 +2,7 @@
 
 import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
-import { Player } from './src/entities.js';
+import { Player, Mercenary } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 
@@ -63,6 +63,7 @@ window.onload = function() {
                 playerGroup.id
             ),
             inventory: [],
+            allies: [],
             gold: 0,
             statPoints: 5,
             camera: { x: 0, y: 0 },
@@ -70,6 +71,22 @@ window.onload = function() {
             zoomLevel: 0.5
         };
         playerGroup.addMember(gameState.player);
+
+        function hireWarrior() {
+            if (gameState.gold < 50) {
+                console.log('골드가 부족합니다.');
+                return;
+            }
+            const spawnX = gameState.player.x + mapManager.tileSize;
+            const spawnY = gameState.player.y;
+            const warrior = new Mercenary(spawnX, spawnY, mapManager.tileSize, assets.player, playerGroup.id);
+            gameState.gold -= 50;
+            gameState.allies.push(warrior);
+            playerGroup.addMember(warrior);
+        }
+
+        const hireBtn = document.getElementById('btn-hire-warrior');
+        if (hireBtn) hireBtn.onclick = hireWarrior;
 
         function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
@@ -89,6 +106,13 @@ window.onload = function() {
                 player.hp = stats.get('maxHp');
                 gameState.statPoints += 5;
                 console.log(`레벨 업! LV ${stats.get('level')} 달성!`);
+            }
+        }
+
+        function handleGainExp(amount) {
+            if (amount > 0) {
+                gameState.player.stats.addExp(amount);
+                checkForLevelUp();
             }
         }
 
@@ -171,7 +195,7 @@ window.onload = function() {
             }
 
             handleItemCollision();
-            metaAIManager.update(gameState.player, mapManager, handlePlayerAttacked);
+            metaAIManager.update(gameState.player, mapManager, monsterManager, handlePlayerAttacked, handleGainExp);
         }
 
         function render() {
@@ -196,6 +220,7 @@ window.onload = function() {
             mapManager.render(ctx, assets);
             monsterManager.render(ctx);
             itemManager.render(ctx);
+            gameState.allies.forEach(a => a.render(ctx));
             player.render(ctx);
             uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
             ctx.restore();
