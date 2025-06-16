@@ -98,21 +98,22 @@ window.onload = function() {
         function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
                 gameState.statPoints--;
-                gameState.player.allocateStatPoint(stat);
+                gameState.player.stats.allocatePoint(stat);
+                gameState.player.stats.recalculate();
+                // HP가 증가했을 수 있으므로 현재 HP를 갱신
+                gameState.player.hp = gameState.player.stats.get('maxHp');
             } else {
                 console.log('스탯 포인트가 부족합니다.');
             }
         }
 
         function checkForLevelUp() {
-            const player = gameState.player;
-            const stats = player.stats;
+            const stats = gameState.player.stats;
             while (stats.get('exp') >= stats.get('expNeeded')) {
                 stats.levelUp();
                 stats.recalculate();
-                player.hp = stats.get('maxHp');
+                gameState.player.hp = stats.get('maxHp');
                 gameState.statPoints += 5;
-                console.log(`레벨 업! LV ${stats.get('level')} 달성!`);
             }
         }
 
