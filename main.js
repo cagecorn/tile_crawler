@@ -4,6 +4,7 @@ import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
 import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
+import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -30,6 +31,14 @@ window.onload = function() {
         const monsterManager = new MonsterManager(7, mapManager, assets);
         const itemManager = new ItemManager(10, mapManager, assets);
         const uiManager = new UIManager();
+        const metaAIManager = new MetaAIManager();
+
+        const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
+        const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
+
+        monsterManager.monsters.forEach(monster => {
+            monsterGroup.addMember(monster);
+        });
 
         const warriorJob = {
             strength: 5,
@@ -51,15 +60,16 @@ window.onload = function() {
                 mapManager.tileSize,
                 warriorJob,
                 assets.player,
-                0
+                playerGroup.id
             ),
             inventory: [],
             gold: 0,
             statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.5 
+            zoomLevel: 0.5
         };
+        playerGroup.addMember(gameState.player);
 
         function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
@@ -161,7 +171,7 @@ window.onload = function() {
             }
 
             handleItemCollision();
-            monsterManager.update(gameState.player, handlePlayerAttacked);
+            metaAIManager.update(gameState.player, mapManager, handlePlayerAttacked);
         }
 
         function render() {
