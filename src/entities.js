@@ -24,6 +24,8 @@ class Entity {
     get attackPower() { return this.stats.get('attackPower'); }
     get maxHp() { return this.stats.get('maxHp'); }
     get expValue() { return this.stats.get('expValue'); }
+    get visionRange() { return this.stats.get('visionRange'); }
+    get attackRange() { return this.stats.get('attackRange'); }
 
     render(ctx) { if (this.image) { ctx.drawImage(this.image, this.x, this.y, this.width, this.height); } }
     takeDamage(damage) { this.hp -= damage; if(this.hp < 0) this.hp = 0; }

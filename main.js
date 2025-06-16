@@ -1,8 +1,8 @@
 // main.js
 
 import { MapManager } from './src/map.js';
-import { MercenaryManager, MonsterManager, UIManager } from './src/managers.js';
-import { Player, Item } from './src/entities.js';
+import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/managers.js';
+import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 
@@ -38,9 +38,11 @@ window.onload = function() {
         const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
         monsterManager.monsters.forEach(monster => monsterGroup.addMember(monster));
+        mercenaryManager.mercenaries.forEach(merc => playerGroup.addMember(merc));
 
         const warriorJob = {
-            strength: 5, agility: 5, endurance: 5, focus: 5, intelligence: 5, movement: 5,
+            strength: 5, agility: 5, endurance: 5, focus: 5, intelligence: 5,
+            movement: 5, maxHp: 20, attackPower: 2,
         };
 
         const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
@@ -93,26 +95,36 @@ window.onload = function() {
 
         function update() {
             if (gameState.isGameOver) return;
+
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
 
-            let moveX = 0;
-            let moveY = 0;
-            if ('ArrowUp' in keysPressed) moveY -= player.speed;
-            if ('ArrowDown' in keysPressed) moveY += player.speed;
-            if ('ArrowLeft' in keysPressed) moveX -= player.speed;
-            if ('ArrowRight' in keysPressed) moveX += player.speed;
+            let moveX = 0, moveY = 0;
+            if (keysPressed['ArrowUp']) moveY -= player.speed;
+            if (keysPressed['ArrowDown']) moveY += player.speed;
+            if (keysPressed['ArrowLeft']) moveX -= player.speed;
+            if (keysPressed['ArrowRight']) moveX += player.speed;
 
-            const targetX = player.x + moveX;
-            const targetY = player.y + moveY;
+            if (moveX !== 0 || moveY !== 0) {
+                const targetX = player.x + moveX;
+                const targetY = player.y + moveY;
+                const monsterToAttack = monsterManager.getMonsterAt(
+                    targetX + player.width / 2,
+                    targetY + player.height / 2
+                );
 
-            if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
-                player.x = targetX;
-                player.y = targetY;
+                if (monsterToAttack && player.attackCooldown === 0) {
+                    handleMonsterAttacked(monsterToAttack.id, player.attackPower);
+                    player.attackCooldown = 30;
+                } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
+                    player.x = targetX;
+                    player.y = targetY;
+                }
             }
 
             const context = {
-                player, mapManager,
+                player,
+                mapManager,
                 onPlayerAttacked: (damage, target) => handlePlayerAttacked(damage, target),
                 onMonsterAttacked: handleMonsterAttacked,
             };
