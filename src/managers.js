@@ -82,6 +82,9 @@ export class UIManager {
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
 
+        // 인벤토리 변화를 감지하기 위한 이전 상태 저장
+        this._lastInventory = [];
+
     }
 
     // gameState를 인자로 받도록 수정
@@ -101,23 +104,35 @@ export class UIManager {
         // 골드 UI 업데이트
         this.goldElement.textContent = gameState.gold;
 
-        // 인벤토리 UI 업데이트
-        this.inventorySlotsElement.innerHTML = '';
-        gameState.inventory.forEach((item, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'inventory-slot';
-            const img = document.createElement('img');
-            img.src = item.image.src;
-            img.alt = item.name;
+        // 인벤토리 내용이 변경된 경우에만 DOM을 갱신
+        if (this._hasInventoryChanged(gameState.inventory)) {
+            this.inventorySlotsElement.innerHTML = '';
+            gameState.inventory.forEach((item, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                const img = document.createElement('img');
+                img.src = item.image.src;
+                img.alt = item.name;
 
-            // 클릭 이벤트가 gameState를 함께 전달하도록 수정
-            slot.onclick = () => {
-                this.useItem(index, gameState);
-            };
+                slot.onclick = () => {
+                    this.useItem(index, gameState);
+                };
 
-            slot.appendChild(img);
-            this.inventorySlotsElement.appendChild(slot);
-        });
+                slot.appendChild(img);
+                this.inventorySlotsElement.appendChild(slot);
+            });
+
+            // 현재 인벤토리 상태 저장
+            this._lastInventory = [...gameState.inventory];
+        }
+    }
+
+    _hasInventoryChanged(current) {
+        if (current.length !== this._lastInventory.length) return true;
+        for (let i = 0; i < current.length; i++) {
+            if (current[i] !== this._lastInventory[i]) return true;
+        }
+        return false;
     }
 
     // 인벤토리 아이템 사용 로직
