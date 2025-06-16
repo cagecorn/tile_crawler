@@ -178,6 +178,8 @@ window.onload = function() {
             camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height));
 
             ctx.save();
+            const zoom = gameState.zoomLevel; // zoomLevel 값을 가져옴
+            ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
             monsterManager.render(ctx);
