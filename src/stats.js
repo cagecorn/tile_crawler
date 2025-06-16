@@ -63,6 +63,7 @@ export class StatManager {
         this.derivedStats.level++;
         this.derivedStats.exp -= this.derivedStats.expNeeded;
         this.derivedStats.expNeeded = Math.floor(this.derivedStats.expNeeded * 1.5);
+        // 레벨업 시 기본 스탯 상승 (예시: 체력, 힘)
         this.increaseBaseStat('endurance', 1);
         this.increaseBaseStat('strength', 1);
     }
