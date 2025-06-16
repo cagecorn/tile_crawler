@@ -1,8 +1,8 @@
 // main.js
 
 import { MapManager } from './src/map.js';
-import { MonsterManager, UIManager } from './src/managers.js';
-import { Player } from './src/entities.js';
+import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
+import { Player, Item } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 
 window.onload = function () {
@@ -16,6 +16,7 @@ window.onload = function () {
     loader.loadImage('epic_monster', 'assets/epic_monster.png');
     loader.loadImage('floor', 'assets/floor.png');
     loader.loadImage('wall', 'assets/wall.png');
+    loader.loadImage('gold', 'assets/gold.png');
 
     // 모든 에셋 로딩이 끝나면 게임을 초기화하고 시작합니다.
     loader.onReady((assets) => {
@@ -29,6 +30,7 @@ window.onload = function () {
 
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
+        const itemManager = new ItemManager(5, mapManager, assets);
         const uiManager = new UIManager();
 
         const warriorJob = { maxHp: 20, attackPower: 2 };
@@ -41,6 +43,8 @@ window.onload = function () {
                 warriorJob,
                 assets.player
             ),
+            inventory: [],
+            gold: 0,
             camera: { x: 0, y: 0 },
             isGameOver: false,
             zoomLevel: 0.5, // 줌 배율 추가 (0.25 = 4배 줌 아웃)
@@ -70,11 +74,12 @@ window.onload = function () {
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
             monsterManager.render(ctx);
+            itemManager.render(ctx);
             player.render(ctx);
             uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters);
             ctx.restore();
 
-            uiManager.updatePlayerStats(gameState.player);
+            uiManager.updatePlayerStats(gameState);
         }
 
         const keysPressed = {};
@@ -112,6 +117,7 @@ window.onload = function () {
                 player.y = targetY;
             }
 
+            handleItemCollision();
             monsterManager.update(gameState.player, handlePlayerAttacked);
         }
 
@@ -120,6 +126,28 @@ window.onload = function () {
             if (gameState.player.hp <= 0) {
                 gameState.isGameOver = true;
                 alert('게임 오버!');
+            }
+        }
+
+        // 아이템 충돌을 처리하는 함수
+        function handleItemCollision() {
+            const player = gameState.player;
+            for (const item of [...itemManager.items]) {
+                if (
+                    player.x < item.x + item.width &&
+                    player.x + player.width > item.x &&
+                    player.y < item.y + item.height &&
+                    player.y + player.height > item.y
+                ) {
+                    if (item.name === 'gold') {
+                        gameState.gold += 10;
+                        console.log(`골드 10 획득! 현재 골드: ${gameState.gold}`);
+                        itemManager.removeItem(item);
+                    } else {
+                        gameState.inventory.push(item);
+                        itemManager.removeItem(item);
+                    }
+                }
             }
         }
 
