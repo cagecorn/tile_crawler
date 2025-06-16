@@ -25,7 +25,7 @@ body, html {
     /* \ud14c\ub450\ub9ac \uc774\ubbf8\uc9c0 \uc124\uc815 */
     border: 20px solid transparent;
     border-image-source: url('assets/ui-border.png'); /* \ud14c\ub450\ub9ac \uc774\ubbf8\uc9c0 \uacbd\ub85c */
-    border-image-slice: 25; /* \uc774\ubbf8\uc9c0\ub97c 9\uc870\uac01\uc73c\ub85c \ub098\ub204\ub294 \uae30\uc900 */
+    border-image-slice: 65; /* \uc774\ubbf8\uc9c0\ub97c 9\uc870\uac01\uc73c\ub85c \ub098\ub204\ub294 \uae30\uc900 */
     border-image-repeat: repeat;
 
     /* \ubc30\uacbd \uc774\ubbf8\uc9c0 \uc124\uc815 */
