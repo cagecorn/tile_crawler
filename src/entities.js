@@ -12,11 +12,17 @@ class Entity {
         this.width = tileSize;
         this.height = tileSize;
         this.image = image;
-        this.speed = 4; // 기본 이동 속도 통일
+        this._speed = 4; // 기본 이동 속도 통일
         this.attackCooldown = 0;
         this.hp = 1; this.maxHp = 1;
         this.isPlayer = false;
         this.isFriendly = false;
+    }
+    get speed() {
+        return this._speed;
+    }
+    set speed(value) {
+        this._speed = value;
     }
     render(ctx) {
         if (this.image) {
