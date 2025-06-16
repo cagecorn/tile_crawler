@@ -4,7 +4,6 @@ import { MapManager } from './src/map.js';
 import { MonsterManager, UIManager, ItemManager } from './src/managers.js';
 import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
-import { StatManager } from './src/stats.js'; // StatManager import
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -32,7 +31,6 @@ window.onload = function() {
         const itemManager = new ItemManager(10, mapManager, assets);
         const uiManager = new UIManager();
 
-        // 새 기본 스탯을 사용하는 직업 객체
         const warriorJob = {
             strength: 5,
             agility: 3,
@@ -42,22 +40,21 @@ window.onload = function() {
             movement: 5,
         };
 
-        const startPos = mapManager.getRandomFloorPosition() || {
-            x: mapManager.tileSize,
-            y: mapManager.tileSize,
-        };
-
         const gameState = {
-            player: new Player(startPos.x, startPos.y, mapManager.tileSize, warriorJob, assets.player),
+            player: new Player(
+                mapManager.tileSize * 1.25,
+                mapManager.tileSize * 1.25,
+                mapManager.tileSize,
+                warriorJob,
+                assets.player
+            ),
             inventory: [],
             gold: 0,
+            statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.5,
-            statPoints: 5,
         };
 
-        // 스탯 포인트 분배 함수
         function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
                 gameState.statPoints--;
@@ -67,7 +64,17 @@ window.onload = function() {
             }
         }
 
-        uiManager.setStatUpCallback(handleStatUp);
+        function checkForLevelUp() {
+            const player = gameState.player;
+            const stats = player.stats;
+            while (stats.get('exp') >= stats.get('expNeeded')) {
+                stats.levelUp();
+                stats.recalculate();
+                player.hp = stats.get('maxHp');
+                gameState.statPoints += 5;
+                console.log(`레벨 업! LV ${stats.get('level')} 달성!`);
+            }
+        }
 
         const keysPressed = {};
         document.addEventListener('keydown', e => {
@@ -111,17 +118,6 @@ window.onload = function() {
             }
         }
 
-        function checkForLevelUp() {
-            const stats = gameState.player.stats;
-            while (stats.get('exp') >= stats.get('expNeeded')) {
-                stats.levelUp();
-                stats.recalculate();
-                gameState.player.hp = gameState.player.maxHp;
-                gameState.statPoints += 5;
-                console.log(`레벨 업! LV ${stats.get('level')} 달성!`);
-            }
-        }
-
         function update() {
             if (gameState.isGameOver) return;
             const player = gameState.player;
@@ -149,8 +145,7 @@ window.onload = function() {
                 );
 
                 if (gainedExp > 0) {
-                    player.stats.addExp(gainedExp);
-                    console.log(`${gainedExp} 경험치 획득! 현재 경험치: ${player.stats.get('exp')}`);
+                    gameState.player.stats.addExp(gainedExp);
                     checkForLevelUp();
                 }
                 player.attackCooldown = 30;
@@ -167,19 +162,17 @@ window.onload = function() {
             if (gameState.isGameOver) return;
             const camera = gameState.camera;
             const player = gameState.player;
-            const zoom = gameState.zoomLevel;
 
-            let targetCameraX = player.x - canvas.width / 2 / zoom;
-            let targetCameraY = player.y - canvas.height / 2 / zoom;
+            let targetCameraX = player.x - canvas.width / 2;
+            let targetCameraY = player.y - canvas.height / 2;
 
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
 
-            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
-            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
+            camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width));
+            camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height));
 
             ctx.save();
-            ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
             mapManager.render(ctx, assets);
             monsterManager.render(ctx);
@@ -197,6 +190,7 @@ window.onload = function() {
             requestAnimationFrame(gameLoop);
         }
 
+        uiManager.init(handleStatUp);
         uiManager.updateUI(gameState);
         gameLoop();
     });
