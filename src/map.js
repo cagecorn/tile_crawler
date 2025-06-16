@@ -7,89 +7,95 @@ const TILE_TYPES = {
 
 export class MapManager {
     constructor() {
-        this.width = 21;
-        this.height = 17;
+        this.width = 41; // 미로 크기를 더 키워서 넓은 통로를 확보
+        this.height = 31;
         this.tileSize = 192;
         this.tileTypes = TILE_TYPES;
-        this.rooms = []; // 생성된 방의 정보를 저장할 배열
+        this.rooms = [];
         this.map = this._generateMaze();
     }
 
     _generateMaze() {
-        // --- 1. DFS로 기본 미로 생성 (기존 로직) ---
+        const corridorWidth = 2; // <<< 통로 너비를 여기서 쉽게 조절할 수 있습니다 (2 = 2타일 너비)
+
+        // 1. 모든 타일을 벽으로 초기화
         const map = [];
         for (let y = 0; y < this.height; y++) {
             map.push(Array(this.width).fill(this.tileTypes.WALL));
         }
-        const stack = [];
-        const visited = Array.from({ length: this.height }, () => Array(this.width).fill(false));
-        let startX = 1, startY = 1;
-        map[startY][startX] = this.tileTypes.FLOOR;
-        visited[startY][startX] = true;
-        stack.push({ x: startX, y: startY });
-        while (stack.length > 0) {
-            const current = stack.pop();
-            const directions = [{ x: 0, y: -2 }, { x: 0, y: 2 }, { x: -2, y: 0 }, { x: 2, y: 0 }];
-            directions.sort(() => Math.random() - 0.5);
-            const neighbors = [];
-            for (const dir of directions) {
-                const nx = current.x + dir.x;
-                const ny = current.y + dir.y;
-                if (nx > 0 && nx < this.width - 1 && ny > 0 && ny < this.height - 1 && !visited[ny][nx]) {
-                    neighbors.push({ x: nx, y: ny, wallX: current.x + dir.x / 2, wallY: current.y + dir.y / 2 });
-                }
-            }
-            if (neighbors.length > 0) {
-                stack.push(current);
-                const next = neighbors[0];
-                map[next.wallY][next.wallX] = this.tileTypes.FLOOR;
-                map[next.y][next.x] = this.tileTypes.FLOOR;
-                visited[next.y][next.x] = true;
-                stack.push(next);
-            }
-        }
 
-        // --- 2. 생성된 통로를 넓히는 작업 ---
-        const newMap = JSON.parse(JSON.stringify(map));
-        for (let y = 1; y < this.height - 1; y++) {
-            for (let x = 1; x < this.width - 1; x++) {
-                if (map[y][x] === this.tileTypes.FLOOR) {
-                    let wallCount = 0;
-                    if (map[y - 1][x] === this.tileTypes.WALL) wallCount++;
-                    if (map[y + 1][x] === this.tileTypes.WALL) wallCount++;
-                    if (map[y][x - 1] === this.tileTypes.WALL) wallCount++;
-                    if (map[y][x + 1] === this.tileTypes.WALL) wallCount++;
+        // 2. 방 먼저 생성하기
+        const roomCount = 8;
+        const minRoomSize = 3;
+        const maxRoomSize = 5;
 
-                    if (wallCount >= 2) {
-                        if (Math.random() < 0.5) {
-                            if (newMap[y - 1][x] === this.tileTypes.WALL) newMap[y - 1][x] = this.tileTypes.FLOOR;
-                            if (newMap[y + 1][x] === this.tileTypes.WALL) newMap[y + 1][x] = this.tileTypes.FLOOR;
-                            if (newMap[y][x - 1] === this.tileTypes.WALL) newMap[y][x - 1] = this.tileTypes.FLOOR;
-                            if (newMap[y][x + 1] === this.tileTypes.WALL) newMap[y][x + 1] = this.tileTypes.FLOOR;
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- 3. 방 추가 로직은 넓혀진 맵을 기준으로 실행 ---
-        const roomCount = 4;
         for (let i = 0; i < roomCount; i++) {
-            const roomWidth = Math.floor(Math.random() * 3) + 3;
-            const roomHeight = Math.floor(Math.random() * 3) + 3;
-            const roomX = Math.floor(Math.random() * (this.width - roomWidth - 1) / 2) * 2 + 1;
-            const roomY = Math.floor(Math.random() * (this.height - roomHeight - 1) / 2) * 2 + 1;
-            for (let y = roomY; y < roomY + roomHeight; y++) {
-                for (let x = roomX; x < roomX + roomWidth; x++) {
-                    newMap[y][x] = this.tileTypes.FLOOR;
+            let roomW = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
+            let roomH = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
+            let roomX = Math.floor(Math.random() * (this.width - roomW - 2)) + 1;
+            let roomY = Math.floor(Math.random() * (this.height - roomH - 2)) + 1;
+
+            // 방끼리 겹치지 않게 하기 (간단한 방식)
+            let overlaps = false;
+            for (const room of this.rooms) {
+                if (roomX < room.x + room.width && roomX + roomW > room.x &&
+                    roomY < room.y + room.height && roomY + roomH > room.y) {
+                    overlaps = true;
+                    break;
                 }
             }
-            this.rooms.push({ x: roomX, y: roomY, width: roomWidth, height: roomHeight });
+            if (overlaps) continue;
+
+            for (let y = roomY; y < roomY + roomH; y++) {
+                for (let x = roomX; x < roomX + roomW; x++) {
+                    map[y][x] = this.tileTypes.FLOOR;
+                }
+            }
+            this.rooms.push({ x: roomX, y: roomY, width: roomW, height: roomH });
+        }
+        
+        // 3. 방과 방 사이를 넓은 통로로 잇기
+        for (let i = 0; i < this.rooms.length - 1; i++) {
+            const start = this.rooms[i];
+            const end = this.rooms[i + 1];
+
+            const startX = Math.floor(start.x + start.width / 2);
+            const startY = Math.floor(start.y + start.height / 2);
+            const endX = Math.floor(end.x + end.width / 2);
+            const endY = Math.floor(end.y + end.height / 2);
+
+            this._carvePassage(map, startX, startY, endX, startY, corridorWidth);
+            this._carvePassage(map, endX, startY, endX, endY, corridorWidth);
         }
 
-        return newMap;
+        return map;
     }
-    
+
+    // 두 지점 사이에 넓은 통로를 만드는 헬퍼 함수
+    _carvePassage(map, x1, y1, x2, y2, width) {
+        const minX = Math.min(x1, x2);
+        const maxX = Math.max(x1, x2);
+        const minY = Math.min(y1, y2);
+        const maxY = Math.max(y1, y2);
+
+        // 가로 통로
+        if (minY === maxY) {
+            for (let x = minX; x <= maxX; x++) {
+                for (let w = 0; w < width; w++) {
+                    if (map[minY + w]) map[minY + w][x] = this.tileTypes.FLOOR;
+                }
+            }
+        }
+        // 세로 통로
+        else if (minX === maxX) {
+            for (let y = minY; y <= maxY; y++) {
+                for (let w = 0; w < width; w++) {
+                    if (map[y][minX + w]) map[y][minX + w] = this.tileTypes.FLOOR;
+                }
+            }
+        }
+    }
+
     getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
         let attempts = 0;
         while (attempts < 50) {
@@ -144,3 +150,4 @@ export class MapManager {
         }
     }
 }
+
