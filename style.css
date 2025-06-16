@@ -79,6 +79,34 @@ body, html {
     transition: width 0.2s ease-in-out; /* HP\uac00 \ubd80\ub4dc\ub7ec\uc6b4 \ubc29\uc2dd\uc73c\ub85c \ubcc0\ud3ec \ucd94\uac00 */
 }
 
+/* EXP \ubc14 \uc2a4\ud0c0\uc77c */
+.exp-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: #888;
+    border: 1px solid #444;
+    border-radius: 3px;
+    margin-top: 5px;
+    position: relative;
+}
+
+.exp-bar-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #4aa3d1;
+    border-radius: 2px;
+    transition: width 0.2s ease-in-out;
+}
+
+.exp-bar-text {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #fff;
+}
+
 /* ===== 인벤토리 UI 스타일 ===== */
 
 #inventory-section {
