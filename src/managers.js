@@ -72,21 +72,30 @@ export class MonsterManager {
 // === UIManager 클래스 전체 수정 ===
 export class UIManager {
     constructor() {
-        // 플레이어 정보 표시 영역과 인벤토리 영역 요소를 미리 찾아 둔다
         this.statsContainer = document.getElementById('player-stats-container');
         this.goldElement = document.getElementById('ui-player-gold');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
 
-        // HP, 공격력 등 기존 스탯 요소들도 저장해 둔다
+        // HP, 공격력 등 스탯 관련 요소
         this.hpElement = document.getElementById('ui-player-hp');
         this.maxHpElement = document.getElementById('ui-player-maxHp');
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
+
+        // 게임 상태를 나중에 주입받기 위한 변수
+        this.gameState = null;
     }
 
-    // 플레이어 정보창을 업데이트하는 메서드
-    updatePlayerStats(gameState) {
-        const player = gameState.player;
+    // main.js에서 게임 상태를 받아오기 위한 초기화 함수
+    init(gameState) {
+        this.gameState = gameState;
+    }
+
+    // 전체 UI를 업데이트하는 메서드
+    updateUI() {
+        if (!this.gameState) return;
+
+        const player = this.gameState.player;
 
         // 기본 능력치 표시
         this.hpElement.textContent = player.hp;
@@ -97,19 +106,42 @@ export class UIManager {
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
 
         // 골드 UI 업데이트
-        this.goldElement.textContent = gameState.gold;
+        this.goldElement.textContent = this.gameState.gold;
 
         // 인벤토리 UI 업데이트
         this.inventorySlotsElement.innerHTML = '';
-        gameState.inventory.forEach(item => {
+        this.gameState.inventory.forEach((item, index) => {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
             const img = document.createElement('img');
             img.src = item.image.src;
             img.alt = item.name;
+
+            // 아이템 사용을 위한 클릭 이벤트
+            slot.onclick = () => {
+                this.useItem(index);
+            };
+
             slot.appendChild(img);
             this.inventorySlotsElement.appendChild(slot);
         });
+    }
+
+    // 인벤토리 아이템 사용 로직
+    useItem(itemIndex) {
+        const player = this.gameState.player;
+        const item = this.gameState.inventory[itemIndex];
+
+        if (item.name === 'potion') {
+            player.hp = Math.min(player.maxHp, player.hp + 5);
+            console.log(`포션을 사용했습니다! HP +5`);
+        }
+
+        // 사용한 아이템을 제거
+        this.gameState.inventory.splice(itemIndex, 1);
+
+        // 변경 사항을 즉시 반영
+        this.updateUI();
     }
 
     // HP 바를 그리는 메서드 (이전과 동일)
@@ -151,8 +183,16 @@ export class ItemManager {
         for (let i = 0; i < count; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
-                // 지금은 'gold' 아이템만 생성
-                this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold));
+                // 50% 확률로 골드 또는 포션 생성
+                if (Math.random() < 0.5) {
+                    this.items.push(
+                        new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold)
+                    );
+                } else {
+                    this.items.push(
+                        new Item(pos.x, pos.y, this.mapManager.tileSize, 'potion', this.assets.potion)
+                    );
+                }
             }
         }
     }
