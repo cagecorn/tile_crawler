@@ -11,17 +11,19 @@ export class StatManager {
             endurance: config.endurance || 1,
             focus: config.focus || 1,
             intelligence: config.intelligence || 1,
-            movement: config.movement || 5,
-            hp: config.hp || 1,
-            maxHp: config.maxHp || 1,
-            attackPower: config.attackPower || 1,
+            movement: config.movement || 3,
             expValue: config.expValue || 0,
             sizeInTiles_w: config.sizeInTiles_w || 1,
             sizeInTiles_h: config.sizeInTiles_h || 1,
         };
         this._pointsAllocated = {
-            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0
+            strength: 0,
+            agility: 0,
+            endurance: 0,
+            focus: 0,
+            intelligence: 0,
         };
+        this.derivedStats = {};
         this.recalculate();
     }
 
@@ -36,10 +38,14 @@ export class StatManager {
         for (const stat in this._pointsAllocated) {
             final[stat] += this._pointsAllocated[stat];
         }
-        
+
+        // --- 파생 스탯 계산 ---
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = 1 + final.strength * 2;
-        
+        // === 누락되었던 이동속도 계산 로직 추가 ===
+        final.movementSpeed = final.movement; // 지금은 무게가 없으므로 기본 이동속도와 동일하게 설정
+
+        // 모든 계산된 스탯을 derivedStats에 저장
         this.derivedStats = final;
     }
 
