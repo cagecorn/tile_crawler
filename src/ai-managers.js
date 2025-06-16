@@ -49,8 +49,10 @@ export class MetaAIManager {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
             for (const member of group.members) {
-                // 각 멤버에게 그룹의 현재 전략을 알려주며 업데이트
-                member.update(group.strategy, player, mapManager, onPlayerAttack);
+                // member가 update 메서드를 가질 때만 호출합니다.
+                if (typeof member.update === 'function') {
+                    member.update(group.strategy, player, mapManager, onPlayerAttack);
+                }
             }
         }
     }
