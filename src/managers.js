@@ -50,11 +50,12 @@ export class MonsterManager {
         if (monster) {
             monster.takeDamage(damage);
             if (monster.hp <= 0) {
+                const exp = monster.expValue;
                 this.monsters = this.monsters.filter(m => m.id !== monsterId);
-                return monster.expValue; // 몬스터 처치 시 경험치 반환
+                return exp;
             }
         }
-        return 0; // 몬스터가 죽지 않았으면 경험치 0 반환
+        return 0;
     }
 
     getMonsterAt(x, y) {
@@ -251,7 +252,7 @@ export class UIManager {
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp <= 0) {
+        if (entity.hp >= entity.maxHp || entity.hp <= 0) {
             return;
         }
         const barWidth = entity.width;

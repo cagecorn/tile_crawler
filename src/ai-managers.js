@@ -1,26 +1,21 @@
 // src/ai-managers.js
 
-// 전략의 종류를 미리 정의합니다.
 export const STRATEGY = {
-    IDLE: 'idle', // 대기
-    AGGRESSIVE: 'aggressive', // 공격적
-    DEFENSIVE: 'defensive', // 방어적
+    IDLE: 'idle',
+    AGGRESSIVE: 'aggressive',
+    DEFENSIVE: 'defensive',
 };
 
-// 유닛 그룹을 정의하는 클래스
 class AIGroup {
     constructor(id, strategy = STRATEGY.AGGRESSIVE) {
         this.id = id;
         this.members = [];
         this.strategy = strategy;
     }
-
-    addMember(entity) {
-        this.members.push(entity);
-    }
+    addMember(entity) { this.members.push(entity); }
+    removeMember(entityId) { this.members = this.members.filter(m => m.id !== entityId); }
 }
 
-// 모든 AI 그룹을 관리하는 메타 매니저
 export class MetaAIManager {
     constructor() {
         this.groups = {};
@@ -32,60 +27,58 @@ export class MetaAIManager {
         }
         return this.groups[id];
     }
+    
+    setGroupStrategy(id, strategy) { /* ... */ }
 
-    getGroup(id) {
-        return this.groups[id];
-    }
+    executeAction(entity, action, context) {
+        if (!action || !action.type || action.type === 'idle') return;
 
-    // 그룹의 전략을 변경하는 함수
-    setGroupStrategy(id, strategy) {
-        if (this.groups[id]) {
-            this.groups[id].strategy = strategy;
+        const { onPlayerAttacked, onMonsterAttacked } = context;
+
+        switch (action.type) {
+            case 'attack':
+                if (entity.attackCooldown === 0) {
+                    const target = action.target;
+                    if (entity.isFriendly) {
+                        onMonsterAttacked(target.id, entity.attackPower);
+                    } else {
+                        onPlayerAttacked(entity.attackPower, target);
+                    }
+                    entity.attackCooldown = 60;
+                }
+                break;
+            case 'move':
+                const dx = action.target.x - entity.x;
+                const dy = action.target.y - entity.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 1) {
+                    let moveX = (dx / distance) * entity.speed;
+                    let moveY = (dy / distance) * entity.speed;
+                    const newX = entity.x + moveX;
+                    const newY = entity.y + moveY;
+                    if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
+                        entity.x = newX;
+                        entity.y = newY;
+                    }
+                }
+                break;
         }
     }
 
-    // 특정 엔티티를 그룹에서 제거
-    removeEntity(entity) {
+    update(context) {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
-            group.members = group.members.filter(m => m !== entity);
-        }
-    }
+            const currentContext = {
+                ...context,
+                allies: group.members,
+                enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
+            };
 
-    // 모든 그룹의 AI를 업데이트
-    update(player, mapManager, monsterManager, onPlayerAttack, onGainExp) {
-        const playerGroup = this.groups['player_party'];
-        const monsterGroup = this.groups['dungeon_monsters'];
-
-        if (playerGroup) {
-            for (const member of playerGroup.members) {
-                if (member.isPlayer) continue; // 플레이어는 직접 제어
-                if (typeof member.update === 'function') {
-                    member.update({
-                        player,
-                        allies: playerGroup.members,
-                        enemies: monsterGroup ? monsterGroup.members : [],
-                        mapManager,
-                        monsterManager,
-                        onGainExp
-                    });
-                    if (member.hp <= 0) this.removeEntity(member);
-                }
-            }
-        }
-
-        if (monsterGroup) {
-            for (const member of monsterGroup.members) {
-                if (typeof member.update === 'function') {
-                    member.update({
-                        player,
-                        allies: monsterGroup.members,
-                        enemies: playerGroup ? playerGroup.members : [],
-                        mapManager,
-                        onPlayerAttack,
-                        monsterManager
-                    });
-                    if (member.hp <= 0) this.removeEntity(member);
+            for (const member of group.members) {
+                if (member.attackCooldown > 0) member.attackCooldown--;
+                if (member.ai) {
+                    const action = member.ai.decideAction(member, currentContext);
+                    this.executeAction(member, action, currentContext);
                 }
             }
         }
