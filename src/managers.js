@@ -76,6 +76,14 @@ export class UIManager {
     constructor() {
         // UI 요소들 찾아두기
         this.levelElement = document.getElementById('ui-player-level');
+        this.statPointsElement = document.getElementById('ui-player-statPoints');
+        this.strengthElement = document.getElementById('ui-player-strength');
+        this.agilityElement = document.getElementById('ui-player-agility');
+        this.enduranceElement = document.getElementById('ui-player-endurance');
+        this.focusElement = document.getElementById('ui-player-focus');
+        this.intelligenceElement = document.getElementById('ui-player-intelligence');
+        this.movementElement = document.getElementById('ui-player-movement');
+        this.movementSpeedElement = document.getElementById('ui-player-movementSpeed');
         this.hpElement = document.getElementById('ui-player-hp');
         this.maxHpElement = document.getElementById('ui-player-maxHp');
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
@@ -91,12 +99,22 @@ export class UIManager {
 
     updateUI(gameState) {
         const player = gameState.player;
+        const stats = player.stats;
 
-        // 스탯 업데이트
-        this.levelElement.textContent = player.level;
+        // 스탯 업데이트 - StatManager에서 값을 읽어옴
+        this.levelElement.textContent = stats.get('level');
+        this.statPointsElement.textContent = gameState.statPoints;
+        this.strengthElement.textContent = stats.get('strength');
+        this.agilityElement.textContent = stats.get('agility');
+        this.enduranceElement.textContent = stats.get('endurance');
+        this.focusElement.textContent = stats.get('focus');
+        this.intelligenceElement.textContent = stats.get('intelligence');
+        this.movementElement.textContent = stats.get('movement');
+
         this.hpElement.textContent = Math.ceil(player.hp);
-        this.maxHpElement.textContent = player.maxHp;
-        this.attackPowerElement.textContent = player.attackPower;
+        this.maxHpElement.textContent = stats.get('maxHp');
+        this.attackPowerElement.textContent = stats.get('attackPower');
+        this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
         this.goldElement.textContent = gameState.gold;
 
         // HP 바 업데이트
