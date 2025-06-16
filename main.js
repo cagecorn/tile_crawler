@@ -60,9 +60,9 @@ window.onload = function() {
                 startPos.x,
                 startPos.y,
                 mapManager.tileSize,
-                warriorJob,
                 assets.player,
-                playerGroup.id
+                playerGroup.id,
+                warriorJob
             ),
             inventory: [],
             allies: [],
