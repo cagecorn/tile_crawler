@@ -35,10 +35,11 @@ window.onload = function () {
 
         const warriorJob = { maxHp: 20, attackPower: 2 };
 
+        const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
         const gameState = {
             player: new Player(
-                mapManager.tileSize * 1.25,
-                mapManager.tileSize * 1.25,
+                startPos.x,
+                startPos.y,
                 mapManager.tileSize,
                 warriorJob,
                 assets.player
