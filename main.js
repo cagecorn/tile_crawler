@@ -53,6 +53,7 @@ window.onload = function() {
             statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
+            zoomLevel: 0.5 
         };
 
         function handleStatUp(stat) {
