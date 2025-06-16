@@ -16,11 +16,13 @@ window.onload = function() {
     loader.loadImage('floor', 'assets/images/metal.png');
     loader.loadImage('wall', 'assets/images/wall-tile.png');
     loader.loadImage('player', 'assets/images/player.png');
+    loader.loadImage('monster', 'assets/images/slime.png');
+    loader.loadImage('epic_monster', 'assets/images/troll.png');
 
     loader.onReady((assets) => {
         // 매니저 인스턴스 생성
         const mapManager = new MapManager();
-        const monsterManager = new MonsterManager(7, mapManager);
+        const monsterManager = new MonsterManager(7, mapManager, assets);
         const uiManager = new UIManager();
 
         const warriorJob = {
