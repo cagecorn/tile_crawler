@@ -50,7 +50,7 @@ export class Player extends Entity {
     }
 
     allocateStatPoint(stat) {
-        this.stats.increaseBaseStat(stat, 1);
+        this.stats.allocatePoint(stat);
         this.stats.recalculate();
     }
 
@@ -59,8 +59,8 @@ export class Player extends Entity {
     }
 
     set speed(value) {
-        const current = this.stats.get('movement');
-        this.stats.increaseBaseStat('movement', value - current);
+        // StatManager는 직접 값을 설정하는 메서드가 없으므로 기본 스탯을 수정
+        this.stats._baseStats.movement = value;
         this.stats.recalculate();
     }
 
