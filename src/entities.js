@@ -1,6 +1,7 @@
 // src/entities.js
 
 import { MeleeAI } from './ai.js';
+import { StatManager } from './stats.js';
 
 class Entity {
     constructor(x, y, tileSize, image, groupId) {
@@ -28,14 +29,43 @@ class Entity {
 }
 
 export class Player extends Entity {
-    constructor(x, y, tileSize, image, groupId) {
+    constructor(x, y, tileSize, job, image, groupId) {
         super(x, y, tileSize, image, groupId);
         this.isPlayer = true;
         this.isFriendly = true;
-        // 플레이어는 직접 조종하므로 AI가 없음 (null)
+        // 플레이어는 직접 조종하므로 AI가 없음
         this.ai = null;
-        // ... (스탯 관련 로직은 나중에 StatManager로 옮길 예정)
-        this.hp = 20; this.maxHp = 20; this.attackPower = 2;
+
+        // StatManager 를 사용하여 스탯 관리
+        this.stats = new StatManager(job);
+        this.hp = this.stats.get('maxHp');
+        this._maxHpBonus = 0;
+        this._attackPowerBonus = 0;
+    }
+
+    allocateStatPoint(stat) {
+        this.stats.increaseBaseStat(stat, 1);
+        this.stats.recalculate();
+    }
+
+    get speed() {
+        return this.stats.get('movementSpeed');
+    }
+
+    get attackPower() {
+        return this.stats.get('attackPower') + this._attackPowerBonus;
+    }
+
+    set attackPower(value) {
+        this._attackPowerBonus = value - this.stats.get('attackPower');
+    }
+
+    get maxHp() {
+        return this.stats.get('maxHp') + this._maxHpBonus;
+    }
+
+    set maxHp(value) {
+        this._maxHpBonus = value - this.stats.get('maxHp');
     }
 }
 
