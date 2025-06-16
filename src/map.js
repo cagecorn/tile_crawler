@@ -16,7 +16,7 @@ export class MapManager {
     }
 
     _generateMaze() {
-        const corridorWidth = 3; // 통로를 조금 더 넓혀 이동 공간 확보 (3타일 너비)
+        const corridorWidth = 2; // 통로가 너무 넓어 복잡도가 떨어져 이전 너비로 복원
 
         // 1. 모든 타일을 벽으로 초기화
         const map = [];
@@ -25,9 +25,9 @@ export class MapManager {
         }
 
         // 2. 방 먼저 생성하기
-        const roomCount = 12; // 방 개수를 늘려 보다 개방된 지형 생성
-        const minRoomSize = 4;
-        const maxRoomSize = 6;
+        const roomCount = 8;
+        const minRoomSize = 3;
+        const maxRoomSize = 5;
 
         for (let i = 0; i < roomCount; i++) {
             let roomW = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;

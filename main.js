@@ -40,10 +40,14 @@ window.onload = function() {
             movement: 5,
         };
 
+        const startPos = mapManager.getRandomFloorPosition() || {
+            x: mapManager.tileSize,
+            y: mapManager.tileSize,
+        };
         const gameState = {
             player: new Player(
-                mapManager.tileSize * 1.25,
-                mapManager.tileSize * 1.25,
+                startPos.x,
+                startPos.y,
                 mapManager.tileSize,
                 warriorJob,
                 assets.player
