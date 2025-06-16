@@ -214,7 +214,7 @@ export class UIManager {
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp <= 0 || entity.hp === entity.maxHp) {
+        if (entity.hp <= 0) {
             return;
         }
         const barWidth = entity.width;
