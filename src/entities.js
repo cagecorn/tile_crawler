@@ -6,8 +6,8 @@ export class Player {
     constructor(x, y, tileSize, job, image) {
         this.x = x;
         this.y = y;
-        this.width = tileSize / 2;
-        this.height = tileSize / 2;
+        this.width = tileSize;
+        this.height = tileSize;
         this.image = image; // 'color' 대신 'image' 사용
         this.speed = 5;
 
