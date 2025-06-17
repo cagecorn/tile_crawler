@@ -21,11 +21,10 @@ class AIGroup {
 export class MetaAIManager {
     constructor(eventManager) {
         this.groups = {};
-        // entity_death 이벤트를 구독하여, 그룹에서 해당 멤버를 제거
-        eventManager.subscribe('entity_death', (data) => {
-            const victim = data.victim;
-            if (this.groups[victim.groupId]) {
-                this.groups[victim.groupId].removeMember(victim.id);
+        // "몬스터 제거" 이벤트를 구독하여 그룹에서 멤버를 제거
+        eventManager.subscribe('entity_removed', (data) => {
+            for (const groupId in this.groups) {
+                this.groups[groupId].removeMember(data.victimId);
             }
         });
     }
