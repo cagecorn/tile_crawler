@@ -63,22 +63,28 @@ export class MetaAIManager {
                 const endX = Math.floor(action.target.x / tileSize);
                 const endY = Math.floor(action.target.y / tileSize);
                 const path = context.pathfindingManager.findPath(startX, startY, endX, endY);
+                let targetX, targetY;
                 if (path.length > 0) {
                     const next = path[0];
-                    const targetX = next.x * tileSize;
-                    const targetY = next.y * tileSize;
-                    const dx = targetX - entity.x;
-                    const dy = targetY - entity.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance > 1) {
-                        let moveX = (dx / distance) * entity.speed;
-                        let moveY = (dy / distance) * entity.speed;
-                        const newX = entity.x + moveX;
-                        const newY = entity.y + moveY;
-                        if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
-                            entity.x = newX;
-                            entity.y = newY;
-                        }
+                    targetX = next.x * tileSize;
+                    targetY = next.y * tileSize;
+                } else {
+                    // pathfinding 실패 시 직접 목표 지점을 향해 이동 시도
+                    targetX = action.target.x;
+                    targetY = action.target.y;
+                }
+
+                const dx = targetX - entity.x;
+                const dy = targetY - entity.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 1) {
+                    let moveX = (dx / distance) * entity.speed;
+                    let moveY = (dy / distance) * entity.speed;
+                    const newX = entity.x + moveX;
+                    const newY = entity.y + moveY;
+                    if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
+                        entity.x = newX;
+                        entity.y = newY;
                     }
                 }
                 break;
