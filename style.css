@@ -58,7 +58,8 @@ body, html {
 .stat-line {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* 요소들을 양 끝으로 정렬 */
+    justify-content: flex-start;
+    gap: 4px;
     margin-bottom: 5px;
 }
 
