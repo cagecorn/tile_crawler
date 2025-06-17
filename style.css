@@ -34,7 +34,7 @@ body, html {
 /* 모든 UI 패널들은 캔버스 위에 위치 (z-index: 10) */
 #ui-panel, #combat-log-panel, #system-log-panel, .modal-panel {
     position: fixed; /* 다른 요소 위에 올리기 위해 fixed 사용 */
-    z-index: 10;
+    z-index: 100; /* 레이어 캔버스(최대 60) 위에 오도록 */
 }
 
 #ui-panel {
@@ -42,9 +42,10 @@ body, html {
     left: 20px;
     width: 250px;
     border: 20px solid transparent;
-    border-image-source: url('assets/ui-border.jpg');
+    border-image-source: url('assets/ui-border.png');
     border-image-slice: 65 fill;
     border-image-repeat: repeat;
+    background-image: url('assets/ui-bg.png');
     background-color: #3a2d1d;
     background-clip: padding-box;
     padding: 10px;
@@ -59,6 +60,95 @@ body, html {
     align-items: center;
     justify-content: space-between; /* 요소들을 양 끝으로 정렬 */
     margin-bottom: 5px;
+}
+
+/* HP 바 스타일 */
+.hp-bar-container {
+    width: 100%;
+    height: 15px;
+    background-color: #888;
+    border: 1px solid #444;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.hp-bar-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #d14a4a;
+    border-radius: 2px;
+    transition: width 0.2s ease-in-out;
+}
+
+/* EXP 바 스타일 */
+.exp-bar-container {
+    width: 100%;
+    height: 15px;
+    background-color: #333;
+    border: 1px solid #777;
+    border-radius: 3px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.exp-bar-fill {
+    width: 0%;
+    height: 100%;
+    background-color: #3a7bd5;
+    border-radius: 2px;
+    transition: width 0.5s ease-in-out;
+}
+
+.exp-bar-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: white;
+    font-size: 10px;
+    text-align: center;
+    line-height: 15px;
+    text-shadow: 1px 1px 1px black;
+}
+
+.stat-plus {
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+/* 인벤토리 UI 스타일 */
+#inventory-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#inventory-section h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+#inventory-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 5px;
+    min-height: 48px;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.inventory-slot {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #777;
+    background-color: #333;
+}
+
+.inventory-slot img {
+    width: 100%;
+    height: 100%;
 }
 
 /* ... (기존 HP 바, 경험치 바 스타일은 변경 없음) ... */
