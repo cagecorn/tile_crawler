@@ -52,12 +52,16 @@ window.onload = function() {
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
+        const originalUseItem = uiManager.useItem.bind(uiManager);
         uiManager.useItem = function(itemIndex, gameState) {
             const item = gameState.inventory[itemIndex];
+            if (!item) return;
             if (item.type === 'weapon' || item.type === 'armor') {
                 equipmentManager.equip(gameState.player, item);
                 gameState.inventory.splice(itemIndex, 1);
-                return;
+                this.updateUI(gameState);
+            } else {
+                originalUseItem(itemIndex, gameState);
             }
         };
         const metaAIManager = new MetaAIManager(eventManager);
