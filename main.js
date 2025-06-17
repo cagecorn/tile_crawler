@@ -1,5 +1,6 @@
 // main.js
 
+import { monsterDeathWorkflow } from './src/workflows.js'; // 워크플로우를 불러옵니다.
 import { EventManager } from './src/eventManager.js';
 import { LogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
@@ -36,7 +37,7 @@ window.onload = function() {
         const logManager = new LogManager(eventManager);
         const combatCalculator = new CombatCalculator();
         const mapManager = new MapManager();
-        const monsterManager = new MonsterManager(7, mapManager, assets);
+        const monsterManager = new MonsterManager(7, mapManager, assets, eventManager);
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
@@ -74,32 +75,35 @@ window.onload = function() {
             }
         };
 
-        // === 2. 이벤트 구독 설정 ===
+        // === 2. 이벤트 구독 설정 (워크플로우 기반) ===
         eventManager.subscribe('entity_attack', (data) => {
             const damage = combatCalculator.calculateDamage(data.attacker, data.defender);
             data.defender.takeDamage(damage);
             eventManager.publish('log', { message: `${data.attacker.constructor.name} -> ${data.defender.constructor.name}에게 ${damage} 피해!` });
 
             if (data.defender.hp <= 0) {
-                eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
+                monsterDeathWorkflow({ eventManager, victim: data.defender, attacker: data.attacker });
             }
         });
 
+        // 사망 이벤트 리스너
         eventManager.subscribe('entity_death', (data) => {
-            const { attacker, victim } = data;
-            eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.` });
-            if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
-                attacker.stats.addExp(victim.expValue);
-                eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
-            }
-            if (!victim.isFriendly) {
-                monsterManager.removeMonster(victim.id);
-            }
+            const { victim } = data;
+            logManager.add(`%c${victim.constructor.name}가 쓰러졌습니다.`, 'red');
         });
 
+        // 경험치 획득 이벤트 리스너
         eventManager.subscribe('exp_gained', (data) => {
-            eventManager.publish('log', { message: `${data.exp} 경험치 획득.` });
-            checkForLevelUp(data.player);
+            const { player, exp } = data;
+            player.stats.addExp(exp);
+            logManager.add(`%c${exp}의 경험치를 획득했습니다.`, 'yellow');
+            checkForLevelUp(player);
+        });
+
+        // (미래를 위한 구멍) 아이템 드랍 이벤트 리스너
+        eventManager.subscribe('drop_loot', (data) => {
+            console.log(`${data.position.x}, ${data.position.y} 위치에 아이템 드랍!`);
+            // 여기에 나중에 ItemManager가 아이템을 생성하는 로직을 넣으면 됨
         });
 
         const keysPressed = {};

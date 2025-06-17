@@ -4,11 +4,17 @@ import { Monster, Item, Mercenary } from './entities.js'; // Mercenary 추가
 import { MetaAIManager as BaseMetaAI } from './ai-managers.js'; // 이름 충돌 방지
 
 export class MonsterManager {
-    constructor(monsterCount, mapManager, assets) {
+    constructor(monsterCount, mapManager, assets, eventManager) {
         this.monsters = [];
         this.mapManager = mapManager;
         this.assets = assets;
         this._spawnMonsters(monsterCount);
+        // "몬스터 제거" 이벤트를 구독
+        eventManager.subscribe('entity_removed', (data) => {
+            if (this.monsters.some(m => m.id === data.victimId)) {
+                this.removeMonster(data.victimId);
+            }
+        });
     }
 
     _spawnMonsters(count) {
