@@ -4,8 +4,8 @@ import { rollOnTable } from './utils/random.js';
 import { FAITHS } from './data/faiths.js';
 import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
-import { ITEMS } from '../data/items.js';
-import { PREFIXES, SUFFIXES } from '../data/affixes.js';
+import { ITEMS } from './data/items.js';
+import { PREFIXES, SUFFIXES } from './data/affixes.js';
 
 export class CharacterFactory {
     constructor(assets) {
