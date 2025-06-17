@@ -8,9 +8,10 @@ export class CombatLogManager {
 
         eventManager.subscribe('log', (data) => this.add(data.message));
 
-        eventManager.subscribe('entity_attack', (data) => {
+        // 'damage_calculated' 이벤트를 구독하여 전투 로그를 남긴다.
+        eventManager.subscribe('damage_calculated', (data) => {
             const { attacker, defender, damage } = data;
-            this.add(`${attacker.constructor.name} (이)가 ${defender.constructor.name} (을)를 공격하여 ${damage}의 피해를 입혔습니다.`);
+            this.add(`${attacker.constructor.name}가 ${defender.constructor.name}을(를) 공격하여 ${damage}의 피해를 입혔습니다.`);
         });
 
         eventManager.subscribe('entity_death', (data) => {

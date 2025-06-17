@@ -1,7 +1,6 @@
 // main.js
 
 import { CharacterFactory } from './src/factory.js';
-import { monsterDeathWorkflow } from './src/workflows.js';
 import { EventManager } from './src/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
@@ -38,7 +37,7 @@ window.onload = function() {
         const factory = new CharacterFactory(assets);
         const combatLogManager = new CombatLogManager(eventManager);
         const systemLogManager = new SystemLogManager(eventManager);
-        const combatCalculator = new CombatCalculator();
+        const combatCalculator = new CombatCalculator(eventManager);
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets, eventManager, factory);
         const mercenaryManager = new MercenaryManager(assets);
@@ -114,31 +113,27 @@ window.onload = function() {
             eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
         };
 
-        // === 2. 이벤트 구독 설정 (워크플로우 기반) ===
+        // === 2. 이벤트 구독 설정 ===
+        // 공격 이벤트가 발생하면 CombatCalculator에 계산을 요청
         eventManager.subscribe('entity_attack', (data) => {
-            const damage = combatCalculator.calculateDamage(data.attacker, data.defender);
-            data.defender.takeDamage(damage);
-            eventManager.publish('log', { message: `${data.attacker.constructor.name} -> ${data.defender.constructor.name}에게 ${damage} 피해!` });
+            combatCalculator.handleAttack(data);
+        });
+
+        // 피해량 계산 완료 이벤트를 받아 실제 피해 적용
+        eventManager.subscribe('damage_calculated', (data) => {
+            data.defender.takeDamage(data.damage);
             if (data.defender.hp <= 0) {
-                monsterDeathWorkflow({ eventManager, victim: data.defender, attacker: data.attacker });
+                eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
             }
         });
 
+        // 죽음 이벤트가 발생하면 경험치 이벤트를 발행
         eventManager.subscribe('entity_death', (data) => {
             const { attacker, victim } = data;
-            const victimName = victim.constructor.name;
-            eventManager.publish('log', { message: `${victimName}가 쓰러졌습니다.`, color: 'red' });
-
-            // === 플레이어 사망 처리 로직 추가 ===
-            if (victim.isPlayer) {
-                eventManager.publish('game_over');
-                return; // 플레이어가 죽었으면 아래 경험치 로직은 실행 안 함
-            }
+            eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.`, color: 'red' });
 
             if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
-                const exp = victim.expValue;
-                attacker.stats.addExp(exp);
-                eventManager.publish('exp_gained', { player: attacker, exp: exp });
+                eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
             }
         });
 
@@ -159,6 +154,12 @@ window.onload = function() {
         eventManager.subscribe('drop_loot', (data) => {
             console.log(`${data.position.x}, ${data.position.y} 위치에 아이템 드랍!`);
         });
+
+        // === 3. 게임 로직 ===
+        // 공격 처리를 위한 함수는 이벤트만 발행하도록 변경
+        function handleAttack(attacker, defender) {
+            eventManager.publish('entity_attack', { attacker, defender });
+        }
 
         const keysPressed = {};
         document.addEventListener('keydown', e => { keysPressed[e.key] = true; });
@@ -206,7 +207,7 @@ window.onload = function() {
                     targetY + player.height / 2
                 );
                 if (monsterToAttack && player.attackCooldown === 0) {
-                    eventManager.publish('entity_attack', { attacker: player, defender: monsterToAttack });
+                    handleAttack(player, monsterToAttack);
                     player.attackCooldown = 30;
                 } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                     player.x = targetX;
