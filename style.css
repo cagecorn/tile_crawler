@@ -7,255 +7,28 @@ body, html {
     background-color: #000;
 }
 
-#canvas-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-}
-
-.game-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
+#game-canvas {
+    display: block;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-}
-
-/* === UI \ud328\ub110 \uc2a4\ud0c0\uc77c \uc804\uccb4 \uc218\uc815 \ubc0f \ucd94\uac00 === */
-#ui-panel {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 250px; /* \ud328\ub110 \ub108\ube44 \uace0\uc815 */
-    
-    /* \ud14c\ub450\ub9ac \uc774\ubbf8\uc9c0 \uc124\uc815 */
-    border: 20px solid transparent;
-    border-image-source: url('assets/ui-border.png'); /* \ud14c\ub450\ub9ac \uc774\ubbf8\uc9c0 \uacbd\ub85c */
-    border-image-slice: 70; /* \uc774\ubbf8\uc9c0\ub97c 9\uc870\uac01\uc73c\ub85c \ub098\ub204\ub294 \uae30\uc900 */
-    border-image-repeat: repeat;
-
-    /* \ubc30\uacbd \uc774\ubbf8\uc9c0 \uc124\uc815 */
-    background-image: url('assets/ui-bg.png'); /* \ubc30\uacbd \uc774\ubbf8\uc9c0 \uacbd\ub85c */
-    background-color: #3a2d1d;
-    background-clip: padding-box; /* \ubc30\uacbd\uc774 \ud14c\ub450\ub9ac \uc548\uc1fc\uac70\ub9ac\ubcf4\ub0b4 \uc228\uadc0\ub098 \ucd94\uac00 */
-    
-    padding: 10px;
-    color: #4a3b2a; /* \ud14d\uc2a4\ud2b8 \uc0c9\uc0c1 \ubcc0\uacbd */
-    font-family: sans-serif;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    pointer-events: auto;
-}
-
-#ui-panel h2 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    text-align: center;
-    border-bottom: 2px solid #5a4b3a;
-    padding-bottom: 5px;
-    color: #3a2d1d;
-}
-
-.stat-line {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.stat-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-}
-
-/* HP \ubc14 \uc2a4\ud0c0\uc77c */
-.hp-bar-container {
-    width: 100%;
-    height: 15px;
-    background-color: #888;
-    border: 1px solid #444;
-    border-radius: 3px;
-    margin-top: 5px;
-}
-
-.hp-bar-fill {
-    width: 100%;
-    height: 100%;
-    background-color: #d14a4a;
-    border-radius: 2px;
-    transition: width 0.2s ease-in-out; /* HP\uac00 \ubd80\ub4dc\ub7ec\uc6b4 \ubc29\uc2dd\uc73c\ub85c \ubcc0\ud3ec \ucd94\uac00 */
-}
-
-/* EXP \ubc14 \uc2a4\ud0c0\uc77c */
-.exp-bar-container {
-    width: 100%;
-    height: 10px;
-    background-color: #888;
-    border: 1px solid #444;
-    border-radius: 3px;
-    margin-top: 5px;
-    position: relative;
-}
-
-.exp-bar-fill {
-    width: 100%;
-    height: 100%;
-    background-color: #4aa3d1;
-    border-radius: 2px;
-    transition: width 0.2s ease-in-out;
-}
-
-.exp-bar-text {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    color: #fff;
-}
-
-.stat-plus {
-    margin-left: 4px;
-    cursor: pointer;
-}
-
-/* ===== 인벤토리 UI 스타일 ===== */
-
-#inventory-section {
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#inventory-section h3 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-}
-
-#inventory-slots {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-    gap: 5px;
-    min-height: 48px; /* 인벤토리가 비어있어도 최소 높이 유지 */
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 5px;
-    border-radius: 3px;
-}
-
-.inventory-slot {
-    width: 48px;
-    height: 48px;
-    border: 1px solid #777;
-    background-color: #333;
-}
-
-.inventory-slot img {
-    width: 100%;
-    height: 100%;
-}
-
-#mercenary-controls {
-    margin-top: 10px;
-}
-
-.hire-button {
-    width: 100%;
-    padding: 4px 0;
-    margin-top: 5px;
-}
-
-/* 경험치 바 스타일 */
-.exp-bar-container {
-    width: 100%;
-    height: 15px;
-    background-color: #333;
-    border: 1px solid #777;
-    border-radius: 3px;
-    margin-top: 10px;
-    position: relative; /* 텍스트 위치 기준 */
-}
-
-.exp-bar-fill {
-    width: 0%;
-    height: 100%;
-    background-color: #3a7bd5;
-    border-radius: 2px;
-    transition: width 0.5s ease-in-out;
-}
-
-.exp-bar-text {
-    position: absolute;
+    position: fixed; /* 레이어 순서를 위해 fixed 사용 */
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    color: white;
-    font-size: 10px;
-    text-align: center;
-    line-height: 15px; /* height와 동일하게 설정 */
-    text-shadow: 1px 1px 1px black;
+    z-index: 1; /* 가장 아래에 있는 레이어 */
 }
 
-#combat-log-panel {
-    position: fixed;
-    bottom: 20px;
+/* 모든 UI 패널들은 캔버스 위에 위치 (z-index: 10) */
+#ui-panel, #combat-log-panel, #system-log-panel, .modal-panel {
+    position: fixed; /* 다른 요소 위에 올리기 위해 fixed 사용 */
+    z-index: 10;
+}
+
+#ui-panel {
+    top: 20px;
     left: 20px;
-    width: 400px;
-    height: 150px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid #555;
-    border-radius: 5px;
-    color: white;
-    font-family: sans-serif;
-    font-size: 12px;
-    padding: 10px;
-    overflow-y: auto;
-    pointer-events: auto;
-}
-
-/* style.css 파일 맨 아래에 추가 */
-
-.log-title {
-    font-weight: bold;
-    color: #ffc107; /* 노란색 계열 */
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-}
-
-#system-log-panel {
-    position: fixed;
-    bottom: 20px;
-    right: 20px; /* 오른쪽 하단에 배치 */
-    width: 400px;
-    height: 150px;
-    background-color: rgba(10, 20, 40, 0.75); /* 푸른색 계열 배경 */
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    color: #a2d2ff; /* 밝은 하늘색 텍스트 */
-    font-family: 'Courier New', Courier, monospace; /* 고정폭 글꼴 */
-    font-size: 11px;
-    padding: 10px;
-    overflow-y: auto;
-    opacity: 0.7; /* 약간 투명하게 */
-    pointer-events: auto;
-}
-
-#system-log-content {
-    white-space: pre-wrap; /* 긴 메시지도 줄바꿈되도록 */
-}
-
-/* style.css 파일 맨 아래에 추가 */
-
-.modal-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px;
+    width: 250px;
     border: 20px solid transparent;
     border-image-source: url('assets/ui-border.jpg');
     border-image-slice: 65 fill;
@@ -265,12 +38,71 @@ body, html {
     padding: 10px;
     color: #4a3b2a;
     font-weight: bold;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    font-family: sans-serif;
+}
+
+.stat-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 요소들을 양 끝으로 정렬 */
+    margin-bottom: 5px;
+}
+
+/* ... (기존 HP 바, 경험치 바 스타일은 변경 없음) ... */
+
+#combat-log-panel {
+    bottom: 20px;
+    left: 20px;
+    width: 400px;
+    height: 150px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #555;
+    color: white;
+    font-size: 12px;
+    padding: 10px;
+    overflow-y: auto;
+    border-radius: 5px;
+}
+
+#system-log-panel {
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    height: 150px;
+    background-color: rgba(10, 20, 40, 0.75);
+    border: 1px solid #007bff;
+    color: #a2d2ff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    padding: 10px;
+    overflow-y: auto;
+    border-radius: 5px;
+    opacity: 0.7;
+}
+
+.log-title {
+    font-weight: bold;
+    color: #ffc107;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.modal-panel {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    border-image-slice: 65 fill;
+    background-clip: padding-box;
+    padding: 10px;
+    font-weight: bold;
     box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    z-index: 100; /* 다른 UI 위에 오도록 설정 */
 }
 
 .modal-panel.hidden {
-    display: none; /* hidden 클래스가 있으면 숨김 */
+    display: none;
 }
 
 .close-btn {
@@ -287,3 +119,5 @@ body, html {
     font-size: 16px;
     font-weight: bold;
 }
+
+##이는 다중 레이어 시스템 만들기 전에 작성된 패치이므로, 그 시스템에 유연하게 적용시켜줘.##
