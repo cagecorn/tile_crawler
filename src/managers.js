@@ -2,6 +2,8 @@
 
 import { Monster, Item, Mercenary } from './entities.js'; // Mercenary 추가
 import { MetaAIManager as BaseMetaAI } from './ai-managers.js'; // 이름 충돌 방지
+import { rollOnTable } from './utils/random.js';
+import { MONSTER_SPAWN_TABLE } from './data/tables.js';
 
 export class MonsterManager {
     constructor(monsterCount, mapManager, assets, eventManager) {
@@ -19,34 +21,24 @@ export class MonsterManager {
 
     _spawnMonsters(count) {
         for (let i = 0; i < count; i++) {
-            let size = { w: 1, h: 1 };
-            let image = this.assets.monster;
-            if (Math.random() < 0.25) {
+            // 다이스 봇을 사용해 어떤 몬스터를 스폰할지 결정
+            const monsterType = rollOnTable(MONSTER_SPAWN_TABLE);
+
+            let size, image, config;
+
+            if (monsterType === 'epic_monster') {
                 size = { w: 2, h: 2 };
                 image = this.assets.epic_monster;
+                config = { /* ... 에픽 몬스터 스탯 ... */ };
+            } else { // 'normal_monster' 또는 기본값
+                size = { w: 1, h: 1 };
+                image = this.assets.monster;
+                config = { /* ... 일반 몬스터 스탯 ... */ };
             }
 
-            let pos;
-            if (size.w > 1) {
-                if (this.mapManager.rooms.length > 0) {
-                    const room = this.mapManager.rooms[Math.floor(Math.random() * this.mapManager.rooms.length)];
-                    pos = { x: room.x * this.mapManager.tileSize, y: room.y * this.mapManager.tileSize };
-                }
-            } else {
-                pos = this.mapManager.getRandomFloorPosition(size);
-            }
-
+            const pos = this.mapManager.getRandomFloorPosition(size);
             if (pos) {
-                const config = {
-                    sizeInTiles_w: size.w,
-                    sizeInTiles_h: size.h,
-                    strength: size.w > 1 ? 2 : 1,
-                    endurance: size.w > 1 ? 2 : 0,
-                    visionRange: 192 * 5,
-                    attackRange: 192,
-                    expValue: size.w > 1 ? 15 : 5
-                };
-                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 0, config));
+                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 'dungeon_monsters', config));
             }
         }
     }
