@@ -125,8 +125,28 @@ window.onload = function() {
         });
 
         eventManager.subscribe('entity_death', (data) => {
-            const { victim } = data;
-            combatLogManager.add(`%c${victim.constructor.name}가 쓰러졌습니다.`, 'red');
+            const { attacker, victim } = data;
+            const victimName = victim.constructor.name;
+            eventManager.publish('log', { message: `${victimName}가 쓰러졌습니다.`, color: 'red' });
+
+            // === 플레이어 사망 처리 로직 추가 ===
+            if (victim.isPlayer) {
+                eventManager.publish('game_over');
+                return; // 플레이어가 죽었으면 아래 경험치 로직은 실행 안 함
+            }
+
+            if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
+                const exp = victim.expValue;
+                attacker.stats.addExp(exp);
+                eventManager.publish('exp_gained', { player: attacker, exp: exp });
+            }
+        });
+
+        // 게임오버 이벤트 구독 추가
+        eventManager.subscribe('game_over', () => {
+            gameState.isGameOver = true;
+            alert("게임 오버!");
+            combatLogManager.add('%c게임 오버!', 'magenta');
         });
 
         eventManager.subscribe('exp_gained', (data) => {

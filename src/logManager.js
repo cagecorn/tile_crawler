@@ -46,9 +46,18 @@ export class SystemLogManager {
     constructor(eventManager) {
         this.logElement = document.getElementById('system-log-content');
         this.logs = [];
-        // 'debug' 채널의 이벤트만 구독
+        this.frameCount = 0; // 프레임 카운터 추가
+
         eventManager.subscribe('debug', (data) => {
-            this.add(data.tag, data.message);
+            // 특정 태그는 조건을 걸어서 너무 자주 찍히지 않도록 함
+            if (data.tag === 'Frame') {
+                this.frameCount++;
+                if (this.frameCount % 60 === 0) { // 60프레임(약 1초)에 한 번만
+                    this.add(data.tag, data.message);
+                }
+            } else {
+                this.add(data.tag, data.message);
+            }
         });
     }
     add(tag, message) {
