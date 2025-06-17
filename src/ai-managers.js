@@ -44,6 +44,7 @@ export class MetaAIManager {
 
         // 행동 결정 로그
         eventManager.publish('debug', {
+            tag: 'AI',
             message: `${entity.constructor.name} (id: ${entity.id.substr(0,4)}) decided action: ${action.type}`
         });
 

@@ -152,7 +152,7 @@ window.onload = function() {
        function update() {
            if (gameState.isGameOver) return;
 
-            eventManager.publish('debug', { message: '--- Frame Update Start ---' });
+            eventManager.publish('debug', { tag: 'System', message: '--- Frame Update Start ---' });
 
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
@@ -201,7 +201,7 @@ window.onload = function() {
             const context = { eventManager, player, mapManager, monsterManager, mercenaryManager };
             metaAIManager.update(context);
 
-            eventManager.publish('debug', { message: '--- Frame Update End ---' });
+            eventManager.publish('debug', { tag: 'System', message: '--- Frame Update End ---' });
         }
 
         function checkForLevelUp(player) {
