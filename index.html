@@ -6,7 +6,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="game-canvas"></canvas>
+    <div id="canvas-container">
+        <canvas id="map-canvas" class="game-layer"></canvas>
+        <canvas id="entity-canvas" class="game-layer"></canvas>
+        <canvas id="fx-canvas" class="game-layer"></canvas>
+    </div>
 
     <div id="ui-panel">
         <h2>플레이어 상태</h2>
