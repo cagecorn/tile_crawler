@@ -34,12 +34,15 @@ export class CombatLogManager {
     }
 
     render() {
+        const isAtBottom = Math.abs(this.logElement.scrollHeight - this.logElement.clientHeight - this.logElement.scrollTop) < 5;
         this.logElement.innerHTML = this.logs.map(log =>
             `<span style="color: ${log.color};">${log.message}</span>`
         ).join('<br>');
-        setTimeout(() => {
-            this.logElement.scrollTop = this.logElement.scrollHeight;
-        }, 0);
+        if (isAtBottom) {
+            setTimeout(() => {
+                this.logElement.scrollTop = this.logElement.scrollHeight;
+            }, 0);
+        }
     }
 }
 
@@ -64,16 +67,29 @@ export class SystemLogManager {
     }
     add(tag, message) {
         const timestamp = new Date().toLocaleTimeString();
-        this.logs.push(`[${timestamp}] [${tag}] ${message}`);
-        if (this.logs.length > 50) this.logs.shift();
+
+        const last = this.logs[this.logs.length - 1];
+        if (last && last.tag === tag && last.message === message) {
+            last.count = (last.count || 1) + 1;
+        } else {
+            this.logs.push({ timestamp, tag, message, count: 1 });
+            if (this.logs.length > 50) this.logs.shift();
+        }
         this.render();
     }
     render() {
         if (this.logElement) {
-            this.logElement.innerText = this.logs.join('\n');
-            setTimeout(() => {
-                this.logElement.scrollTop = this.logElement.scrollHeight;
-            }, 0);
+            const isAtBottom = Math.abs(this.logElement.scrollHeight - this.logElement.clientHeight - this.logElement.scrollTop) < 5;
+            const text = this.logs.map(log => {
+                const countText = log.count > 1 ? ` (x${log.count})` : '';
+                return `[${log.timestamp}] [${log.tag}] ${log.message}${countText}`;
+            }).join('\n');
+            this.logElement.innerText = text;
+            if (isAtBottom) {
+                setTimeout(() => {
+                    this.logElement.scrollTop = this.logElement.scrollHeight;
+                }, 0);
+            }
         }
     }
 }
