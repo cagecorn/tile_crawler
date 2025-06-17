@@ -24,7 +24,7 @@ window.onload = function() {
 
     loader.onReady(assets => {
         const layerManager = new LayerManager();
-        const canvas = layerManager.layers.map;
+        const canvas = layerManager.layers.mapBase;
 
         // === 1. 핵심 객체들 생성 ===
         const eventManager = new EventManager();
@@ -163,7 +163,7 @@ window.onload = function() {
         function render() {
             if (gameState.isGameOver) return;
 
-            layerManager.clearAll();
+            layerManager.clear();
 
             const camera = gameState.camera;
             const zoom = gameState.zoomLevel;
@@ -175,28 +175,31 @@ window.onload = function() {
             camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
             camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
 
-            const layers = layerManager.contexts;
+            for (const key in layerManager.contexts) {
+                const ctx = layerManager.contexts[key];
+                ctx.save();
+                ctx.scale(zoom, zoom);
+                ctx.translate(-camera.x, -camera.y);
+            }
 
-            layers.map.save();
-            layers.map.scale(zoom, zoom);
-            layers.map.translate(-camera.x, -camera.y);
-            mapManager.render(layers.map, assets);
-            itemManager.render(layers.map);
-            layers.map.restore();
+            const contexts = layerManager.contexts;
 
-            layers.entity.save();
-            layers.entity.scale(zoom, zoom);
-            layers.entity.translate(-camera.x, -camera.y);
-            monsterManager.render(layers.entity);
-            mercenaryManager.render(layers.entity);
-            gameState.player.render(layers.entity);
-            layers.entity.restore();
+            mapManager.render(contexts.mapBase, contexts.mapDecor, assets);
+            itemManager.render(contexts.mapDecor);
 
-            layers.fx.save();
-            layers.fx.scale(zoom, zoom);
-            layers.fx.translate(-camera.x, -camera.y);
-            uiManager.renderHpBars(layers.fx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
-            layers.fx.restore();
+            // buffManager.renderGroundAuras(contexts.groundFx, ...); // (미래 구멍)
+
+            monsterManager.render(contexts.entity);
+            mercenaryManager.render(contexts.entity);
+            gameState.player.render(contexts.entity);
+
+            uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
+
+            // weatherManager.render(contexts.weather); // (미래 구멍)
+
+            for (const key in layerManager.contexts) {
+                layerManager.contexts[key].restore();
+            }
 
             uiManager.updateUI(gameState);
         }
@@ -267,11 +270,11 @@ window.onload = function() {
 
         });
 
-        // === 캔버스 클릭 이벤트 추가 (최상위 fx-canvas에 연결) ===
-        layerManager.layers.fx.addEventListener('click', (event) => {
+        // === 캔버스 클릭 이벤트 추가 (상단 vfx-canvas에 연결) ===
+        layerManager.layers.vfx.addEventListener('click', (event) => {
             if (gameState.isGameOver) return;
 
-            const rect = layerManager.layers.fx.getBoundingClientRect();
+            const rect = layerManager.layers.vfx.getBoundingClientRect();
             const scale = gameState.zoomLevel;
             const worldX = (event.clientX - rect.left) / scale + gameState.camera.x;
             const worldY = (event.clientY - rect.top) / scale + gameState.camera.y;

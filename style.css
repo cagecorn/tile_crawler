@@ -7,17 +7,29 @@ body, html {
     background-color: #000;
 }
 
-#game-canvas {
-    display: block;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    position: fixed; /* 레이어 순서를 위해 fixed 사용 */
+#canvas-container {
+    position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 1; /* 가장 아래에 있는 레이어 */
 }
+
+.game-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#map-base-canvas    { z-index: 10; }
+#map-decor-canvas   { z-index: 20; }
+#ground-fx-canvas   { z-index: 30; }
+#entity-canvas      { z-index: 40; }
+#vfx-canvas         { z-index: 50; }
+#weather-canvas     { z-index: 60; }
 
 /* 모든 UI 패널들은 캔버스 위에 위치 (z-index: 10) */
 #ui-panel, #combat-log-panel, #system-log-panel, .modal-panel {
