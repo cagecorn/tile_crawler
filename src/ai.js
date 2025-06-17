@@ -45,7 +45,11 @@ export class MeleeAI extends AIArchetype {
                 // 공격 범위 안에 있으면 공격
                 return { type: 'attack', target: nearestTarget };
             } else {
-                // 공격 범위 밖에 있으면 추격
+            // === 이동 로직 수정 ===
+            // 목표와의 거리가 자신의 속도보다 같거나 작으면, 더 이상 접근하지 않고 대기
+            if (minDistance <= self.speed) {
+                return { type: 'idle' };
+            }
                 return { type: 'move', target: nearestTarget };
             }
         } else if (self.isFriendly && !self.isPlayer) {

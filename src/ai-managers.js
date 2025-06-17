@@ -77,7 +77,12 @@ export class MetaAIManager {
                 const dx = targetX - entity.x;
                 const dy = targetY - entity.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance > 1) {
+                if (distance <= entity.speed) {
+                    if (!context.mapManager.isWallAt(targetX, targetY, entity.width, entity.height)) {
+                        entity.x = targetX;
+                        entity.y = targetY;
+                    }
+                } else {
                     let moveX = (dx / distance) * entity.speed;
                     let moveY = (dy / distance) * entity.speed;
                     const newX = entity.x + moveX;
