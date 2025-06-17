@@ -9,6 +9,7 @@ import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 import { SaveLoadManager } from './src/saveLoadManager.js';
+import { LayerManager } from './src/layerManager.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -22,15 +23,8 @@ window.onload = function() {
     loader.loadImage('potion', 'assets/potion.png');
 
     loader.onReady(assets => {
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        const layerManager = new LayerManager();
+        const canvas = layerManager.layers.map;
 
         // === 1. 핵심 객체들 생성 ===
         const eventManager = new EventManager();
@@ -168,25 +162,42 @@ window.onload = function() {
 
         function render() {
             if (gameState.isGameOver) return;
+
+            layerManager.clearAll();
+
             const camera = gameState.camera;
-            const player = gameState.player;
             const zoom = gameState.zoomLevel;
-            const targetCameraX = player.x - canvas.width / (2 * zoom);
-            const targetCameraY = player.y - canvas.height / (2 * zoom);
+
+            const targetCameraX = gameState.player.x - canvas.width / (2 * zoom);
+            const targetCameraY = gameState.player.y - canvas.height / (2 * zoom);
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
             camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
             camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
-            ctx.save();
-            ctx.scale(zoom, zoom);
-            ctx.translate(-camera.x, -camera.y);
-            mapManager.render(ctx, assets);
-            itemManager.render(ctx);
-            monsterManager.render(ctx);
-            mercenaryManager.render(ctx);
-            gameState.player.render(ctx);
-            uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
-            ctx.restore();
+
+            const layers = layerManager.contexts;
+
+            layers.map.save();
+            layers.map.scale(zoom, zoom);
+            layers.map.translate(-camera.x, -camera.y);
+            mapManager.render(layers.map, assets);
+            itemManager.render(layers.map);
+            layers.map.restore();
+
+            layers.entity.save();
+            layers.entity.scale(zoom, zoom);
+            layers.entity.translate(-camera.x, -camera.y);
+            monsterManager.render(layers.entity);
+            mercenaryManager.render(layers.entity);
+            gameState.player.render(layers.entity);
+            layers.entity.restore();
+
+            layers.fx.save();
+            layers.fx.scale(zoom, zoom);
+            layers.fx.translate(-camera.x, -camera.y);
+            uiManager.renderHpBars(layers.fx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
+            layers.fx.restore();
+
             uiManager.updateUI(gameState);
         }
 
