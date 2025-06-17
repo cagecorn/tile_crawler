@@ -124,6 +124,7 @@ window.onload = function() {
             data.defender.takeDamage(data.damage);
             if (data.defender.hp <= 0) {
                 eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
+                eventManager.publish('entity_removed', { victimId: data.defender.id });
             }
         });
 
