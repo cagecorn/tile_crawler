@@ -37,7 +37,9 @@ export class CombatLogManager {
         this.logElement.innerHTML = this.logs.map(log =>
             `<span style="color: ${log.color};">${log.message}</span>`
         ).join('<br>');
-        this.logElement.scrollTop = this.logElement.scrollHeight;
+        setTimeout(() => {
+            this.logElement.scrollTop = this.logElement.scrollHeight;
+        }, 0);
     }
 }
 
@@ -69,7 +71,9 @@ export class SystemLogManager {
     render() {
         if (this.logElement) {
             this.logElement.innerText = this.logs.join('\n');
-            this.logElement.scrollTop = this.logElement.scrollHeight;
+            setTimeout(() => {
+                this.logElement.scrollTop = this.logElement.scrollHeight;
+            }, 0);
         }
     }
 }

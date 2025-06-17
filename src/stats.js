@@ -33,24 +33,24 @@ export class StatManager {
     }
 
     recalculate() {
+        const currentExp = this.derivedStats.exp;
+        const currentLevel = this.derivedStats.level;
+        const currentExpNeeded = this.derivedStats.expNeeded;
+
         const final = {};
-        // 기본 스탯과 포인트 투자 스탯을 합산
         for (const stat in this._baseStats) {
             final[stat] = (this._baseStats[stat] || 0) + (this._pointsAllocated[stat] || 0);
         }
 
-        // 파생 스탯 계산
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = 1 + final.strength * 2;
         final.movementSpeed = final.movement;
 
-        // 기존의 level, exp, expNeeded 값을 유지 (버그 수정)
-        // 이전에 계산된 값이 있다면 그것을 사용하고, 없다면 final에서 가져옴
-        final.level = this.derivedStats.level || final.level;
-        final.exp = this.derivedStats.exp || final.exp;
-        final.expNeeded = this.derivedStats.expNeeded || final.expNeeded;
-
         this.derivedStats = final;
+
+        if (currentExp !== undefined) this.derivedStats.exp = currentExp;
+        if (currentLevel !== undefined) this.derivedStats.level = currentLevel;
+        if (currentExpNeeded !== undefined) this.derivedStats.expNeeded = currentExpNeeded;
     }
 
     get(statName) {

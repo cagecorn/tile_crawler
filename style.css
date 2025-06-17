@@ -13,6 +13,11 @@ body, html {
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* === UI \ud328\ub110 \uc2a4\ud0c0\uc77c \uc804\uccb4 \uc218\uc815 \ubc0f \ucd94\uac00 === */
@@ -38,6 +43,7 @@ body, html {
     font-family: sans-serif;
     font-weight: bold;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    pointer-events: auto;
 }
 
 #ui-panel h2 {
@@ -203,6 +209,7 @@ body, html {
     font-size: 12px;
     padding: 10px;
     overflow-y: auto;
+    pointer-events: auto;
 }
 
 /* style.css 파일 맨 아래에 추가 */
@@ -230,6 +237,7 @@ body, html {
     padding: 10px;
     overflow-y: auto;
     opacity: 0.7; /* 약간 투명하게 */
+    pointer-events: auto;
 }
 
 #system-log-content {
