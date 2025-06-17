@@ -48,12 +48,12 @@ export class SystemLogManager {
         this.logs = [];
         // 'debug' 채널의 이벤트만 구독
         eventManager.subscribe('debug', (data) => {
-            this.add(data.message);
+            this.add(data.tag, data.message);
         });
     }
-    add(message) {
+    add(tag, message) {
         const timestamp = new Date().toLocaleTimeString();
-        this.logs.push(`[${timestamp}] ${message}`);
+        this.logs.push(`[${timestamp}] [${tag}] ${message}`);
         if (this.logs.length > 50) this.logs.shift();
         this.render();
     }
