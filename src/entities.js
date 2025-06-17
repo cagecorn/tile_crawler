@@ -1,6 +1,6 @@
 // src/entities.js
 
-import { MeleeAI } from './ai.js';
+import { MeleeAI, RangedAI } from './ai.js';
 import { StatManager } from './stats.js';
 
 class Entity {
@@ -21,6 +21,14 @@ class Entity {
         this.isPlayer = false;
         this.isFriendly = false;
         this.ai = null;
+
+        // --- 장비창(Equipment) 추가 ---
+        this.equipment = {
+            weapon: null,
+            armor: null,
+            accessory1: null,
+            accessory2: null,
+        };
     }
 
     get speed() { return this.stats.get('movementSpeed'); }
@@ -29,6 +37,18 @@ class Entity {
     get expValue() { return this.stats.get('expValue'); }
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
+
+    // --- AI를 동적으로 변경하는 메서드 추가 ---
+    updateAI() {
+        if (!this.ai) return;
+
+        const weapon = this.equipment.weapon;
+        if (weapon && weapon.tags.includes('ranged')) {
+            this.ai = new RangedAI();
+        } else {
+            this.ai = new MeleeAI();
+        }
+    }
 
     render(ctx) {
         if (this.image) {
@@ -77,13 +97,18 @@ export class Monster extends Entity {
 
 export class Item {
     constructor(x, y, tileSize, name, image) {
-        this.id = Math.random().toString(36).substr(2, 9);
-        this.x = x;
-        this.y = y;
-        this.name = name;
-        this.image = image;
-        this.width = tileSize;
-        this.height = tileSize;
+        this.x = x; this.y = y; this.width = tileSize; this.height = tileSize;
+        this.name = name; this.image = image;
+        this.baseId = '';
+        this.tags = [];
+        const statsMap = new Map();
+        statsMap.add = function(statObj) {
+            for (const key in statObj) {
+                this.set(key, (this.get(key) || 0) + statObj[key]);
+            }
+        };
+        this.stats = statsMap;
+        this.sockets = [];
     }
 
     render(ctx) {

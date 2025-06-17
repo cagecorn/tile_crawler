@@ -1,11 +1,11 @@
 // main.js
 
-import { CharacterFactory } from './src/factory.js';
+import { CharacterFactory, ItemFactory } from './src/factory.js';
 import { EventManager } from './src/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
 import { MapManager } from './src/map.js';
-import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/managers.js';
+import { MercenaryManager, MonsterManager, UIManager, ItemManager, EquipmentManager } from './src/managers.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 import { SaveLoadManager } from './src/saveLoadManager.js';
@@ -23,6 +23,9 @@ window.onload = function() {
     loader.loadImage('wall', 'assets/wall.png');
     loader.loadImage('gold', 'assets/gold.png');
     loader.loadImage('potion', 'assets/potion.png');
+    loader.loadImage('sword', 'assets/images/shortsword.png');
+    loader.loadImage('bow', 'assets/images/bow.png');
+    loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
 
     loader.onReady(assets => {
         const layerManager = new LayerManager();
@@ -31,6 +34,14 @@ window.onload = function() {
         // === 1. 핵심 객체들 생성 ===
         const eventManager = new EventManager();
         const factory = new CharacterFactory(assets);
+        const itemFactory = new ItemFactory(assets);
+        const equipmentManager = new EquipmentManager(eventManager);
+        ItemManager.prototype._spawnItems = function(count) {
+            for(let i=0; i<count; i++) {
+                const pos = this.mapManager.getRandomFloorPosition();
+                this.items.push(itemFactory.create('short_sword', pos.x, pos.y, this.mapManager.tileSize));
+            }
+        };
         const combatLogManager = new CombatLogManager(eventManager);
         const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator(eventManager);
@@ -41,6 +52,17 @@ window.onload = function() {
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
+        const originalUseItem = uiManager.useItem.bind(uiManager);
+        uiManager.useItem = function(itemIndex, gameState) {
+            const item = gameState.inventory[itemIndex];
+            if (item.type === 'weapon' || item.type === 'armor') {
+                equipmentManager.equip(gameState.player, item);
+                gameState.inventory.splice(itemIndex, 1);
+                this.updateUI(gameState);
+            } else {
+                originalUseItem(itemIndex, gameState);
+            }
+        };
         const metaAIManager = new MetaAIManager(eventManager);
         const saveLoadManager = new SaveLoadManager();
 
