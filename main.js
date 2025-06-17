@@ -10,6 +10,8 @@ import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 import { SaveLoadManager } from './src/saveLoadManager.js';
 import { LayerManager } from './src/layerManager.js';
+import { PathfindingManager } from './src/pathfindingManager.js';
+import { FogManager } from './src/fogManager.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -33,6 +35,8 @@ window.onload = function() {
         const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator(eventManager);
         const mapManager = new MapManager();
+        const pathfindingManager = new PathfindingManager(mapManager);
+        const fogManager = new FogManager(mapManager.width, mapManager.height);
         const monsterManager = new MonsterManager(7, mapManager, assets, eventManager, factory);
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
@@ -193,6 +197,7 @@ window.onload = function() {
             mercenaryManager.render(contexts.entity);
             gameState.player.render(contexts.entity);
 
+            fogManager.render(contexts.vfx, mapManager.tileSize);
             uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
 
             // weatherManager.render(contexts.weather); // (미래 구멍)
@@ -245,7 +250,8 @@ window.onload = function() {
                 }
                 itemManager.removeItem(itemToPick);
             }
-            const context = { eventManager, player, mapManager, monsterManager, mercenaryManager };
+            fogManager.update(player, mapManager);
+            const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager };
             metaAIManager.update(context);
             eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });
         }
