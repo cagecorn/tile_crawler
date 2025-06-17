@@ -333,7 +333,12 @@ export class MetaAIManager extends BaseMetaAI {
                 const dx = action.target.x - entity.x;
                 const dy = action.target.y - entity.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance > 1) {
+                if (distance <= entity.speed) {
+                    if (!mapManager.isWallAt(action.target.x, action.target.y, entity.width, entity.height)) {
+                        entity.x = action.target.x;
+                        entity.y = action.target.y;
+                    }
+                } else {
                     let moveX = (dx / distance) * entity.speed;
                     let moveY = (dy / distance) * entity.speed;
                     const newX = entity.x + moveX;

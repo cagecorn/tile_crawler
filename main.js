@@ -12,6 +12,8 @@ import { SaveLoadManager } from './src/saveLoadManager.js';
 import { LayerManager } from './src/layerManager.js';
 import { PathfindingManager } from './src/pathfindingManager.js';
 import { FogManager } from './src/fogManager.js';
+import { NarrativeManager } from './src/narrativeManager.js';
+import { TurnManager } from './src/turnManager.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -52,6 +54,8 @@ window.onload = function() {
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
+        const narrativeManager = new NarrativeManager();
+        const turnManager = new TurnManager();
         const originalUseItem = uiManager.useItem.bind(uiManager);
         uiManager.useItem = function(itemIndex, gameState) {
             const item = gameState.inventory[itemIndex];
@@ -232,8 +236,11 @@ window.onload = function() {
             uiManager.updateUI(gameState);
         }
 
-        function update() {
-            if (gameState.isGameOver) return;
+       function update() {
+           if (gameState.isGameOver) return;
+
+            const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
+            turnManager.update(allEntities); // 턴 매니저 업데이트
             eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
