@@ -1,12 +1,12 @@
 // main.js
 
-import { monsterDeathWorkflow } from './src/workflows.js'; // 워크플로우를 불러옵니다.
+import { CharacterFactory } from './src/factory.js';
+import { monsterDeathWorkflow } from './src/workflows.js';
 import { EventManager } from './src/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
 import { MapManager } from './src/map.js';
 import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/managers.js';
-import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 import { SaveLoadManager } from './src/saveLoadManager.js';
@@ -33,13 +33,14 @@ window.onload = function() {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // === 1. 모든 매니저 생성 (EventManager를 다른 매니저에 전달) ===
+        // === 1. 핵심 객체들 생성 ===
         const eventManager = new EventManager();
+        const factory = new CharacterFactory(assets);
         const combatLogManager = new CombatLogManager(eventManager);
         const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator();
         const mapManager = new MapManager();
-        const monsterManager = new MonsterManager(7, mapManager, assets, eventManager);
+        const monsterManager = new MonsterManager(7, mapManager, assets, eventManager, factory);
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
@@ -49,17 +50,18 @@ window.onload = function() {
         const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
-        monsterManager.monsters.forEach(monster => monsterGroup.addMember(monster));
-        mercenaryManager.mercenaries.forEach(merc => playerGroup.addMember(merc));
-
-        const warriorJob = {
-            strength: 5, agility: 5, endurance: 5, focus: 5, intelligence: 5,
-            movement: 5, maxHp: 20, attackPower: 2,
-        };
-
+        // === 2. 플레이어 생성 ===
         const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
+        const player = factory.create('player', {
+            x: startPos.x,
+            y: startPos.y,
+            tileSize: mapManager.tileSize,
+            groupId: playerGroup.id,
+            image: assets.player,
+            baseStats: { strength: 5, agility: 5, endurance: 5, movement: 5 }
+        });
         const gameState = {
-            player: new Player(startPos.x, startPos.y, mapManager.tileSize, assets.player, playerGroup.id, warriorJob),
+            player,
             inventory: [],
             gold: 100,
             statPoints: 5,
@@ -67,13 +69,40 @@ window.onload = function() {
             isGameOver: false,
             zoomLevel: 0.5
         };
-        playerGroup.addMember(gameState.player);
+        playerGroup.addMember(player);
 
+        // === 3. 몬스터 생성 ===
+        const monsters = [];
+        for (let i = 0; i < 7; i++) {
+            const pos = mapManager.getRandomFloorPosition();
+            if (pos) {
+                const monster = factory.create('monster', {
+                    x: pos.x,
+                    y: pos.y,
+                    tileSize: mapManager.tileSize,
+                    groupId: monsterGroup.id,
+                    image: assets.monster,
+                    baseStats: {}
+                });
+                monsters.push(monster);
+            }
+        }
+        monsterManager.monsters = monsters;
+        monsters.forEach(m => monsterGroup.addMember(m));
 
+        // === 4. 용병 고용 로직 ===
         document.getElementById('hire-mercenary').onclick = () => {
             if (gameState.gold >= 50) {
                 gameState.gold -= 50;
-                const newMerc = mercenaryManager.hireMercenary(gameState.player.x, gameState.player.y, mapManager.tileSize, playerGroup.id);
+                const newMerc = factory.create('mercenary', {
+                    x: gameState.player.x,
+                    y: gameState.player.y,
+                    tileSize: mapManager.tileSize,
+                    groupId: playerGroup.id,
+                    image: assets.mercenary,
+                    baseStats: { strength: 2, agility: 2, endurance: 2, movement: 4 }
+                });
+                mercenaryManager.hire(newMerc);
                 playerGroup.addMember(newMerc);
             }
         };
@@ -90,19 +119,16 @@ window.onload = function() {
             const damage = combatCalculator.calculateDamage(data.attacker, data.defender);
             data.defender.takeDamage(damage);
             eventManager.publish('log', { message: `${data.attacker.constructor.name} -> ${data.defender.constructor.name}에게 ${damage} 피해!` });
-
             if (data.defender.hp <= 0) {
                 monsterDeathWorkflow({ eventManager, victim: data.defender, attacker: data.attacker });
             }
         });
 
-        // 사망 이벤트 리스너
         eventManager.subscribe('entity_death', (data) => {
             const { victim } = data;
             combatLogManager.add(`%c${victim.constructor.name}가 쓰러졌습니다.`, 'red');
         });
 
-        // 경험치 획득 이벤트 리스너
         eventManager.subscribe('exp_gained', (data) => {
             const { player, exp } = data;
             player.stats.addExp(exp);
@@ -110,10 +136,8 @@ window.onload = function() {
             checkForLevelUp(player);
         });
 
-        // (미래를 위한 구멍) 아이템 드랍 이벤트 리스너
         eventManager.subscribe('drop_loot', (data) => {
             console.log(`${data.position.x}, ${data.position.y} 위치에 아이템 드랍!`);
-            // 여기에 나중에 ItemManager가 아이템을 생성하는 로직을 넣으면 됨
         });
 
         const keysPressed = {};
@@ -124,17 +148,13 @@ window.onload = function() {
             if (gameState.isGameOver) return;
             const camera = gameState.camera;
             const player = gameState.player;
-
             const zoom = gameState.zoomLevel;
             const targetCameraX = player.x - canvas.width / (2 * zoom);
             const targetCameraY = player.y - canvas.height / (2 * zoom);
-
             const mapPixelWidth = mapManager.width * mapManager.tileSize;
             const mapPixelHeight = mapManager.height * mapManager.tileSize;
-
             camera.x = Math.max(0, Math.min(targetCameraX, mapPixelWidth - canvas.width / zoom));
             camera.y = Math.max(0, Math.min(targetCameraY, mapPixelHeight - canvas.height / zoom));
-
             ctx.save();
             ctx.scale(zoom, zoom);
             ctx.translate(-camera.x, -camera.y);
@@ -145,24 +165,19 @@ window.onload = function() {
             gameState.player.render(ctx);
             uiManager.renderHpBars(ctx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
             ctx.restore();
-
             uiManager.updateUI(gameState);
         }
 
-       function update() {
-           if (gameState.isGameOver) return;
-
+        function update() {
+            if (gameState.isGameOver) return;
             eventManager.publish('debug', { tag: 'System', message: '--- Frame Update Start ---' });
-
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
-
             let moveX = 0, moveY = 0;
             if (keysPressed['ArrowUp']) moveY -= player.speed;
             if (keysPressed['ArrowDown']) moveY += player.speed;
             if (keysPressed['ArrowLeft']) moveX -= player.speed;
             if (keysPressed['ArrowRight']) moveX += player.speed;
-
             if (moveX !== 0 || moveY !== 0) {
                 const targetX = player.x + moveX;
                 const targetY = player.y + moveY;
@@ -170,7 +185,6 @@ window.onload = function() {
                     targetX + player.width / 2,
                     targetY + player.height / 2
                 );
-
                 if (monsterToAttack && player.attackCooldown === 0) {
                     eventManager.publish('entity_attack', { attacker: player, defender: monsterToAttack });
                     player.attackCooldown = 30;
@@ -179,14 +193,12 @@ window.onload = function() {
                     player.y = targetY;
                 }
             }
-
             const itemToPick = itemManager.items.find(item =>
                 player.x < item.x + mapManager.tileSize &&
                 player.x + player.width > item.x &&
                 player.y < item.y + mapManager.tileSize &&
                 player.y + player.height > item.y
             );
-
             if (itemToPick) {
                 if (itemToPick.name === 'gold') {
                     gameState.gold += 10;
@@ -197,10 +209,8 @@ window.onload = function() {
                 }
                 itemManager.removeItem(itemToPick);
             }
-
             const context = { eventManager, player, mapManager, monsterManager, mercenaryManager };
             metaAIManager.update(context);
-
             eventManager.publish('debug', { tag: 'System', message: '--- Frame Update End ---' });
         }
 

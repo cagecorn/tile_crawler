@@ -4,13 +4,16 @@ import { MeleeAI } from './ai.js';
 import { StatManager } from './stats.js';
 
 class Entity {
-    constructor(x, y, tileSize, image, groupId, statsConfig) {
+    constructor(config) {
+        const { x, y, tileSize, image, groupId, stats, properties } = config;
         this.id = Math.random().toString(36).substr(2, 9);
         this.groupId = groupId;
         this.x = x;
         this.y = y;
         this.image = image;
-        this.stats = new StatManager(statsConfig);
+        this.tileSize = tileSize;
+        this.properties = properties || {};
+        this.stats = new StatManager(stats || {}, this);
         this.width = this.stats.get('sizeInTiles_w') * tileSize;
         this.height = this.stats.get('sizeInTiles_h') * tileSize;
         this.hp = this.stats.get('maxHp');
@@ -19,7 +22,7 @@ class Entity {
         this.isFriendly = false;
         this.ai = null;
     }
-    
+
     get speed() { return this.stats.get('movementSpeed'); }
     get attackPower() { return this.stats.get('attackPower'); }
     get maxHp() { return this.stats.get('maxHp'); }
@@ -40,38 +43,38 @@ class Entity {
             x: this.x,
             y: this.y,
             hp: this.hp,
-            stats: this.stats.getSavableState(), // StatManager에게 상태 보고를 위임
+            stats: this.stats.getSavableState(),
+            properties: this.properties,
         };
     }
 
-    takeDamage(damage) { this.hp -= damage; if(this.hp < 0) this.hp = 0; }
+    takeDamage(damage) { this.hp -= damage; if (this.hp < 0) this.hp = 0; }
 }
 
 export class Player extends Entity {
-    constructor(x, y, tileSize, image, groupId, job) {
-        super(x, y, tileSize, image, groupId, job);
+    constructor(config) {
+        super(config);
         this.isPlayer = true;
         this.isFriendly = true;
     }
 }
 
 export class Mercenary extends Entity {
-    constructor(x, y, tileSize, image, groupId, job) {
-        super(x, y, tileSize, image, groupId, job);
+    constructor(config) {
+        super(config);
         this.isFriendly = true;
         this.ai = new MeleeAI();
     }
 }
 
 export class Monster extends Entity {
-    constructor(x, y, tileSize, image, groupId, config) {
-        super(x, y, tileSize, image, groupId, config);
+    constructor(config) {
+        super(config);
         this.isFriendly = false;
         this.ai = new MeleeAI();
     }
 }
 
-// 간단한 아이템 클래스 구현
 export class Item {
     constructor(x, y, tileSize, name, image) {
         this.id = Math.random().toString(36).substr(2, 9);
