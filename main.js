@@ -270,11 +270,11 @@ window.onload = function() {
 
         });
 
-        // === 캔버스 클릭 이벤트 추가 (상단 vfx-canvas에 연결) ===
-        layerManager.layers.vfx.addEventListener('click', (event) => {
+        // === 캔버스 클릭 이벤트 추가 (가장 상단 weather-canvas에 연결) ===
+        layerManager.layers.weather.addEventListener('click', (event) => {
             if (gameState.isGameOver) return;
 
-            const rect = layerManager.layers.vfx.getBoundingClientRect();
+            const rect = layerManager.layers.weather.getBoundingClientRect();
             const scale = gameState.zoomLevel;
             const worldX = (event.clientX - rect.left) / scale + gameState.camera.x;
             const worldY = (event.clientY - rect.top) / scale + gameState.camera.y;
