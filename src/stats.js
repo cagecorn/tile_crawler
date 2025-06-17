@@ -55,6 +55,13 @@ export class StatManager {
         return this.derivedStats[statName] ?? 0;
     }
 
+    getSavableState() {
+        return {
+            baseStats: this._baseStats,
+            pointsAllocated: this._pointsAllocated,
+        };
+    }
+
     addExp(amount) {
         // 경험치는 기본 스탯에 누적한 뒤 즉시 재계산하여 UI와 레벨업 체크에 반영
         this._baseStats.exp += amount;
