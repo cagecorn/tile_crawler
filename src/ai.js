@@ -1,5 +1,7 @@
 // src/ai.js
 
+import { hasLineOfSight } from './utils/geometry.js';
+
 // --- AI 유형(Archetype)의 기반이 될 부모 클래스 ---
 class AIArchetype {
     // action은 { type: 'move', target: {x, y} } 또는 { type: 'attack', target: entity } 같은 객체
@@ -29,7 +31,15 @@ export class MeleeAI extends AIArchetype {
         }
 
         // 2. 행동 결정
-        if (nearestTarget && minDistance < self.visionRange) {
+        if (nearestTarget &&
+            minDistance < self.visionRange &&
+            hasLineOfSight(
+                Math.floor(self.x / mapManager.tileSize),
+                Math.floor(self.y / mapManager.tileSize),
+                Math.floor(nearestTarget.x / mapManager.tileSize),
+                Math.floor(nearestTarget.y / mapManager.tileSize),
+                mapManager
+            )) {
             // 적이 시야 안에 있을 경우
             if (minDistance < self.attackRange) {
                 // 공격 범위 안에 있으면 공격

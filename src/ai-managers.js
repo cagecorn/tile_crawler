@@ -57,17 +57,28 @@ export class MetaAIManager {
                 }
                 break;
             case 'move':
-                const dx = action.target.x - entity.x;
-                const dy = action.target.y - entity.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance > 1) {
-                    let moveX = (dx / distance) * entity.speed;
-                    let moveY = (dy / distance) * entity.speed;
-                    const newX = entity.x + moveX;
-                    const newY = entity.y + moveY;
-                    if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
-                        entity.x = newX;
-                        entity.y = newY;
+                const tileSize = context.mapManager.tileSize;
+                const startX = Math.floor(entity.x / tileSize);
+                const startY = Math.floor(entity.y / tileSize);
+                const endX = Math.floor(action.target.x / tileSize);
+                const endY = Math.floor(action.target.y / tileSize);
+                const path = context.pathfindingManager.findPath(startX, startY, endX, endY);
+                if (path.length > 0) {
+                    const next = path[0];
+                    const targetX = next.x * tileSize;
+                    const targetY = next.y * tileSize;
+                    const dx = targetX - entity.x;
+                    const dy = targetY - entity.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance > 1) {
+                        let moveX = (dx / distance) * entity.speed;
+                        let moveY = (dy / distance) * entity.speed;
+                        const newX = entity.x + moveX;
+                        const newY = entity.y + moveY;
+                        if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
+                            entity.x = newX;
+                            entity.y = newY;
+                        }
                     }
                 }
                 break;

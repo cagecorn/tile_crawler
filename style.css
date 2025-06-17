@@ -225,3 +225,15 @@ body, html {
 }
 
 ##이는 다중 레이어 시스템 만들기 전에 작성된 패치이므로, 그 시스템에 유연하게 적용시켜줘.##
+
+#minimap-canvas {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 150px;
+    border: 2px solid #555;
+    background-color: black;
+    z-index: 100;
+}
+
