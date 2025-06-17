@@ -319,7 +319,7 @@ export class MapManager {
         return false;
     }
 
-    render(ctx, assets) {
+    render(ctxBase, ctxDecor, assets) {
         const wallImage = assets.wall;
         const floorImage = assets.floor;
 
@@ -327,7 +327,7 @@ export class MapManager {
             for (let x = 0; x < this.width; x++) {
                 const imageToDraw = (this.map[y][x] === this.tileTypes.WALL) ? wallImage : floorImage;
                 if (imageToDraw) {
-                    ctx.drawImage(imageToDraw, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
+                    ctxBase.drawImage(imageToDraw, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
                 }
             }
         }
