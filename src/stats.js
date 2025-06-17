@@ -33,20 +33,23 @@ export class StatManager {
     }
 
     recalculate() {
-        const final = { ...this._baseStats };
-        for (const stat in this._pointsAllocated) {
-            final[stat] = (final[stat] || 0) + this._pointsAllocated[stat];
+        const final = {};
+        // 기본 스탯과 포인트 투자 스탯을 합산
+        for (const stat in this._baseStats) {
+            final[stat] = (this._baseStats[stat] || 0) + (this._pointsAllocated[stat] || 0);
         }
-        if (this.entity && this.entity.properties) {
-            const { stars = {} } = this.entity.properties;
-            for (const stat in stars) {
-                final[stat] = (final[stat] || 0) + stars[stat];
-            }
-            // 신앙/특성/MBTI 등을 이용한 보너스는 향후 구현할 공간
-        }
+
+        // 파생 스탯 계산
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = 1 + final.strength * 2;
         final.movementSpeed = final.movement;
+
+        // 기존의 level, exp, expNeeded 값을 유지 (버그 수정)
+        // 이전에 계산된 값이 있다면 그것을 사용하고, 없다면 final에서 가져옴
+        final.level = this.derivedStats.level || final.level;
+        final.exp = this.derivedStats.exp || final.exp;
+        final.expNeeded = this.derivedStats.expNeeded || final.expNeeded;
+
         this.derivedStats = final;
     }
 
