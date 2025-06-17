@@ -90,10 +90,12 @@ body, html {
 }
 
 .modal-panel {
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 300px;
+    z-index: 100;
     border-image-slice: 65 fill;
     background-clip: padding-box;
     padding: 10px;
