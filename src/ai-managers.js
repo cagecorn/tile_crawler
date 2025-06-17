@@ -13,12 +13,21 @@ class AIGroup {
         this.strategy = strategy;
     }
     addMember(entity) { this.members.push(entity); }
-    removeMember(entityId) { this.members = this.members.filter(m => m.id !== entityId); }
+    removeMember(entityId) {
+        this.members = this.members.filter(m => m.id !== entityId);
+    }
 }
 
 export class MetaAIManager {
-    constructor() {
+    constructor(eventManager) {
         this.groups = {};
+        // entity_death 이벤트를 구독하여, 그룹에서 해당 멤버를 제거
+        eventManager.subscribe('entity_death', (data) => {
+            const victim = data.victim;
+            if (this.groups[victim.groupId]) {
+                this.groups[victim.groupId].removeMember(victim.id);
+            }
+        });
     }
 
     createGroup(id, strategy) {
@@ -32,18 +41,13 @@ export class MetaAIManager {
 
     executeAction(entity, action, context) {
         if (!action || !action.type || action.type === 'idle') return;
-
-        const { onPlayerAttacked, onMonsterAttacked } = context;
+        const { eventManager } = context;
 
         switch (action.type) {
             case 'attack':
                 if (entity.attackCooldown === 0) {
-                    const target = action.target;
-                    if (entity.isFriendly) {
-                        onMonsterAttacked(target.id, entity.attackPower);
-                    } else {
-                        onPlayerAttacked(entity.attackPower, target);
-                    }
+                    // 공격 이벤트를 발행
+                    eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
                     entity.attackCooldown = 60;
                 }
                 break;
@@ -74,7 +78,8 @@ export class MetaAIManager {
                 enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
             };
 
-            for (const member of group.members) {
+            for (const member of [...group.members]) { // 복사본 순회!
+                if (member.hp <= 0) continue;
                 if (member.attackCooldown > 0) member.attackCooldown--;
                 if (member.ai) {
                     const action = member.ai.decideAction(member, currentContext);

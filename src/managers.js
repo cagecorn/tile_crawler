@@ -49,14 +49,15 @@ export class MonsterManager {
         const monster = this.monsters.find(m => m.id === monsterId);
         if (monster) {
             monster.takeDamage(damage);
-            if (monster.hp <= 0) {
-                const exp = monster.expValue;
-                const name = monster.constructor.name;
-                this.monsters = this.monsters.filter(m => m.id !== monsterId);
-                return { gainedExp: exp, victimName: name };
-            }
+            // 죽었는지 여부만 반환
+            return monster.hp <= 0 ? { wasKilled: true, victim: monster } : { wasKilled: false };
         }
-        return { gainedExp: 0, victimName: null };
+        return { wasKilled: false };
+    }
+
+    // 이벤트 매니저가 "이 몬스터 제거해"라고 알려주면, 그때 제거만 함
+    removeMonster(monsterId) {
+        this.monsters = this.monsters.filter(m => m.id !== monsterId);
     }
 
     getMonsterAt(x, y) {
@@ -246,7 +247,7 @@ export class UIManager {
 
     // HP 바를 그리는 메서드 (이전과 동일)
     renderHpBars(ctx, player, monsters, mercenaries) {
-        // this._drawHpBar(ctx, player); // 플레이어 HP바는 이제 HTML UI로 옮겼으므로 주석 처리
+        // 플레이어 HP바는 이제 여기서 그리지 않음 (HTML로 완전히 이전)
         for (const monster of monsters) {
             this._drawHpBar(ctx, monster);
         }
@@ -256,9 +257,7 @@ export class UIManager {
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp >= entity.maxHp || entity.hp <= 0) {
-            return;
-        }
+        if (entity.hp >= entity.maxHp || entity.hp <= 0) return;
         const barWidth = entity.width;
         const barHeight = 8;
         const x = entity.x;
