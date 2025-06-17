@@ -1,5 +1,7 @@
 // src/logManager.js
-export class LogManager {
+
+// === LogManager를 CombatLogManager로 이름 변경 ===
+export class CombatLogManager {
     constructor(eventManager) {
         this.logElement = document.getElementById('combat-log-content');
         this.logs = [];
@@ -36,5 +38,29 @@ export class LogManager {
             `<span style="color: ${log.color};">${log.message}</span>`
         ).join('<br>');
         this.logElement.scrollTop = this.logElement.scrollHeight;
+    }
+}
+
+// === SystemLogManager 클래스 새로 추가 ===
+export class SystemLogManager {
+    constructor(eventManager) {
+        this.logElement = document.getElementById('system-log-content');
+        this.logs = [];
+        // 'debug' 채널의 이벤트만 구독
+        eventManager.subscribe('debug', (data) => {
+            this.add(data.message);
+        });
+    }
+    add(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        this.logs.push(`[${timestamp}] ${message}`);
+        if (this.logs.length > 50) this.logs.shift();
+        this.render();
+    }
+    render() {
+        if (this.logElement) {
+            this.logElement.innerText = this.logs.join('\n');
+            this.logElement.scrollTop = this.logElement.scrollHeight;
+        }
     }
 }

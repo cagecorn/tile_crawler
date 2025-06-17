@@ -204,3 +204,34 @@ body, html {
     padding: 10px;
     overflow-y: auto;
 }
+
+/* style.css 파일 맨 아래에 추가 */
+
+.log-title {
+    font-weight: bold;
+    color: #ffc107; /* 노란색 계열 */
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+#system-log-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px; /* 오른쪽 하단에 배치 */
+    width: 400px;
+    height: 150px;
+    background-color: rgba(10, 20, 40, 0.75); /* 푸른색 계열 배경 */
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    color: #a2d2ff; /* 밝은 하늘색 텍스트 */
+    font-family: 'Courier New', Courier, monospace; /* 고정폭 글꼴 */
+    font-size: 11px;
+    padding: 10px;
+    overflow-y: auto;
+    opacity: 0.7; /* 약간 투명하게 */
+}
+
+#system-log-content {
+    white-space: pre-wrap; /* 긴 메시지도 줄바꿈되도록 */
+}
