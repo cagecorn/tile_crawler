@@ -267,23 +267,26 @@ window.onload = function() {
 
         });
 
-        // === 캔버스 클릭 이벤트 추가 ===
-        canvas.addEventListener('click', (event) => {
+        // === 캔버스 클릭 이벤트 추가 (최상위 fx-canvas에 연결) ===
+        layerManager.layers.fx.addEventListener('click', (event) => {
             if (gameState.isGameOver) return;
 
-            const rect = canvas.getBoundingClientRect();
+            const rect = layerManager.layers.fx.getBoundingClientRect();
             const scale = gameState.zoomLevel;
             const worldX = (event.clientX - rect.left) / scale + gameState.camera.x;
             const worldY = (event.clientY - rect.top) / scale + gameState.camera.y;
 
-            for (const merc of mercenaryManager.mercenaries) {
-                if (worldX >= merc.x && worldX <= merc.x + merc.width &&
-                    worldY >= merc.y && worldY <= merc.y + merc.height) {
+            const clickedMerc = [...mercenaryManager.mercenaries].reverse().find(merc =>
+                worldX >= merc.x && worldX <= merc.x + merc.width &&
+                worldY >= merc.y && worldY <= merc.y + merc.height
+            );
 
-                    uiManager.showMercenaryDetail(merc);
-                    return;
-                }
+            if (clickedMerc) {
+                uiManager.showMercenaryDetail(clickedMerc);
+                return; // 용병을 클릭했으면 더 이상 진행 안 함
             }
+
+            // 나중에 몬스터 클릭 시 정보창 띄우는 로직도 여기에 추가 가능
         });
 
         function gameLoop() {

@@ -127,7 +127,7 @@ export class UIManager {
         this._isInitialized = false;
     }
 
-    init(onStatUp, onMercenaryClick) {
+    init(onStatUp) {
         if (this._isInitialized) return;
         this._statUpCallback = onStatUp;
         if (this.statUpButtonsContainer) {
@@ -157,14 +157,18 @@ export class UIManager {
     // --- 아래 두 메서드를 새로 추가 ---
     showMercenaryDetail(mercenary) {
         if (!this.mercDetailPanel) return;
-        this.mercDetailName.textContent = `전사 용병 (Lv.${mercenary.stats.get('level')})`;
 
-        const statsToShow = ['hp', 'maxHp', 'strength', 'agility', 'endurance', 'movementSpeed'];
+        this.mercDetailName.textContent = `${mercenary.constructor.name} (Lv.${mercenary.stats.get('level')})`;
+
+        const statsToShow = ['hp', 'maxHp', 'attackPower', 'strength', 'agility', 'endurance', 'movementSpeed'];
         this.mercStatsContainer.innerHTML = '';
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
-            statDiv.textContent = `${stat}: ${mercenary.stats.get(stat)}`;
+            const statValue = typeof mercenary.stats.get(stat) === 'number'
+                ? mercenary.stats.get(stat).toFixed(1)
+                : mercenary.stats.get(stat);
+            statDiv.textContent = `${stat}: ${statValue}`;
             this.mercStatsContainer.appendChild(statDiv);
         });
 
