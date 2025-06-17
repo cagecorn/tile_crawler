@@ -1,17 +1,17 @@
 // src/managers.js
 
-import { Monster, Item, Mercenary } from './entities.js'; // Mercenary 추가
-import { MetaAIManager as BaseMetaAI } from './ai-managers.js'; // 이름 충돌 방지
+import { Item } from './entities.js';
+import { MetaAIManager as BaseMetaAI } from './ai-managers.js';
 import { rollOnTable } from './utils/random.js';
 import { MONSTER_SPAWN_TABLE } from './data/tables.js';
 
 export class MonsterManager {
-    constructor(monsterCount, mapManager, assets, eventManager) {
+    constructor(monsterCount, mapManager, assets, eventManager, factory) {
         this.monsters = [];
         this.mapManager = mapManager;
         this.assets = assets;
+        this.factory = factory;
         this._spawnMonsters(monsterCount);
-        // "몬스터 제거" 이벤트를 구독
         eventManager.subscribe('entity_removed', (data) => {
             if (this.monsters.some(m => m.id === data.victimId)) {
                 this.removeMonster(data.victimId);
@@ -21,24 +21,28 @@ export class MonsterManager {
 
     _spawnMonsters(count) {
         for (let i = 0; i < count; i++) {
-            // 다이스 봇을 사용해 어떤 몬스터를 스폰할지 결정
             const monsterType = rollOnTable(MONSTER_SPAWN_TABLE);
-
             let size, image, config;
-
             if (monsterType === 'epic_monster') {
                 size = { w: 2, h: 2 };
                 image = this.assets.epic_monster;
-                config = { /* ... 에픽 몬스터 스탯 ... */ };
-            } else { // 'normal_monster' 또는 기본값
+                config = { baseStats: {} };
+            } else {
                 size = { w: 1, h: 1 };
                 image = this.assets.monster;
-                config = { /* ... 일반 몬스터 스탯 ... */ };
+                config = { baseStats: {} };
             }
-
             const pos = this.mapManager.getRandomFloorPosition(size);
             if (pos) {
-                this.monsters.push(new Monster(pos.x, pos.y, this.mapManager.tileSize, image, 'dungeon_monsters', config));
+                const monster = this.factory.create('monster', {
+                    x: pos.x,
+                    y: pos.y,
+                    tileSize: this.mapManager.tileSize,
+                    groupId: 'dungeon_monsters',
+                    image,
+                    ...config,
+                });
+                this.monsters.push(monster);
             }
         }
     }
@@ -47,21 +51,21 @@ export class MonsterManager {
         const monster = this.monsters.find(m => m.id === monsterId);
         if (monster) {
             monster.takeDamage(damage);
-            // 죽었는지 여부만 반환
             return monster.hp <= 0 ? { wasKilled: true, victim: monster } : { wasKilled: false };
         }
         return { wasKilled: false };
     }
 
-    // 이벤트 매니저가 "이 몬스터 제거해"라고 알려주면, 그때 제거만 함
     removeMonster(monsterId) {
         this.monsters = this.monsters.filter(m => m.id !== monsterId);
     }
 
     getMonsterAt(x, y) {
         for (const monster of this.monsters) {
-            if (x >= monster.x && x < monster.x + monster.width &&
-                y >= monster.y && y < monster.y + monster.height) {
+            if (
+                x >= monster.x && x < monster.x + monster.width &&
+                y >= monster.y && y < monster.y + monster.height
+            ) {
                 return monster;
             }
         }
@@ -81,25 +85,15 @@ export class MonsterManager {
     }
 }
 
-// === MercenaryManager 새로 추가 ===
 export class MercenaryManager {
     constructor(assets) {
         this.mercenaries = [];
         this.assets = assets;
     }
 
-    hireMercenary(x, y, tileSize, groupId) {
-        const job = {
-            strength: 2,
-            agility: 2,
-            endurance: 2,
-            movement: 4,
-            visionRange: 192 * 4,
-            attackRange: 192 * 0.8
-        };
-        const newMerc = new Mercenary(x, y, tileSize, this.assets.mercenary, groupId, job);
-        this.mercenaries.push(newMerc);
-        return newMerc;
+    hire(mercenary) {
+        this.mercenaries.push(mercenary);
+        return mercenary;
     }
 
     render(ctx) {
@@ -109,10 +103,8 @@ export class MercenaryManager {
     }
 }
 
-// === UIManager 클래스 전체 수정 ===
 export class UIManager {
     constructor() {
-        // UI 요소들 찾아두기
         this.levelElement = document.getElementById('ui-player-level');
         this.statPointsElement = document.getElementById('ui-player-statPoints');
         this.movementSpeedElement = document.getElementById('ui-player-movementSpeed');
@@ -124,13 +116,8 @@ export class UIManager {
         this.expBarFillElement = document.getElementById('ui-exp-bar-fill');
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
-
-        // 버튼 이벤트 위임을 위해 부모 컨테이너를 저장
         this.statUpButtonsContainer = document.getElementById('player-stats-container');
-
-        // 현재 인벤토리 상태 저장용 배열 (UI 빈번한 재생성 방지)
         this._lastInventory = [];
-
         this._statUpCallback = null;
         this._isInitialized = false;
     }
@@ -161,11 +148,8 @@ export class UIManager {
     updateUI(gameState) {
         const player = gameState.player;
         const stats = player.stats;
-
-        // 스탯 업데이트 - StatManager에서 값을 읽어옴
         this.levelElement.textContent = stats.get('level');
         this.statPointsElement.textContent = gameState.statPoints;
-
         const primaryStats = ['strength', 'agility', 'endurance', 'focus', 'intelligence', 'movement'];
         primaryStats.forEach(stat => {
             const valueElement = document.getElementById(`ui-player-${stat}`);
@@ -175,25 +159,16 @@ export class UIManager {
                 buttonElement.style.display = gameState.statPoints > 0 ? 'inline-block' : 'none';
             }
         });
-
         this.hpElement.textContent = Math.ceil(player.hp);
         this.maxHpElement.textContent = stats.get('maxHp');
         this.attackPowerElement.textContent = stats.get('attackPower');
         this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
         this.goldElement.textContent = gameState.gold;
-
-        // HP 바 업데이트
         const hpRatio = player.hp / player.maxHp;
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
-
-        // 경험치 바 업데이트
         const expRatio = stats.get('exp') / stats.get('expNeeded');
         this.expBarFillElement.style.width = `${expRatio * 100}%`;
         this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
-
-
-
-        // 인벤토리 내용이 변경된 경우에만 DOM을 갱신하여 클릭 이벤트 손실을 방지
         if (this._hasInventoryChanged(gameState.inventory)) {
             this.inventorySlotsElement.innerHTML = '';
             gameState.inventory.forEach((item, index) => {
@@ -202,21 +177,16 @@ export class UIManager {
                 const img = document.createElement('img');
                 img.src = item.image.src;
                 img.alt = item.name;
-
                 slot.onclick = () => {
                     this.useItem(index, gameState);
                 };
-
                 slot.appendChild(img);
                 this.inventorySlotsElement.appendChild(slot);
             });
-
-            // 변화된 인벤토리 상태 저장
             this._lastInventory = [...gameState.inventory];
         }
     }
 
-    // 현재 인벤토리가 마지막으로 렌더링한 인벤토리와 다른지 확인
     _hasInventoryChanged(current) {
         if (current.length !== this._lastInventory.length) return true;
         for (let i = 0; i < current.length; i++) {
@@ -225,27 +195,18 @@ export class UIManager {
         return false;
     }
 
-    // 인벤토리 아이템 사용 로직
-    // useItem도 gameState를 인자로 받도록 수정
     useItem(itemIndex, gameState) {
         const player = gameState.player;
         const item = gameState.inventory[itemIndex];
-
         if (item.name === 'potion') {
             player.hp = Math.min(player.maxHp, player.hp + 5);
             console.log(`포션을 사용했습니다! HP +5`);
         }
-
-        // 사용한 아이템을 제거
         gameState.inventory.splice(itemIndex, 1);
-
-        // UI를 다시 그려서 변경사항을 즉시 반영
         this.updateUI(gameState);
     }
 
-    // HP 바를 그리는 메서드 (이전과 동일)
     renderHpBars(ctx, player, monsters, mercenaries) {
-        // 플레이어 HP바는 이제 여기서 그리지 않음 (HTML로 완전히 이전)
         for (const monster of monsters) {
             this._drawHpBar(ctx, monster);
         }
@@ -270,7 +231,6 @@ export class UIManager {
     }
 }
 
-// === 아래 ItemManager 클래스를 파일 맨 아래에 새로 추가 ===
 export class ItemManager {
     constructor(itemCount, mapManager, assets) {
         this.items = [];
@@ -283,21 +243,15 @@ export class ItemManager {
         for (let i = 0; i < count; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
-                // 50% 확률로 골드 또는 포션 생성
                 if (Math.random() < 0.5) {
-                    this.items.push(
-                        new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold)
-                    );
+                    this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold));
                 } else {
-                    this.items.push(
-                        new Item(pos.x, pos.y, this.mapManager.tileSize, 'potion', this.assets.potion)
-                    );
+                    this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'potion', this.assets.potion));
                 }
             }
         }
     }
 
-    // 특정 아이템을 맵에서 제거하는 함수
     removeItem(itemToRemove) {
         this.items = this.items.filter(item => item !== itemToRemove);
     }
@@ -309,14 +263,10 @@ export class ItemManager {
     }
 }
 
-// === MetaAIManager 로직 수정 ===
 export class MetaAIManager extends BaseMetaAI {
-    // 유닛의 행동을 실제로 실행하는 함수
     executeAction(entity, action, context) {
         if (!action) return;
-
         const { player, mapManager, onPlayerAttack, onMonsterAttacked } = context;
-
         switch (action.type) {
             case 'attack':
                 if (entity.attackCooldown === 0) {
