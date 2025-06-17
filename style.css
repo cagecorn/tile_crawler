@@ -243,3 +243,43 @@ body, html {
 #system-log-content {
     white-space: pre-wrap; /* 긴 메시지도 줄바꿈되도록 */
 }
+
+/* style.css 파일 맨 아래에 추가 */
+
+.modal-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    border: 20px solid transparent;
+    border-image-source: url('assets/ui-border.jpg');
+    border-image-slice: 65 fill;
+    border-image-repeat: repeat;
+    background-color: #3a2d1d;
+    background-clip: padding-box;
+    padding: 10px;
+    color: #4a3b2a;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    z-index: 100; /* 다른 UI 위에 오도록 설정 */
+}
+
+.modal-panel.hidden {
+    display: none; /* hidden 클래스가 있으면 숨김 */
+}
+
+.close-btn {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    background: #8c2a2a;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
