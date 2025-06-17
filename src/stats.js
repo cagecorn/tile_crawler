@@ -33,10 +33,6 @@ export class StatManager {
     }
 
     recalculate() {
-        const currentExp = this.derivedStats.exp;
-        const currentLevel = this.derivedStats.level;
-        const currentExpNeeded = this.derivedStats.expNeeded;
-
         const final = {};
         for (const stat in this._baseStats) {
             final[stat] = (this._baseStats[stat] || 0) + (this._pointsAllocated[stat] || 0);
@@ -47,10 +43,6 @@ export class StatManager {
         final.movementSpeed = final.movement;
 
         this.derivedStats = final;
-
-        if (currentExp !== undefined) this.derivedStats.exp = currentExp;
-        if (currentLevel !== undefined) this.derivedStats.level = currentLevel;
-        if (currentExpNeeded !== undefined) this.derivedStats.expNeeded = currentExpNeeded;
     }
 
     get(statName) {
