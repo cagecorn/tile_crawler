@@ -42,6 +42,11 @@ export class MetaAIManager {
         if (!action || !action.type || action.type === 'idle') return;
         const { eventManager } = context;
 
+        // 행동 결정 로그
+        eventManager.publish('debug', {
+            message: `${entity.constructor.name} (id: ${entity.id.substr(0,4)}) decided action: ${action.type}`
+        });
+
         switch (action.type) {
             case 'attack':
                 if (entity.attackCooldown === 0) {

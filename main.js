@@ -2,7 +2,7 @@
 
 import { monsterDeathWorkflow } from './src/workflows.js'; // 워크플로우를 불러옵니다.
 import { EventManager } from './src/eventManager.js';
-import { LogManager } from './src/logManager.js';
+import { CombatLogManager, SystemLogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
 import { MapManager } from './src/map.js';
 import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/managers.js';
@@ -35,7 +35,8 @@ window.onload = function() {
 
         // === 1. 모든 매니저 생성 (EventManager를 다른 매니저에 전달) ===
         const eventManager = new EventManager();
-        const logManager = new LogManager(eventManager);
+        const combatLogManager = new CombatLogManager(eventManager);
+        const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator();
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets, eventManager);
@@ -98,14 +99,14 @@ window.onload = function() {
         // 사망 이벤트 리스너
         eventManager.subscribe('entity_death', (data) => {
             const { victim } = data;
-            logManager.add(`%c${victim.constructor.name}가 쓰러졌습니다.`, 'red');
+            combatLogManager.add(`%c${victim.constructor.name}가 쓰러졌습니다.`, 'red');
         });
 
         // 경험치 획득 이벤트 리스너
         eventManager.subscribe('exp_gained', (data) => {
             const { player, exp } = data;
             player.stats.addExp(exp);
-            logManager.add(`%c${exp}의 경험치를 획득했습니다.`, 'yellow');
+            combatLogManager.add(`%c${exp}의 경험치를 획득했습니다.`, 'yellow');
             checkForLevelUp(player);
         });
 
@@ -148,8 +149,10 @@ window.onload = function() {
             uiManager.updateUI(gameState);
         }
 
-        function update() {
-            if (gameState.isGameOver) return;
+       function update() {
+           if (gameState.isGameOver) return;
+
+            eventManager.publish('debug', { message: '--- Frame Update Start ---' });
 
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
@@ -187,16 +190,18 @@ window.onload = function() {
             if (itemToPick) {
                 if (itemToPick.name === 'gold') {
                     gameState.gold += 10;
-                    logManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
+                    combatLogManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
                 } else {
                     gameState.inventory.push(itemToPick);
-                    logManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
+                    combatLogManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
                 }
                 itemManager.removeItem(itemToPick);
             }
 
             const context = { eventManager, player, mapManager, monsterManager, mercenaryManager };
             metaAIManager.update(context);
+
+            eventManager.publish('debug', { message: '--- Frame Update End ---' });
         }
 
         function checkForLevelUp(player) {
