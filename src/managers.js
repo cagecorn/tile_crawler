@@ -299,6 +299,21 @@ export class ItemManager {
     }
 }
 
+export class EquipmentManager {
+    constructor(eventManager) {
+        this.eventManager = eventManager;
+    }
+
+    equip(entity, item) {
+        if (item.type === 'weapon') {
+            entity.equipment.weapon = item;
+            entity.updateAI();
+            this.eventManager.publish('log', { message: `${entity.constructor.name} (이)가 ${item.name} (을)를 장착했다.` });
+        }
+        // ... (나중에 armor, accessory 처리 로직 추가)
+    }
+}
+
 export class MetaAIManager extends BaseMetaAI {
     executeAction(entity, action, context) {
         if (!action) return;

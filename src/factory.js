@@ -1,9 +1,11 @@
 // src/factory.js
-import { Player, Mercenary, Monster } from './entities.js';
+import { Player, Mercenary, Monster, Item } from './entities.js';
 import { rollOnTable } from './utils/random.js';
 import { FAITHS } from './data/faiths.js';
 import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
+import { ITEMS } from '../data/items.js';
+import { PREFIXES, SUFFIXES } from '../data/affixes.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -56,5 +58,49 @@ export class CharacterFactory {
     _rollStars() {
         // ... (별 갯수 랜덤 배분 로직) ...
         return { strength: 1, agility: 1, endurance: 1, focus: 1, intelligence: 1 };
+    }
+}
+
+// === ItemFactory 클래스 새로 추가 ===
+export class ItemFactory {
+    constructor(assets) {
+        this.assets = assets;
+    }
+
+    create(itemId, x, y, tileSize) {
+        const baseItem = ITEMS[itemId];
+        if (!baseItem) return null;
+
+        const item = new Item(x, y, tileSize, baseItem.name, this.assets[baseItem.imageKey]);
+        item.baseId = itemId;
+        item.type = baseItem.type;
+        item.tags = [...baseItem.tags];
+
+        if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
+        if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
+
+        item.sockets = this._createSockets();
+
+        return item;
+    }
+
+    _applyAffix(item, affixPool, type) {
+        const keys = Object.keys(affixPool);
+        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+        const affix = affixPool[randomKey];
+
+        item.name = (type === 'prefix') ? `${affix.name} ${item.name}` : `${item.name} ${affix.name}`;
+        if (!item.stats.add) {
+            item.stats.add = function(statObj) {
+                for (const key in statObj) {
+                    this.set(key, (this.get(key) || 0) + statObj[key]);
+                }
+            };
+        }
+        item.stats.add(affix.stats);
+    }
+
+    _createSockets() {
+        return [];
     }
 }
