@@ -253,6 +253,26 @@ window.onload = function() {
                 gameState.player.stats.allocatePoint(stat);
                 gameState.player.stats.recalculate();
             }
+
+        });
+
+        // === 캔버스 클릭 이벤트 추가 ===
+        canvas.addEventListener('click', (event) => {
+            if (gameState.isGameOver) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scale = gameState.zoomLevel;
+            const worldX = (event.clientX - rect.left) / scale + gameState.camera.x;
+            const worldY = (event.clientY - rect.top) / scale + gameState.camera.y;
+
+            for (const merc of mercenaryManager.mercenaries) {
+                if (worldX >= merc.x && worldX <= merc.x + merc.width &&
+                    worldY >= merc.y && worldY <= merc.y + merc.height) {
+
+                    uiManager.showMercenaryDetail(merc);
+                    return;
+                }
+            }
         });
 
         function gameLoop() {

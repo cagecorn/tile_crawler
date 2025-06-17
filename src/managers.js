@@ -117,12 +117,17 @@ export class UIManager {
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
         this.statUpButtonsContainer = document.getElementById('player-stats-container');
+        // --- 용병 정보창 요소 추가 ---
+        this.mercDetailPanel = document.getElementById('mercenary-detail-panel');
+        this.mercDetailName = document.getElementById('merc-detail-name');
+        this.mercStatsContainer = document.getElementById('merc-stats-container');
+        this.closeMercDetailBtn = document.getElementById('close-merc-detail-btn');
         this._lastInventory = [];
         this._statUpCallback = null;
         this._isInitialized = false;
     }
 
-    init(onStatUp) {
+    init(onStatUp, onMercenaryClick) {
         if (this._isInitialized) return;
         this._statUpCallback = onStatUp;
         if (this.statUpButtonsContainer) {
@@ -138,11 +143,38 @@ export class UIManager {
                 }
             });
         }
+        // 닫기 버튼 이벤트
+        if (this.closeMercDetailBtn) {
+            this.closeMercDetailBtn.onclick = () => this.hideMercenaryDetail();
+        }
         this._isInitialized = true;
     }
 
     setStatUpCallback(cb) {
         this.init(cb);
+    }
+
+    // --- 아래 두 메서드를 새로 추가 ---
+    showMercenaryDetail(mercenary) {
+        if (!this.mercDetailPanel) return;
+        this.mercDetailName.textContent = `전사 용병 (Lv.${mercenary.stats.get('level')})`;
+
+        const statsToShow = ['hp', 'maxHp', 'strength', 'agility', 'endurance', 'movementSpeed'];
+        this.mercStatsContainer.innerHTML = '';
+        statsToShow.forEach(stat => {
+            const statDiv = document.createElement('div');
+            statDiv.className = 'stat-line';
+            statDiv.textContent = `${stat}: ${mercenary.stats.get(stat)}`;
+            this.mercStatsContainer.appendChild(statDiv);
+        });
+
+        this.mercDetailPanel.classList.remove('hidden');
+    }
+
+    hideMercenaryDetail() {
+        if (this.mercDetailPanel) {
+            this.mercDetailPanel.classList.add('hidden');
+        }
     }
 
     updateUI(gameState) {
