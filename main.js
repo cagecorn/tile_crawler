@@ -9,6 +9,7 @@ import { MercenaryManager, MonsterManager, UIManager, ItemManager } from './src/
 import { Player } from './src/entities.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
+import { SaveLoadManager } from './src/saveLoadManager.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -42,6 +43,7 @@ window.onload = function() {
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
         const metaAIManager = new MetaAIManager(eventManager);
+        const saveLoadManager = new SaveLoadManager();
 
         const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
@@ -73,6 +75,13 @@ window.onload = function() {
                 const newMerc = mercenaryManager.hireMercenary(gameState.player.x, gameState.player.y, mapManager.tileSize, playerGroup.id);
                 playerGroup.addMember(newMerc);
             }
+        };
+
+        document.getElementById('save-game-btn').onclick = () => {
+            const saveData = saveLoadManager.gatherSaveData(gameState, monsterManager, mercenaryManager);
+            console.log("--- GAME STATE SAVED (SNAPSHOT) ---");
+            console.log(saveData);
+            eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
         };
 
         // === 2. 이벤트 구독 설정 (워크플로우 기반) ===

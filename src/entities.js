@@ -27,7 +27,23 @@ class Entity {
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
 
-    render(ctx) { if (this.image) { ctx.drawImage(this.image, this.x, this.y, this.width, this.height); } }
+    render(ctx) {
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+
+    getSaveState() {
+        return {
+            id: this.id,
+            type: this.constructor.name,
+            x: this.x,
+            y: this.y,
+            hp: this.hp,
+            stats: this.stats.getSavableState(), // StatManager에게 상태 보고를 위임
+        };
+    }
+
     takeDamage(damage) { this.hp -= damage; if(this.hp < 0) this.hp = 0; }
 }
 
@@ -71,5 +87,13 @@ export class Item {
         if (this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
+    }
+
+    getSaveState() {
+        return {
+            name: this.name,
+            x: this.x,
+            y: this.y,
+        };
     }
 }
