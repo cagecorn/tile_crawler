@@ -31,15 +31,16 @@ window.onload = function() {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // === 1. 모든 매니저 생성 (EventManager를 다른 매니저에 전달) ===
         const eventManager = new EventManager();
-        const logManager = new LogManager();
+        const logManager = new LogManager(eventManager);
         const combatCalculator = new CombatCalculator();
         const mapManager = new MapManager();
         const monsterManager = new MonsterManager(7, mapManager, assets);
         const mercenaryManager = new MercenaryManager(assets);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
-        const metaAIManager = new MetaAIManager();
+        const metaAIManager = new MetaAIManager(eventManager);
 
         const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
@@ -64,13 +65,6 @@ window.onload = function() {
         };
         playerGroup.addMember(gameState.player);
 
-        function handleMonsterAttacked(monsterId, damage) {
-            const { gainedExp, victimName } = monsterManager.handleAttackOnMonster(monsterId, damage);
-            if (gainedExp > 0) {
-                eventManager.publish('entity_death', { attacker: this, victimName: victimName, exp: gainedExp });
-                metaAIManager.getGroup('dungeon_monsters').removeMember(monsterId);
-            }
-        }
 
         document.getElementById('hire-mercenary').onclick = () => {
             if (gameState.gold >= 50) {
@@ -80,53 +74,32 @@ window.onload = function() {
             }
         };
 
-        eventManager.subscribe('entity_attack', ({ attacker, defender }) => {
-            const damage = combatCalculator.calculateDamage(attacker, defender);
-            defender.takeDamage(damage);
-            logManager.add(`${attacker.constructor.name}가 ${defender.constructor.name}을(를) 공격하여 ${damage}의 피해를 입혔습니다.`);
-            if (defender.hp <= 0) {
-                eventManager.publish('entity_death', { attacker, victim: defender });
+        // === 2. 이벤트 구독 설정 ===
+        eventManager.subscribe('entity_attack', (data) => {
+            const damage = combatCalculator.calculateDamage(data.attacker, data.defender);
+            data.defender.takeDamage(damage);
+            eventManager.publish('log', { message: `${data.attacker.constructor.name} -> ${data.defender.constructor.name}에게 ${damage} 피해!` });
+
+            if (data.defender.hp <= 0) {
+                eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
             }
         });
 
-        eventManager.subscribe('entity_death', (payload) => {
-            if (payload.victim) {
-                const { attacker, victim } = payload;
-                logManager.add(`${victim.constructor.name}가 쓰러졌습니다.`);
-                if (!victim.isFriendly) {
-                    monsterManager.monsters = monsterManager.monsters.filter(m => m.id !== victim.id);
-                    monsterGroup.removeMember(victim.id);
-                    attacker.stats.addExp(victim.expValue);
-                    logManager.add(`${victim.expValue}의 경험치를 획득했습니다.`);
-                    eventManager.publish('exp_gained', { player: attacker });
-                } else if (victim.isPlayer) {
-                    gameState.isGameOver = true;
-                    alert('게임 오버!');
-                }
-            } else {
-                const { attacker, victimName, exp } = payload;
-                logManager.add(`${victimName}가 쓰러졌습니다.`);
-                if (exp && attacker) {
-                    attacker.stats.addExp(exp);
-                    logManager.add(`${exp}의 경험치를 획득했습니다.`);
-                    eventManager.publish('exp_gained', { player: attacker });
-                }
-                if (victimName === 'Player') {
-                    gameState.isGameOver = true;
-                    alert('게임 오버!');
-                }
+        eventManager.subscribe('entity_death', (data) => {
+            const { attacker, victim } = data;
+            eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.` });
+            if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
+                attacker.stats.addExp(victim.expValue);
+                eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
+            }
+            if (!victim.isFriendly) {
+                monsterManager.removeMonster(victim.id);
             }
         });
 
-        eventManager.subscribe('exp_gained', ({ player }) => {
-            const stats = player.stats;
-            while (stats.get('exp') >= stats.get('expNeeded')) {
-                stats.levelUp();
-                stats.recalculate();
-                player.hp = player.maxHp;
-                if (player.isPlayer) gameState.statPoints += 5;
-                logManager.add(`레벨 업! LV ${stats.get('level')} 달성!`);
-            }
+        eventManager.subscribe('exp_gained', (data) => {
+            eventManager.publish('log', { message: `${data.exp} 경험치 획득.` });
+            checkForLevelUp(data.player);
         });
 
         const keysPressed = {};
@@ -209,20 +182,19 @@ window.onload = function() {
                 itemManager.removeItem(itemToPick);
             }
 
-            const context = {
-                player,
-                mapManager,
-                onPlayerAttacked: (damage, target) => {
-                    target.takeDamage(damage);
-                    if (target.hp <= 0) {
-                        eventManager.publish('entity_death', { attacker: null, victim: target });
-                    }
-                },
-                onMonsterAttacked: (monsterId, damage) => {
-                    handleMonsterAttacked.call(player, monsterId, damage);
-                }
-            };
+            const context = { eventManager, player, mapManager, monsterManager, mercenaryManager };
             metaAIManager.update(context);
+        }
+
+        function checkForLevelUp(player) {
+            const stats = player.stats;
+            while (stats.get('exp') >= stats.get('expNeeded')) {
+                stats.levelUp();
+                stats.recalculate();
+                player.hp = player.maxHp;
+                gameState.statPoints += 5;
+                eventManager.publish('level_up', { player: player, level: stats.get('level') });
+            }
         }
 
         uiManager.init(stat => {

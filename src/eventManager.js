@@ -1,3 +1,4 @@
+// src/eventManager.js
 export class EventManager {
     constructor() {
         this.listeners = {};
@@ -10,7 +11,13 @@ export class EventManager {
     }
     publish(eventName, data) {
         if (this.listeners[eventName]) {
-            this.listeners[eventName].forEach(callback => callback(data));
+            this.listeners[eventName].forEach(callback => {
+                try {
+                    callback(data);
+                } catch (error) {
+                    console.error(`Error in event listener for ${eventName}:`, error);
+                }
+            });
         }
     }
 }
