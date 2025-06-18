@@ -76,6 +76,7 @@ export class Game {
         this.soundManager = this.managers.SoundManager;
         this.effectManager = this.managers.EffectManager;
         this.projectileManager = this.managers.ProjectileManager;
+        this.projectileManager.vfxManager = this.vfxManager;
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
@@ -464,6 +465,7 @@ export class Game {
         const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager };
         metaAIManager.update(context);
         this.projectileManager.update();
+        this.vfxManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });
     }
 
@@ -507,6 +509,7 @@ export class Game {
         fogManager.render(contexts.vfx, mapManager.tileSize);
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
         this.projectileManager.render(contexts.vfx);
+        this.vfxManager.render(contexts.vfx);
 
         // weatherManager.render(contexts.weather); // (미래 구멍)
 
