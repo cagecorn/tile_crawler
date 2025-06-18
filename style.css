@@ -348,3 +348,26 @@ body, html {
 .stat-tab-btn.active { background: #eee; color: #333; }
 .stat-page.hidden { display: none; }
 
+/* Mercenary panel styles */
+#mercenary-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.merc-entry {
+    padding: 6px;
+    border-bottom: 1px solid #555;
+    cursor: pointer;
+}
+
+.merc-entry:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+#merc-inventory {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 5px;
+    padding: 5px;
+}
+
