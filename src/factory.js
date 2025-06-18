@@ -72,7 +72,12 @@ export class ItemFactory {
         const baseItem = ITEMS[itemId];
         if (!baseItem) return null;
 
-        const item = new Item(x, y, tileSize, baseItem.name, this.assets[baseItem.imageKey]);
+        // 아이템 생성 시 imageKey로부터 올바른 이미지를 불러온다
+        const itemImage = this.assets[baseItem.imageKey];
+        if (!itemImage) {
+            console.warn(`Missing image for item ${itemId} with key ${baseItem.imageKey}`);
+        }
+        const item = new Item(x, y, tileSize, baseItem.name, itemImage);
         item.baseId = itemId;
         item.type = baseItem.type;
         item.tags = [...baseItem.tags];

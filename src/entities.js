@@ -89,6 +89,21 @@ export class Mercenary extends Entity {
         this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
     }
+
+    render(ctx) {
+        // 1. 기본 이미지를 먼저 그린다
+        super.render(ctx);
+
+        // 2. 장착한 무기가 있으면 그 위에 겹쳐서 그린다
+        const weapon = this.equipment.weapon;
+        if (weapon && weapon.image) {
+            const drawX = this.x + this.width * 0.3;
+            const drawY = this.y + this.height * 0.3;
+            const drawW = this.width * 0.8;
+            const drawH = this.height * 0.8;
+            ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
+        }
+    }
 }
 
 export class Monster extends Entity {
