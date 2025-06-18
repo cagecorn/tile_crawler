@@ -5,7 +5,7 @@ export class PathfindingManager {
         this.mapManager = mapManager;
     }
 
-    _bfs(startX, startY, endX, endY) {
+    _bfs(startX, startY, endX, endY, isBlocked) {
         const { map, width, height, tileTypes } = this.mapManager;
 
         if (startX === endX && startY === endY) return [];
@@ -42,6 +42,7 @@ export class PathfindingManager {
 
                 if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
                 if (map[ny][nx] === tileTypes.WALL) continue;
+                if (isBlocked(nx, ny) && !(nx === endX && ny === endY)) continue;
                 if (visited.has(nKey)) continue;
 
                 visited.add(nKey);
@@ -54,10 +55,10 @@ export class PathfindingManager {
     }
 
     // 타겟 주변의 이동 가능한 위치까지 경로를 찾는다.
-    findPath(startX, startY, endX, endY) {
+    findPath(startX, startY, endX, endY, isBlocked = () => false) {
         console.log(`Pathfinding from (${startX},${startY}) to (${endX},${endY})`);
 
-        const basePath = this._bfs(startX, startY, endX, endY);
+        const basePath = this._bfs(startX, startY, endX, endY, isBlocked);
         if (basePath.length > 0) return basePath;
 
         const { map, width, height, tileTypes } = this.mapManager;
@@ -71,7 +72,7 @@ export class PathfindingManager {
             const ny = endY + dir.y;
             if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
             if (map[ny][nx] === tileTypes.WALL) continue;
-            const path = this._bfs(startX, startY, nx, ny);
+            const path = this._bfs(startX, startY, nx, ny, isBlocked);
             if (path.length > 0 && (bestPath.length === 0 || path.length < bestPath.length)) {
                 bestPath = path;
             }

@@ -80,7 +80,26 @@ export class MetaAIManager {
                 const startY = Math.floor(entity.y / tileSize);
                 const endX = Math.floor(action.target.x / tileSize);
                 const endY = Math.floor(action.target.y / tileSize);
-                const path = context.pathfindingManager.findPath(startX, startY, endX, endY);
+
+                const allEntities = [
+                    context.player,
+                    ...context.monsterManager.monsters,
+                    ...context.mercenaryManager.mercenaries
+                ];
+                const isBlocked = (x, y) => {
+                    for (const e of allEntities) {
+                        if (e === entity) continue;
+                        const ex = Math.floor(e.x / tileSize);
+                        const ey = Math.floor(e.y / tileSize);
+                        if (ex === x && ey === y) {
+                            if (x === endX && y === endY) return false;
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+
+                const path = context.pathfindingManager.findPath(startX, startY, endX, endY, isBlocked);
                 let targetX, targetY;
                 if (path.length > 0) {
                     const next = path[0];
