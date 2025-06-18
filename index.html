@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="top-menu-bar">
+        <button class="menu-btn" data-panel-id="inventory">인벤토리</button>
+        <button class="menu-btn" data-panel-id="mercenary-panel">용병 부대</button>
+    </div>
     <div id="canvas-container">
         <canvas id="map-base-canvas" class="game-layer"></canvas>
         <canvas id="map-decor-canvas" class="game-layer"></canvas>
@@ -116,6 +120,33 @@
         <button id="close-equip-target-btn" class="close-btn">X</button>
         <h2>누구에게 장착하시겠습니까?</h2>
         <div id="equipment-target-list">
+        </div>
+    </div>
+
+    <div id="inventory-panel" class="modal-panel wide hidden">
+        <button class="close-btn" data-panel-id="inventory">X</button>
+        <h2>🎒 인벤토리</h2>
+        <div class="inventory-container">
+            <div class="inventory-left">
+                <h3>✨ 장착 중</h3>
+                <div id="equipped-items">
+                    <div class="equip-slot" data-slot="weapon">무기: <span></span></div>
+                    <div class="equip-slot" data-slot="armor">방어구: <span></span></div>
+                    <div class="equip-slot" data-slot="accessory1">악세서리1: <span></span></div>
+                    <div class="equip-slot" data-slot="accessory2">악세서리2: <span></span></div>
+                </div>
+            </div>
+            <div class="inventory-right">
+                <h3>📦 소지품</h3>
+                <div id="inventory-filters">
+                    <button class="inv-filter-btn active" data-filter="all">모두</button>
+                    <button class="inv-filter-btn" data-filter="weapon">무기</button>
+                    <button class="inv-filter-btn" data-filter="armor">방어구</button>
+                    <button class="inv-filter-btn" data-filter="consumable">소모품</button>
+                </div>
+                <div id="inventory-list">
+                </div>
+            </div>
         </div>
     </div>
 

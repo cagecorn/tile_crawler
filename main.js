@@ -81,7 +81,8 @@ window.onload = function() {
             statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.5
+            zoomLevel: 0.5,
+            isPaused: false
         };
         playerGroup.addMember(player);
 
@@ -127,6 +128,15 @@ window.onload = function() {
             console.log(saveData);
             eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
         };
+
+        // === 메뉴 버튼 이벤트 리스너 추가 ===
+        document.querySelectorAll('.menu-btn').forEach(button => {
+            button.onclick = () => {
+                const panelId = button.dataset.panelId;
+                uiManager.showPanel(panelId);
+                gameState.isPaused = true;
+            };
+        });
 
         // === 2. 이벤트 구독 설정 ===
         // 공격 이벤트가 발생하면 CombatCalculator에 계산을 요청
@@ -235,7 +245,7 @@ window.onload = function() {
         }
 
        function update() {
-           if (gameState.isGameOver) return;
+           if (gameState.isPaused || gameState.isGameOver) return;
 
             const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
             turnManager.update(allEntities); // 턴 매니저 업데이트
@@ -303,9 +313,27 @@ window.onload = function() {
             }
         }
 
-        uiManager.init(handleStatUp, (entity, item) => {
-            equipmentManager.equip(entity, item, gameState.inventory);
-            gameState.inventory = gameState.inventory.filter(i => i !== item);
+        uiManager.init({
+            onStatUp: handleStatUp,
+            onItemUse: (itemIndex) => {
+                const item = gameState.inventory[itemIndex];
+                if (!item) return;
+
+                if (item.tags.includes('weapon') || item.tags.includes('armor') ||
+                    item.type === 'weapon' || item.type === 'armor') {
+                    uiManager._showEquipTargetPanel(item, gameState);
+                } else if (item.name === 'potion') {
+                    const playerChar = gameState.player;
+                    playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
+                    gameState.inventory.splice(itemIndex, 1);
+                }
+                uiManager.renderInventory(gameState);
+            },
+            onEquipItem: (entity, item) => {
+                equipmentManager.equip(entity, item, gameState.inventory);
+                gameState.inventory = gameState.inventory.filter(i => i !== item);
+                uiManager.renderInventory(gameState);
+            }
         });
 
         // 용병 상세창 닫기 버튼 이벤트 핸들러 추가
@@ -336,11 +364,11 @@ window.onload = function() {
             // 나중에 몬스터 클릭 시 정보창 띄우는 로직도 여기에 추가 가능
         });
 
-        function gameLoop() {
-            update();
+       function gameLoop() {
+            if (!gameState.isPaused) update();
             render();
             requestAnimationFrame(gameLoop);
-        }
+       }
 
         gameLoop();
     });

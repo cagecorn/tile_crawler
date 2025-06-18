@@ -125,15 +125,21 @@ export class UIManager {
         // 장착 대상 선택 패널 요소
         this.equipTargetPanel = document.getElementById('equipment-target-panel');
         this.equipTargetList = document.getElementById('equipment-target-list');
+        // 인벤토리 패널 요소
+        this.inventoryPanel = document.getElementById('inventory-panel');
+        this.equippedItemsContainer = document.getElementById('equipped-items');
+        this.inventoryListContainer = document.getElementById('inventory-list');
+        this.callbacks = {};
         this._lastInventory = [];
         this._statUpCallback = null;
         this._isInitialized = false;
     }
 
-    init(onStatUp, onEquipItem) {
+    init(callbacks) {
         if (this._isInitialized) return;
-        this._statUpCallback = onStatUp;
-        this.onEquipItem = onEquipItem;
+        this.callbacks = callbacks || {};
+        this._statUpCallback = this.callbacks.onStatUp;
+        this.onEquipItem = this.callbacks.onEquipItem;
         if (this.statUpButtonsContainer) {
             this.statUpButtonsContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('stat-up-btn') || event.target.classList.contains('stat-plus')) {
@@ -150,6 +156,10 @@ export class UIManager {
         // 닫기 버튼 이벤트
         if (this.closeMercDetailBtn) {
             this.closeMercDetailBtn.onclick = () => this.hideMercenaryDetail();
+        }
+        if (this.inventoryPanel) {
+            const closeBtn = this.inventoryPanel.querySelector('.close-btn');
+            if (closeBtn) closeBtn.onclick = () => this.hidePanel('inventory');
         }
         this._isInitialized = true;
     }
@@ -197,7 +207,48 @@ export class UIManager {
         }
     }
 
+    showPanel(panelId) {
+        if (panelId === 'inventory' && this.inventoryPanel) {
+            this.inventoryPanel.classList.remove('hidden');
+            if (this.gameState) this.renderInventory(this.gameState);
+        }
+    }
+
+    hidePanel(panelId) {
+        if (panelId === 'inventory' && this.inventoryPanel) {
+            this.inventoryPanel.classList.add('hidden');
+            if (this.gameState) this.gameState.isPaused = false;
+        }
+    }
+
+    renderInventory(gameState) {
+        const player = gameState.player;
+        this.equippedItemsContainer.innerHTML = '';
+        for (const slot in player.equipment) {
+            const item = player.equipment[slot];
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'equip-slot';
+            slotDiv.dataset.slot = slot;
+            slotDiv.textContent = `${slot}: ${item ? item.name : '없음'}`;
+            this.equippedItemsContainer.appendChild(slotDiv);
+        }
+
+        this.inventoryListContainer.innerHTML = '';
+        gameState.inventory.forEach((item, index) => {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'inventory-item-slot';
+            const img = document.createElement('img');
+            img.src = item.image.src;
+            slotDiv.appendChild(img);
+            slotDiv.onclick = () => {
+                if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
+            };
+            this.inventoryListContainer.appendChild(slotDiv);
+        });
+    }
+
     updateUI(gameState) {
+        this.gameState = gameState;
         const player = gameState.player;
         const stats = player.stats;
         this.levelElement.textContent = stats.get('level');
@@ -230,7 +281,7 @@ export class UIManager {
                 img.src = item.image.src;
                 img.alt = item.name;
                 slot.onclick = () => {
-                    this.useItem(index, gameState);
+                    if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
                 };
                 slot.appendChild(img);
                 this.inventorySlotsElement.appendChild(slot);

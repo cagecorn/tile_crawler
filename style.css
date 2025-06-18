@@ -238,3 +238,62 @@ body, html {
     z-index: 100;
 }
 
+/* Inventory modal panel styles */
+.modal-panel.wide {
+    width: 60vw;
+    max-width: 800px;
+}
+
+.inventory-container {
+    display: flex;
+    gap: 20px;
+}
+
+.inventory-left {
+    flex-basis: 250px;
+    flex-shrink: 0;
+}
+
+.inventory-right {
+    flex-grow: 1;
+}
+
+.equip-slot {
+    padding: 8px;
+    background-color: rgba(0,0,0,0.2);
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.equip-slot:hover {
+    background-color: rgba(0,0,0,0.4);
+}
+
+#inventory-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 8px;
+    padding: 8px;
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    min-height: 100px;
+}
+
+.inventory-item-slot {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #777;
+    background-color: #333;
+    cursor: pointer;
+    position: relative;
+}
+
+.inventory-item-slot:hover {
+    border-color: white;
+}
+
+.inventory-item-slot img {
+    width: 100%;
+    height: 100%;
+}
+
