@@ -6,7 +6,7 @@ export const JOBS = {
             strength: 8,
             agility: 4,
             endurance: 6,
-            movement: 5,
+            movement: 10,
             hp: 40,
             attackPower: 17,
         }

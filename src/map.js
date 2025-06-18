@@ -8,8 +8,8 @@ const TILE_TYPES = {
 export class MapManager {
     constructor(seed = Math.floor(Math.random() * 2 ** 32)) {
         this._seed = seed >>> 0;
-        this.width = 41;
-        this.height = 31;
+        this.width = 81;
+        this.height = 61;
         this.tileSize = 192;
         this.tileTypes = TILE_TYPES;
         this.rooms = [];
