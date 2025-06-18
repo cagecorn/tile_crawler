@@ -1,7 +1,31 @@
 export class MercenaryManager {
-    constructor() {
+    constructor(eventManager = null, assets = null, factory = null) {
+        this.eventManager = eventManager;
+        this.assets = assets;
+        this.factory = factory;
         this.mercenaries = [];
         console.log("[MercenaryManager] Initialized");
     }
-    // 나중에 용병 고용, 해고, 업데이트 로직 추가
+
+    hireMercenary(jobId, x, y, tileSize, groupId) {
+        if (!this.factory || !this.assets) {
+            return null;
+        }
+        const merc = this.factory.create('mercenary', {
+            x,
+            y,
+            tileSize,
+            groupId,
+            jobId,
+            image: this.assets.mercenary,
+        });
+        if (merc) this.mercenaries.push(merc);
+        return merc;
+    }
+
+    render(ctx) {
+        for (const merc of this.mercenaries) {
+            if (merc.render) merc.render(ctx);
+        }
+    }
 }
