@@ -1,12 +1,14 @@
 import { CombatCalculator } from '../src/combat.js';
 import { EventManager } from '../src/managers/eventManager.js';
+import { TagManager } from '../src/managers/tagManager.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running CombatCalculator Tests ---");
 
 test('피해량 계산 이벤트', () => {
     const eventManager = new EventManager();
-    const calculator = new CombatCalculator(eventManager);
+    const tagManager = new TagManager();
+    const calculator = new CombatCalculator(eventManager, tagManager);
     let eventData = null;
     eventManager.subscribe('damage_calculated', data => { eventData = data; });
 
@@ -14,12 +16,13 @@ test('피해량 계산 이벤트', () => {
     Math.random = () => 0; // deterministic roll
 
     const attacker = {
-        equipment: { weapon: { damageDice: '1d6' } },
-        stats: { get: (s) => (s === 'strength' ? 2 : 0) },
+        attackPower: 3,
+        equipment: { weapon: {} },
+        stats: { get: () => 0 },
     };
     const defender = { stats: { get: (s) => (s === 'defense' ? 1 : 0) } };
 
-    calculator.handleAttack({ attacker, defender });
+    calculator.handleAttack({ attacker, defender, skill: null });
 
     Math.random = originalRandom;
 

@@ -5,10 +5,10 @@ export const SKILLS = {
         description: '적에게 일반 공격보다 강력한 피해를 입힙니다.',
         manaCost: 10,
         cooldown: 120,
-        damageMultiplier: 2.5,
+        damageMultiplier: 2.0,
         damageDice: '1d8+2',
         icon: 'assets/images/fire-nova-effect.png',
-        tags: ['skill', 'attack', 'melee', 'single_target'],
+        tags: ['skill', 'attack', 'melee', 'physical'],
     },
     fireball: {
         id: 'fireball',

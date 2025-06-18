@@ -7,6 +7,7 @@ import { CharacterFactory, ItemFactory } from './factory.js';
 import { EventManager } from './managers/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './managers/logManager.js';
 import { CombatCalculator } from './combat.js';
+import { TagManager } from './managers/tagManager.js';
 import { MapManager } from './map.js';
 import { MonsterManager, MercenaryManager, ItemManager, EquipmentManager, UIManager, VFXManager, SkillManager, SoundManager, ProjectileManager } from './managers/index.js';
 import { AssetLoader } from './assetLoader.js';
@@ -51,7 +52,8 @@ export class Game {
         this.inputHandler = new InputHandler(this.eventManager);
         this.combatLogManager = new CombatLogManager(this.eventManager);
         this.systemLogManager = new SystemLogManager(this.eventManager);
-        this.combatCalculator = new CombatCalculator(this.eventManager);
+        this.tagManager = new TagManager();
+        this.combatCalculator = new CombatCalculator(this.eventManager, this.tagManager);
         this.mapManager = new MapManager();
         this.saveLoadManager = new SaveLoadManager();
         this.turnManager = new TurnManager();
@@ -231,10 +233,14 @@ export class Game {
             const { caster, skill } = data;
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
 
-            if (skill.projectile) {
+            if (skill.tags.includes('attack')) {
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters);
                 if (nearestEnemy) {
-                    this.projectileManager.create(caster, nearestEnemy, skill);
+                    if (skill.projectile) {
+                        this.projectileManager.create(caster, nearestEnemy, skill);
+                    } else {
+                        eventManager.publish('entity_attack', { attacker: caster, defender: nearestEnemy, skill: skill });
+                    }
                 } else {
                     eventManager.publish('log', { message: '시야에 대상이 없습니다.' });
                     caster.mp += skill.manaCost;
@@ -365,7 +371,7 @@ export class Game {
                 targetY + player.height / 2
             );
             if (monsterToAttack && player.attackCooldown === 0) {
-                this.handleAttack(player, monsterToAttack);
+                this.handleAttack(player, monsterToAttack, null);
                 player.attackCooldown = 30;
             } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                 player.x = targetX;
@@ -445,8 +451,8 @@ export class Game {
         uiManager.updateUI(gameState);
     }
 
-    handleAttack(attacker, defender) {
-        this.eventManager.publish('entity_attack', { attacker, defender });
+    handleAttack(attacker, defender, skill = null) {
+        this.eventManager.publish('entity_attack', { attacker, defender, skill });
     }
 
     checkForLevelUp(player) {
