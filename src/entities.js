@@ -25,6 +25,7 @@ class Entity {
         this.isPlayer = false;
         this.isFriendly = false;
         this.ai = null;
+        this.effects = []; // 적용중인 효과 목록 배열 추가
         this.unitType = 'generic'; // 기본 유닛 타입을 '일반'으로 설정
 
         // --- 장비창(Equipment) 추가 ---

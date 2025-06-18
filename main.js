@@ -24,6 +24,7 @@ import { FogManager } from './src/fogManager.js';
 import { NarrativeManager } from './src/narrativeManager.js';
 import { TurnManager } from './src/turnManager.js';
 import { SKILLS } from './src/data/skills.js';
+import { EffectManager } from './src/managers/effectManager.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -52,6 +53,7 @@ window.onload = function() {
         const saveLoadManager = new SaveLoadManager();
         const turnManager = new TurnManager();
         const narrativeManager = new NarrativeManager();
+        const effectManager = new EffectManager(eventManager);
         const factory = new CharacterFactory(assets);
 
         // --- 새로 추가된 매니저들 생성 ---
@@ -216,6 +218,11 @@ window.onload = function() {
             }
         });
 
+        // 스탯 변경 이벤트 구독 (효과 적용/해제 시 스탯 재계산)
+        eventManager.subscribe('stats_changed', (data) => {
+            data.entity.stats.recalculate();
+        });
+
         // === 3. 게임 로직 ===
         // 공격 처리를 위한 함수는 이벤트만 발행하도록 변경
         function handleAttack(attacker, defender) {
@@ -310,6 +317,7 @@ window.onload = function() {
            if (gameState.isPaused || gameState.isGameOver) return;
 
             const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
+            effectManager.update(allEntities); // EffectManager 업데이트 호출
             turnManager.update(allEntities); // 턴 매니저 업데이트
             eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
             const player = gameState.player;
