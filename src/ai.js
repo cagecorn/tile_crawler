@@ -79,4 +79,63 @@ export class MeleeAI extends AIArchetype {
 
 // --- 앞으로 만들 AI 유형들을 위한 [여백 구멍] ---
 export class HealerAI extends AIArchetype { /* 나중에 구현 */ }
-export class RangedAI extends AIArchetype { /* 나중에 구현 */ }
+
+// --- 원거리형 AI ---
+export class RangedAI extends AIArchetype {
+    decideAction(self, context) {
+        const { player, allies, enemies, mapManager } = context;
+        const targetList = enemies;
+
+        let nearestTarget = null;
+        let minDistance = Infinity;
+        for (const target of targetList) {
+            const dx = target.x - self.x;
+            const dy = target.y - self.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestTarget = target;
+            }
+        }
+
+        if (nearestTarget && minDistance < self.visionRange) {
+            const hasLOS = hasLineOfSight(
+                Math.floor(self.x / mapManager.tileSize),
+                Math.floor(self.y / mapManager.tileSize),
+                Math.floor(nearestTarget.x / mapManager.tileSize),
+                Math.floor(nearestTarget.y / mapManager.tileSize),
+                mapManager
+            );
+
+            if (hasLOS) {
+                if (minDistance <= self.attackRange && minDistance > self.attackRange * 0.5) {
+                    const skillId = self.skills && self.skills[0];
+                    const skill = SKILLS[skillId];
+                    if (
+                        skill &&
+                        self.mp >= skill.manaCost &&
+                        (self.skillCooldowns[skillId] || 0) <= 0
+                    ) {
+                        return { type: 'skill', target: nearestTarget, skillId };
+                    }
+                    return { type: 'attack', target: nearestTarget };
+                }
+
+                if (minDistance <= self.attackRange * 0.5) {
+                    const dx = nearestTarget.x - self.x;
+                    const dy = nearestTarget.y - self.y;
+                    return { type: 'move', target: { x: self.x - dx, y: self.y - dy } };
+                }
+            }
+
+            return { type: 'move', target: nearestTarget };
+        } else if (self.isFriendly && !self.isPlayer) {
+            const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
+            if (playerDistance > self.tileSize) {
+                return { type: 'move', target: player };
+            }
+        }
+
+        return { type: 'idle' };
+    }
+}

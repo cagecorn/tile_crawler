@@ -8,6 +8,7 @@ import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
+import { RangedAI } from './ai.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -55,8 +56,17 @@ export class CharacterFactory {
                     finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
                 }
                 const merc = new Mercenary(finalConfig);
-                const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
-                merc.skills.push(skillId);
+
+                if (config.jobId === 'archer') {
+                    const rangedSkill = Math.random() < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id;
+                    merc.skills.push(rangedSkill);
+                    merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow'] };
+                    merc.ai = new RangedAI();
+                } else {
+                    const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
+                    merc.skills.push(skillId);
+                }
+
                 return merc;
             case 'monster':
                 return new Monster(finalConfig);

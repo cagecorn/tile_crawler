@@ -11,6 +11,18 @@ export const JOBS = {
             attackPower: 17,
         }
     },
-    // 나중에 여기에 'archer', 'healer' 등을 추가
+    archer: {
+        name: '궁수',
+        description: '원거리에서 활을 다루는 전문가입니다.',
+        stats: {
+            strength: 5,
+            agility: 8,
+            endurance: 4,
+            movement: 10,
+            hp: 30,
+            attackPower: 15,
+        }
+    },
+    // 나중에 여기에 'healer' 등을 추가
 };
 
