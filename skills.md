@@ -33,3 +33,8 @@
 | spell_weakness | 마법 취약 | debuff, magic_resist_down |
 | elemental_weakness | 원소 취약 | debuff, resist_down |
 
+### 스킬 비고
+
+- **이중 타격**: 한 번의 명령으로 두 차례 공격합니다.
+- **돌진 공격**: 지정된 거리만큼 적에게 돌진한 뒤 공격을 가합니다.
+

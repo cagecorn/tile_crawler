@@ -54,7 +54,10 @@ export class CharacterFactory {
                 if (config.jobId && JOBS[config.jobId]) {
                     finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
                 }
-                return new Mercenary(finalConfig);
+                const merc = new Mercenary(finalConfig);
+                const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
+                merc.skills.push(skillId);
+                return merc;
             case 'monster':
                 return new Monster(finalConfig);
         }
