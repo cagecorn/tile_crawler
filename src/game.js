@@ -9,7 +9,7 @@ import { CombatLogManager, SystemLogManager } from './managers/logManager.js';
 import { CombatCalculator } from './combat.js';
 import { TagManager } from './managers/tagManager.js';
 import { MapManager } from './map.js';
-import { MonsterManager, MercenaryManager, ItemManager, EquipmentManager, UIManager, VFXManager, SkillManager, SoundManager, ProjectileManager } from './managers/index.js';
+import * as Managers from './managers/index.js'; // managers/index.js에서 모든 매니저를 한 번에 불러옴
 import { AssetLoader } from './assetLoader.js';
 import { MetaAIManager, STRATEGY } from './managers/ai-managers.js';
 import { SaveLoadManager } from './managers/saveLoadManager.js';
@@ -19,7 +19,6 @@ import { FogManager } from './managers/fogManager.js';
 import { NarrativeManager } from './managers/narrativeManager.js';
 import { TurnManager } from './managers/turnManager.js';
 import { SKILLS } from './data/skills.js';
-import { EffectManager } from './managers/effectManager.js';
 
 export class Game {
     constructor() {
@@ -58,19 +57,24 @@ export class Game {
         this.saveLoadManager = new SaveLoadManager();
         this.turnManager = new TurnManager();
         this.narrativeManager = new NarrativeManager();
-        this.effectManager = new EffectManager(this.eventManager);
         this.factory = new CharacterFactory(assets);
 
-        // --- 새로 추가된 매니저들 생성 ---
-        this.monsterManager = new MonsterManager();
-        this.mercenaryManager = new MercenaryManager();
-        this.itemManager = new ItemManager();
-        this.equipmentManager = new EquipmentManager();
-        this.uiManager = new UIManager();
-        this.vfxManager = new VFXManager();
-        this.skillManager = new SkillManager();
-        this.soundManager = new SoundManager();
-        this.projectileManager = new ProjectileManager(this.eventManager, assets);
+        // --- 매니저 생성 부분 수정 ---
+        this.managers = {};
+        for (const managerName in Managers) {
+            this.managers[managerName] = new Managers[managerName](this.eventManager, assets, this.factory);
+        }
+
+        this.monsterManager = this.managers.MonsterManager;
+        this.mercenaryManager = this.managers.MercenaryManager;
+        this.itemManager = this.managers.ItemManager;
+        this.equipmentManager = this.managers.EquipmentManager;
+        this.uiManager = this.managers.UIManager;
+        this.vfxManager = this.managers.VFXManager;
+        this.skillManager = this.managers.SkillManager;
+        this.soundManager = this.managers.SoundManager;
+        this.effectManager = this.managers.EffectManager;
+        this.projectileManager = this.managers.ProjectileManager;
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
