@@ -165,3 +165,37 @@ export class Item {
         };
     }
 }
+
+export class Projectile {
+    constructor(config) {
+        this.x = config.x;
+        this.y = config.y;
+        this.target = config.target;
+        this.speed = config.speed || 10;
+        this.image = config.image;
+        this.width = config.width || 32;
+        this.height = config.height || 32;
+        this.damage = config.damage;
+        this.caster = config.caster;
+    }
+
+    update() {
+        const dx = this.target.x - this.x;
+        const dy = this.target.y - this.y;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance < this.speed) {
+            return { collided: true, target: this.target };
+        }
+
+        this.x += (dx / distance) * this.speed;
+        this.y += (dy / distance) * this.speed;
+        return { collided: false };
+    }
+
+    render(ctx) {
+        if (this.image) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+}

@@ -8,7 +8,7 @@ import { EventManager } from './managers/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './managers/logManager.js';
 import { CombatCalculator } from './combat.js';
 import { MapManager } from './map.js';
-import { MonsterManager, MercenaryManager, ItemManager, EquipmentManager, UIManager, VFXManager, SkillManager, SoundManager } from './managers/index.js';
+import { MonsterManager, MercenaryManager, ItemManager, EquipmentManager, UIManager, VFXManager, SkillManager, SoundManager, ProjectileManager } from './managers/index.js';
 import { AssetLoader } from './assetLoader.js';
 import { MetaAIManager, STRATEGY } from './managers/ai-managers.js';
 import { SaveLoadManager } from './managers/saveLoadManager.js';
@@ -37,6 +37,7 @@ export class Game {
         this.loader.loadImage('sword', 'assets/images/shortsword.png');
         this.loader.loadImage('bow', 'assets/images/bow.png');
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
+        this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -67,6 +68,7 @@ export class Game {
         this.vfxManager = new VFXManager();
         this.skillManager = new SkillManager();
         this.soundManager = new SoundManager();
+        this.projectileManager = new ProjectileManager(this.eventManager, assets);
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
@@ -229,11 +231,14 @@ export class Game {
             const { caster, skill } = data;
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
 
-            if (skill.id === 'power_strike') {
+            if (skill.projectile) {
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters);
                 if (nearestEnemy) {
-                    const damage = caster.attackPower * skill.damageMultiplier;
-                    eventManager.publish('entity_attack', { attacker: caster, defender: nearestEnemy, damage: damage });
+                    this.projectileManager.create(caster, nearestEnemy, skill);
+                } else {
+                    eventManager.publish('log', { message: '시야에 대상이 없습니다.' });
+                    caster.mp += skill.manaCost;
+                    caster.skillCooldowns[skill.id] = 0;
                 }
             }
         });
@@ -386,6 +391,7 @@ export class Game {
         this.fogManager.update(player, mapManager);
         const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager };
         metaAIManager.update(context);
+        this.projectileManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });
     }
 
@@ -428,6 +434,7 @@ export class Game {
 
         fogManager.render(contexts.vfx, mapManager.tileSize);
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
+        this.projectileManager.render(contexts.vfx);
 
         // weatherManager.render(contexts.weather); // (미래 구멍)
 
