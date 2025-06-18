@@ -138,32 +138,38 @@ export class Game {
         monsters.forEach(m => this.monsterGroup.addMember(m));
 
         // === 4. 용병 고용 로직 ===
-        document.getElementById('hire-mercenary').onclick = () => {
-            if (this.gameState.gold >= 50) {
-                this.gameState.gold -= 50;
-                const newMerc = this.mercenaryManager.hireMercenary(
-                    'warrior',
-                    this.gameState.player.x + this.mapManager.tileSize,
-                    this.gameState.player.y,
-                    this.mapManager.tileSize,
-                    'player_party'
-                );
+        const hireBtn = document.getElementById('hire-mercenary');
+        if (hireBtn) {
+            hireBtn.onclick = () => {
+                if (this.gameState.gold >= 50) {
+                    this.gameState.gold -= 50;
+                    const newMerc = this.mercenaryManager.hireMercenary(
+                        'warrior',
+                        this.gameState.player.x + this.mapManager.tileSize,
+                        this.gameState.player.y,
+                        this.mapManager.tileSize,
+                        'player_party'
+                    );
 
-                if (newMerc) {
-                    this.playerGroup.addMember(newMerc);
-                    this.eventManager.publish('log', { message: `전사 용병을 고용했습니다.` });
+                    if (newMerc) {
+                        this.playerGroup.addMember(newMerc);
+                        this.eventManager.publish('log', { message: `전사 용병을 고용했습니다.` });
+                    }
+                } else {
+                    this.eventManager.publish('log', { message: `골드가 부족합니다.` });
                 }
-            } else {
-                this.eventManager.publish('log', { message: `골드가 부족합니다.` });
-            }
-        };
+            };
+        }
 
-        document.getElementById('save-game-btn').onclick = () => {
-            const saveData = this.saveLoadManager.gatherSaveData(this.gameState, this.monsterManager, this.mercenaryManager);
-            console.log("--- GAME STATE SAVED (SNAPSHOT) ---");
-            console.log(saveData);
-            this.eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
-        };
+        const saveBtn = document.getElementById('save-game-btn');
+        if (saveBtn) {
+            saveBtn.onclick = () => {
+                const saveData = this.saveLoadManager.gatherSaveData(this.gameState, this.monsterManager, this.mercenaryManager);
+                console.log("--- GAME STATE SAVED (SNAPSHOT) ---");
+                console.log(saveData);
+                this.eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
+            };
+        }
 
         // === 메뉴 버튼 이벤트 리스너 수정 ===
         const playerInfoBtn = document.querySelector('.menu-btn[data-panel-id="character-sheet-panel"]');
