@@ -18,6 +18,9 @@ class Entity {
         this.width = this.stats.get('sizeInTiles_w') * tileSize;
         this.height = this.stats.get('sizeInTiles_h') * tileSize;
         this.hp = this.stats.get('maxHp');
+        this.mp = this.stats.get('maxMp');
+        this.skills = [];
+        this.skillCooldowns = {};
         this.attackCooldown = 0;
         this.isPlayer = false;
         this.isFriendly = false;
@@ -68,6 +71,20 @@ class Entity {
             stats: this.stats.getSavableState(),
             properties: this.properties,
         };
+    }
+
+    update(context) {
+        if (this.ai) {
+            const action = this.ai.decideAction(this, context);
+            context.metaAIManager.executeAction(this, action, context);
+        }
+
+        if (this.attackCooldown > 0) this.attackCooldown--;
+        for (const skillId in this.skillCooldowns) {
+            if (this.skillCooldowns[skillId] > 0) {
+                this.skillCooldowns[skillId]--;
+            }
+        }
     }
 
     takeDamage(damage) { this.hp -= damage; if (this.hp < 0) this.hp = 0; }

@@ -14,6 +14,7 @@ import { PathfindingManager } from './src/pathfindingManager.js';
 import { FogManager } from './src/fogManager.js';
 import { NarrativeManager } from './src/narrativeManager.js';
 import { TurnManager } from './src/turnManager.js';
+import { SKILLS } from './src/data/skills.js';
 
 window.onload = function() {
     const loader = new AssetLoader();
@@ -193,14 +194,62 @@ window.onload = function() {
             console.log(`${data.position.x}, ${data.position.y} 위치에 아이템 드랍!`);
         });
 
+        eventManager.subscribe('skill_used', (data) => {
+            const { caster, skill } = data;
+            eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
+
+            if (skill.id === 'power_strike') {
+                const nearestEnemy = findNearestEnemy(caster, monsterManager.monsters);
+                if (nearestEnemy) {
+                    const damage = caster.attackPower * skill.damageMultiplier;
+                    eventManager.publish('entity_attack', { attacker: caster, defender: nearestEnemy, damage: damage });
+                }
+            }
+        });
+
         // === 3. 게임 로직 ===
         // 공격 처리를 위한 함수는 이벤트만 발행하도록 변경
         function handleAttack(attacker, defender) {
             eventManager.publish('entity_attack', { attacker, defender });
         }
 
+        function findNearestEnemy(caster, enemies) {
+            let nearest = null;
+            let minDist = Infinity;
+            for (const enemy of enemies) {
+                const dx = enemy.x - caster.x;
+                const dy = enemy.y - caster.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = enemy;
+                }
+            }
+            return nearest;
+        }
+
         const keysPressed = {};
-        document.addEventListener('keydown', e => { keysPressed[e.key] = true; });
+        document.addEventListener('keydown', (event) => {
+            if (gameState.isPaused || gameState.isGameOver) return;
+            keysPressed[event.key] = true;
+
+            if (['1', '2', '3', '4'].includes(event.key)) {
+                const skillIndex = parseInt(event.key) - 1;
+                const player = gameState.player;
+                const skillId = player.skills[skillIndex];
+
+                if (skillId && (player.skillCooldowns[skillId] || 0) <= 0) {
+                    const skillData = SKILLS[skillId];
+                    if (player.mp >= skillData.manaCost) {
+                        player.mp -= skillData.manaCost;
+                        player.skillCooldowns[skillId] = skillData.cooldown;
+                        eventManager.publish('skill_used', { caster: player, skill: skillData });
+                    } else {
+                        eventManager.publish('log', { message: '마나가 부족합니다.'});
+                    }
+                }
+            }
+        });
         document.addEventListener('keyup', e => { delete keysPressed[e.key]; });
 
         function render() {
@@ -304,6 +353,7 @@ window.onload = function() {
                 stats.levelUp();
                 stats.recalculate();
                 player.hp = player.maxHp;
+                player.mp = player.maxMp;
                 gameState.statPoints += 5;
                 eventManager.publish('level_up', { player: player, level: stats.get('level') });
             }

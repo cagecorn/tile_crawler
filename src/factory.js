@@ -7,6 +7,7 @@ import { TRAITS } from './data/traits.js';
 import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
+import { SKILLS } from './data/skills.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -46,7 +47,9 @@ export class CharacterFactory {
         // 4. 타입에 맞는 캐릭터 생성 및 반환
         switch (type) {
             case 'player':
-                return new Player(finalConfig);
+                const player = new Player(finalConfig);
+                player.skills.push(SKILLS.power_strike.id);
+                return player;
             case 'mercenary':
                 if (config.jobId && JOBS[config.jobId]) {
                     finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };

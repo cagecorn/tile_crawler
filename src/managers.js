@@ -4,6 +4,7 @@ import { Item } from './entities.js';
 import { MetaAIManager as BaseMetaAI } from './ai-managers.js';
 import { rollOnTable } from './utils/random.js';
 import { MONSTER_SPAWN_TABLE } from './data/tables.js';
+import { SKILLS } from './data/skills.js';
 
 export class MonsterManager {
     constructor(monsterCount, mapManager, assets, eventManager, factory) {
@@ -125,10 +126,14 @@ export class UIManager {
         this.attackPowerElement = document.getElementById('ui-player-attackPower');
         this.goldElement = document.getElementById('ui-player-gold');
         this.hpBarFillElement = document.getElementById('ui-hp-bar-fill');
+        this.mpElement = document.getElementById('ui-player-mp');
+        this.maxMpElement = document.getElementById('ui-player-maxMp');
+        this.mpBarFillElement = document.getElementById('ui-mp-bar-fill');
         this.expBarFillElement = document.getElementById('ui-exp-bar-fill');
         this.expTextElement = document.getElementById('ui-exp-text');
         this.inventorySlotsElement = document.getElementById('inventory-slots');
         this.statUpButtonsContainer = document.getElementById('player-stats-container');
+        this.skillSlots = Array.from(document.querySelectorAll('#skill-bar .skill-slot'));
         // --- 용병 정보창 요소 추가 ---
         this.mercDetailPanel = document.getElementById('mercenary-detail-panel');
         this.mercDetailName = document.getElementById('merc-detail-name');
@@ -276,11 +281,17 @@ export class UIManager {
         });
         this.hpElement.textContent = Math.ceil(player.hp);
         this.maxHpElement.textContent = stats.get('maxHp');
+        if (this.mpElement) this.mpElement.textContent = Math.ceil(player.mp);
+        if (this.maxMpElement) this.maxMpElement.textContent = stats.get('maxMp');
         this.attackPowerElement.textContent = stats.get('attackPower');
         this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
         this.goldElement.textContent = gameState.gold;
         const hpRatio = player.hp / player.maxHp;
         this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
+        if (this.mpBarFillElement) {
+            const mpRatio = player.mp / player.maxMp;
+            this.mpBarFillElement.style.width = `${mpRatio * 100}%`;
+        }
         const expRatio = stats.get('exp') / stats.get('expNeeded');
         this.expBarFillElement.style.width = `${expRatio * 100}%`;
         this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
@@ -299,6 +310,37 @@ export class UIManager {
                 this.inventorySlotsElement.appendChild(slot);
             });
             this._lastInventory = [...gameState.inventory];
+        }
+
+        if (this.skillSlots) {
+            this.skillSlots.forEach((slot, idx) => {
+                const skillId = player.skills[idx];
+                let overlay = slot.querySelector('.skill-cooldown');
+                if (skillId) {
+                    const skill = SKILLS[skillId];
+                    if (skill && skill.icon) {
+                        slot.style.backgroundImage = `url(${skill.icon})`;
+                        slot.style.backgroundSize = 'cover';
+                        slot.style.backgroundPosition = 'center';
+                        slot.title = skill.name;
+                    }
+                    const cd = player.skillCooldowns[skillId] || 0;
+                    if (cd > 0) {
+                        if (!overlay) {
+                            overlay = document.createElement('div');
+                            overlay.className = 'skill-cooldown';
+                            slot.appendChild(overlay);
+                        }
+                        overlay.textContent = Math.ceil(cd / 60);
+                    } else if (overlay) {
+                        overlay.remove();
+                    }
+                } else {
+                    slot.style.backgroundImage = '';
+                    slot.title = '';
+                    if (overlay) overlay.remove();
+                }
+            });
         }
     }
 
@@ -491,10 +533,14 @@ export class MetaAIManager extends BaseMetaAI {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
             for (const member of group.members) {
-                if (member.attackCooldown > 0) member.attackCooldown--;
-                if (member.ai) {
-                    const action = member.ai.decideAction(member, context);
-                    this.executeAction(member, action, context);
+                if (typeof member.update === 'function') {
+                    member.update({ ...context, metaAIManager: this });
+                } else {
+                    if (member.attackCooldown > 0) member.attackCooldown--;
+                    if (member.ai) {
+                        const action = member.ai.decideAction(member, context);
+                        this.executeAction(member, action, context);
+                    }
                 }
             }
         }

@@ -76,6 +76,7 @@ export class StatManager {
 
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = (final.attackPower || 0) + 1 + final.strength * 2;
+        final.maxMp = 10 + final.focus * 10;
         final.movementSpeed = final.movement;
 
         this.derivedStats = final;
