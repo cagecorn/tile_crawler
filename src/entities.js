@@ -40,6 +40,7 @@ class Entity {
     get speed() { return this.stats.get('movementSpeed'); }
     get attackPower() { return this.stats.get('attackPower'); }
     get maxHp() { return this.stats.get('maxHp'); }
+    get maxMp() { return this.stats.get('maxMp'); }
     get expValue() { return this.stats.get('expValue'); }
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
