@@ -8,7 +8,8 @@ export const SKILLS = {
         damageMultiplier: 2.0,
         damageDice: '1d8+2',
         icon: 'assets/images/fire-nova-effect.png',
-        tags: ['skill', 'attack', 'melee', 'physical'],
+        range: 192,
+        tags: ['skill', 'attack', 'melee', 'physical', '근접', '물리', '단일'],
     },
     fireball: {
         id: 'fireball',
@@ -19,6 +20,7 @@ export const SKILLS = {
         damage: 10,
         damageDice: '1d10+3',
         projectile: 'fireball',
-        tags: ['skill', 'attack', 'magic', 'ranged', 'fire'],
+        range: 384,
+        tags: ['skill', 'attack', 'magic', 'ranged', 'fire', '마법', '화염', '단일'],
     },
 };

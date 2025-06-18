@@ -1,6 +1,7 @@
 // src/ai.js
 
 import { hasLineOfSight } from './utils/geometry.js';
+import { SKILLS } from './data/skills.js';
 
 // --- AI 유형(Archetype)의 기반이 될 부모 클래스 ---
 class AIArchetype {
@@ -40,7 +41,18 @@ export class MeleeAI extends AIArchetype {
                 mapManager
             );
             if (hasLOS && minDistance < self.attackRange) {
-                // 공격 범위 안에 있으면 공격
+                // 사용할 수 있는 스킬이 있다면 스킬 사용
+                const skillId = 'power_strike';
+                const skill = SKILLS[skillId];
+                if (
+                    self.skills && self.skills.includes(skillId) &&
+                    self.mp >= skill.manaCost &&
+                    (self.skillCooldowns[skillId] || 0) <= 0
+                ) {
+                    return { type: 'skill', target: nearestTarget, skillId };
+                }
+
+                // 공격 범위 안에 있으면 기본 공격
                 return { type: 'attack', target: nearestTarget };
             }
 

@@ -266,7 +266,8 @@ export class Game {
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
 
             if (skill.tags.includes('attack')) {
-                const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters);
+                const range = skill.range || Infinity;
+                const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
                 if (nearestEnemy) {
                     if (skill.projectile) {
                         this.projectileManager.create(caster, nearestEnemy, skill);
@@ -368,14 +369,14 @@ export class Game {
         });
     }
 
-    findNearestEnemy(caster, enemies) {
+    findNearestEnemy(caster, enemies, range = Infinity) {
         let nearest = null;
         let minDist = Infinity;
         for (const enemy of enemies) {
             const dx = enemy.x - caster.x;
             const dy = enemy.y - caster.y;
             const dist = Math.hypot(dx, dy);
-            if (dist < minDist) {
+            if (dist < minDist && dist <= range) {
                 minDist = dist;
                 nearest = enemy;
             }

@@ -1,4 +1,5 @@
 // src/ai-managers.js
+import { SKILLS } from '../data/skills.js';
 
 export const STRATEGY = {
     IDLE: 'idle',
@@ -57,6 +58,19 @@ export class MetaAIManager {
                 if (entity.attackCooldown === 0) {
                     // 공격 이벤트를 발행
                     eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
+                    entity.attackCooldown = 60;
+                }
+                break;
+            case 'skill':
+                const skill = SKILLS[action.skillId];
+                if (
+                    skill &&
+                    entity.mp >= skill.manaCost &&
+                    (entity.skillCooldowns[action.skillId] || 0) <= 0
+                ) {
+                    entity.mp -= skill.manaCost;
+                    entity.skillCooldowns[action.skillId] = skill.cooldown;
+                    eventManager.publish('skill_used', { caster: entity, skill });
                     entity.attackCooldown = 60;
                 }
                 break;
