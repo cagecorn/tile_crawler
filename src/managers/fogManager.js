@@ -1,6 +1,6 @@
 // src/fogManager.js
 
-import { hasLineOfSight } from './utils/geometry.js';
+import { hasLineOfSight } from '../utils/geometry.js';
 
 export const FOG_STATE = { UNSEEN: 0, SEEN: 1, VISIBLE: 2 };
 
