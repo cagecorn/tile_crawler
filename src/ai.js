@@ -42,10 +42,10 @@ export class MeleeAI extends AIArchetype {
             );
             if (hasLOS && minDistance < self.attackRange) {
                 // 사용할 수 있는 스킬이 있다면 스킬 사용
-                const skillId = 'power_strike';
+                const skillId = self.skills && self.skills[0];
                 const skill = SKILLS[skillId];
                 if (
-                    self.skills && self.skills.includes(skillId) &&
+                    skill &&
                     self.mp >= skill.manaCost &&
                     (self.skillCooldowns[skillId] || 0) <= 0
                 ) {
