@@ -23,6 +23,9 @@ test('간단한 게임 흐름', () => {
     const merc = mercManager.hireMercenary('warrior', 1, 0, 1, 'player_party');
     assert.ok(merc, '용병 고용');
 
+    const archer = mercManager.hireMercenary('archer', 2, 0, 1, 'player_party');
+    assert.ok(archer && archer.ai, '궁수 용병 고용');
+
     const monster = factory.create('monster', { x:2, y:0, tileSize:1, groupId:'dungeon_monsters', baseStats:{ expValue:5 } });
     let expEvent = false;
     eventManager.subscribe('exp_gained', () => { expEvent = true; });
