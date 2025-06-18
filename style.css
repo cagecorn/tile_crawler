@@ -283,15 +283,28 @@ body, html {
     flex-grow: 1;
 }
 
+#equipped-items {
+    display: grid;
+    grid-template-columns: repeat(2, 48px);
+    gap: 5px;
+    padding: 5px;
+}
+
 .equip-slot {
-    padding: 8px;
-    background-color: rgba(0,0,0,0.2);
+    width: 48px;
+    height: 48px;
+    border: 1px solid #777;
+    background-color: #333;
     margin-bottom: 5px;
-    border-radius: 4px;
     cursor: pointer;
+    position: relative;
 }
 .equip-slot:hover {
     background-color: rgba(0,0,0,0.4);
+}
+.equip-slot img {
+    width: 100%;
+    height: 100%;
 }
 
 #inventory-list {
@@ -322,6 +335,19 @@ body, html {
     height: 100%;
 }
 
+.tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1000;
+    font-size: 12px;
+    max-width: 200px;
+}
+.hidden { display: none; }
+
 .mp-bar-container { width: 100%; height: 10px; background-color: #333; border-radius: 3px; margin-top: 2px; }
 .mp-bar-fill { width: 100%; height: 100%; background-color: #3a7bd5; border-radius: 2px; }
 
@@ -338,6 +364,7 @@ body, html {
 #sheet-equipment .equip-slot {
     display: flex; justify-content: space-between; align-items: center;
     padding: 8px; margin-bottom: 5px; background-color: rgba(0,0,0,0.1);
+    width: auto; height: auto;
 }
 #sheet-inventory {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
@@ -369,5 +396,18 @@ body, html {
     grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
     gap: 5px;
     padding: 5px;
+}
+
+#merc-equipment {
+    display: grid;
+    grid-template-columns: repeat(2, 48px);
+    gap: 5px;
+    padding: 5px;
+}
+
+#merc-skills {
+    display: flex;
+    gap: 5px;
+    padding: 5px 0;
 }
 

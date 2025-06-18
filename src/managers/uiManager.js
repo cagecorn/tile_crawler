@@ -23,6 +23,8 @@ export class UIManager {
         this.mercDetailName = document.getElementById('merc-detail-name');
         this.mercStatsContainer = document.getElementById('merc-stats-container');
         this.mercInventory = document.getElementById('merc-inventory');
+        this.mercEquipment = document.getElementById('merc-equipment');
+        this.mercSkills = document.getElementById('merc-skills');
         this.closeMercDetailBtn = document.getElementById('close-merc-detail-btn');
         this.mercenaryPanel = document.getElementById('mercenary-panel');
         this.mercenaryList = document.getElementById('mercenary-list');
@@ -33,6 +35,7 @@ export class UIManager {
         this.inventoryPanel = document.getElementById('inventory-panel');
         this.equippedItemsContainer = document.getElementById('equipped-items');
         this.inventoryListContainer = document.getElementById('inventory-list');
+        this.tooltip = document.getElementById('tooltip');
         this.characterSheetPanel = document.getElementById('character-sheet-panel');
         this.sheetCharacterName = document.getElementById('sheet-character-name');
         this.sheetEquipment = document.getElementById('sheet-equipment');
@@ -99,7 +102,7 @@ export class UIManager {
 
         this.mercDetailName.textContent = `${mercenary.constructor.name} (Lv.${mercenary.stats.get('level')})`;
 
-        const statsToShow = ['hp', 'maxHp', 'attackPower', 'strength', 'agility', 'endurance', 'movementSpeed'];
+        const statsToShow = ['attackPower', 'strength', 'agility', 'endurance', 'movementSpeed'];
         this.mercStatsContainer.innerHTML = '';
 
         // 레벨 및 경험치 표시
@@ -113,15 +116,41 @@ export class UIManager {
         expDiv.textContent = `EXP: ${mercenary.stats.get('exp')} / ${mercenary.stats.get('expNeeded')}`;
         this.mercStatsContainer.appendChild(expDiv);
 
+        const hpDiv = document.createElement('div');
+        hpDiv.className = 'stat-line';
+        hpDiv.textContent = `HP: ${mercenary.hp.toFixed(1)} / ${mercenary.maxHp}`;
+        this.mercStatsContainer.appendChild(hpDiv);
+
+        const mpDiv = document.createElement('div');
+        mpDiv.className = 'stat-line';
+        mpDiv.textContent = `MP: ${mercenary.mp.toFixed(1)} / ${mercenary.maxMp}`;
+        this.mercStatsContainer.appendChild(mpDiv);
+
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
-            const statValue = typeof mercenary.stats.get(stat) === 'number'
-                ? mercenary.stats.get(stat).toFixed(1)
-                : mercenary.stats.get(stat);
+            const statValue = mercenary.stats.get(stat);
             statDiv.textContent = `${stat}: ${statValue}`;
             this.mercStatsContainer.appendChild(statDiv);
         });
+
+        if (this.mercEquipment) {
+            this.mercEquipment.innerHTML = '';
+            for (const slot in mercenary.equipment) {
+                const item = mercenary.equipment[slot];
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'equip-slot';
+                if (item && item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image.src;
+                    slotDiv.appendChild(img);
+                    this._attachTooltip(slotDiv, this._getItemTooltip(item));
+                } else {
+                    slotDiv.textContent = slot;
+                }
+                this.mercEquipment.appendChild(slotDiv);
+            }
+        }
 
         if (this.mercInventory) {
             this.mercInventory.innerHTML = '';
@@ -136,7 +165,22 @@ export class UIManager {
                 } else {
                     slotDiv.textContent = item.name;
                 }
+                this._attachTooltip(slotDiv, this._getItemTooltip(item));
                 this.mercInventory.appendChild(slotDiv);
+            });
+        }
+
+        if (this.mercSkills) {
+            this.mercSkills.innerHTML = '';
+            (mercenary.skills || []).forEach(skillId => {
+                const skill = SKILLS[skillId];
+                if (!skill) return;
+                const div = document.createElement('div');
+                div.className = 'skill-slot';
+                div.style.backgroundImage = `url(${skill.icon})`;
+                div.style.backgroundSize = 'cover';
+                this._attachTooltip(div, `<strong>${skill.name}</strong><br>${skill.description}`);
+                this.mercSkills.appendChild(div);
             });
         }
 
@@ -231,7 +275,14 @@ export class UIManager {
             const slotDiv = document.createElement('div');
             slotDiv.className = 'equip-slot';
             slotDiv.dataset.slot = slot;
-            slotDiv.textContent = `${slot}: ${item ? item.name : '없음'}`;
+            if (item && item.image) {
+                const img = document.createElement('img');
+                img.src = item.image.src;
+                slotDiv.appendChild(img);
+                this._attachTooltip(slotDiv, this._getItemTooltip(item));
+            } else {
+                slotDiv.textContent = slot;
+            }
             this.equippedItemsContainer.appendChild(slotDiv);
         }
 
@@ -242,6 +293,7 @@ export class UIManager {
             const img = document.createElement('img');
             img.src = item.image.src;
             slotDiv.appendChild(img);
+            this._attachTooltip(slotDiv, this._getItemTooltip(item));
             slotDiv.onclick = () => {
                 if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
             };
@@ -288,6 +340,7 @@ export class UIManager {
                 const img = document.createElement('img');
                 img.src = item.image.src;
                 img.alt = item.name;
+                this._attachTooltip(slot, this._getItemTooltip(item));
                 slot.onclick = () => {
                     if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
                 };
@@ -421,5 +474,28 @@ export class UIManager {
         ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
         ctx.strokeStyle = 'white';
         ctx.strokeRect(x, y, barWidth, barHeight);
+    }
+
+    _getItemTooltip(item) {
+        let html = `<strong>${item.name}</strong>`;
+        if (item.damageDice) html += `<br>Damage: ${item.damageDice}`;
+        if (item.stats) {
+            const entries = item.stats instanceof Map ? Array.from(item.stats.entries()) : Object.entries(item.stats);
+            for (const [k, v] of entries) {
+                html += `<br>${k}: ${v}`;
+            }
+        }
+        return html;
+    }
+
+    _attachTooltip(element, html) {
+        if (!this.tooltip) return;
+        element.onmouseenter = (e) => {
+            this.tooltip.innerHTML = html;
+            this.tooltip.style.left = `${e.pageX + 10}px`;
+            this.tooltip.style.top = `${e.pageY + 10}px`;
+            this.tooltip.classList.remove('hidden');
+        };
+        element.onmouseleave = () => this.tooltip.classList.add('hidden');
     }
 }
