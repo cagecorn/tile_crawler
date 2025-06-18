@@ -1,4 +1,4 @@
-import { PathfindingManager } from '../src/pathfindingManager.js';
+import { PathfindingManager } from '../src/managers/pathfindingManager.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running PathfindingManager Tests ---");

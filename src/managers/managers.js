@@ -1,10 +1,10 @@
 // src/managers.js
 
-import { Item } from './entities.js';
+import { Item } from '../entities.js';
 import { MetaAIManager as BaseMetaAI } from './ai-managers.js';
-import { rollOnTable } from './utils/random.js';
-import { MONSTER_SPAWN_TABLE } from './data/tables.js';
-import { SKILLS } from './data/skills.js';
+import { rollOnTable } from '../utils/random.js';
+import { MONSTER_SPAWN_TABLE } from '../data/tables.js';
+import { SKILLS } from '../data/skills.js';
 
 export class MonsterManager {
     constructor(monsterCount, mapManager, assets, eventManager, factory) {

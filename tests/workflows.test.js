@@ -1,5 +1,5 @@
 import { monsterDeathWorkflow } from '../src/workflows.js';
-import { EventManager } from '../src/eventManager.js';
+import { EventManager } from '../src/managers/eventManager.js';
 
 console.log("--- Running Workflow Tests ---");
 
