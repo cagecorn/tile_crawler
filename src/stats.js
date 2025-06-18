@@ -61,6 +61,13 @@ export class StatManager {
                        + (this._fromEquipment[stat] || 0);
         }
 
+        // 장비에만 존재하는 스탯도 합산
+        for (const stat in this._fromEquipment) {
+            if (!(stat in final)) {
+                final[stat] = this._fromEquipment[stat];
+            }
+        }
+
         final.maxHp = 10 + final.endurance * 5;
         final.attackPower = (final.attackPower || 0) + 1 + final.strength * 2;
         final.movementSpeed = final.movement;
