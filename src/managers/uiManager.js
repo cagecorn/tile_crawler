@@ -22,7 +22,10 @@ export class UIManager {
         this.mercDetailPanel = document.getElementById('mercenary-detail-panel');
         this.mercDetailName = document.getElementById('merc-detail-name');
         this.mercStatsContainer = document.getElementById('merc-stats-container');
+        this.mercInventory = document.getElementById('merc-inventory');
         this.closeMercDetailBtn = document.getElementById('close-merc-detail-btn');
+        this.mercenaryPanel = document.getElementById('mercenary-panel');
+        this.mercenaryList = document.getElementById('mercenary-list');
         // 장착 대상 선택 패널 요소
         this.equipTargetPanel = document.getElementById('equipment-target-panel');
         this.equipTargetList = document.getElementById('equipment-target-list');
@@ -65,6 +68,10 @@ export class UIManager {
         if (this.inventoryPanel) {
             const closeBtn = this.inventoryPanel.querySelector('.close-btn');
             if (closeBtn) closeBtn.onclick = () => this.hidePanel('inventory');
+        }
+        if (this.mercenaryPanel) {
+            const closeBtn = this.mercenaryPanel.querySelector('.close-btn');
+            if (closeBtn) closeBtn.onclick = () => this.hidePanel('mercenary-panel');
         }
         if (this.characterSheetPanel) {
             const closeBtn = this.characterSheetPanel.querySelector('.close-btn');
@@ -116,13 +123,32 @@ export class UIManager {
             this.mercStatsContainer.appendChild(statDiv);
         });
 
+        if (this.mercInventory) {
+            this.mercInventory.innerHTML = '';
+            const inventory = mercenary.inventory || [];
+            inventory.forEach(item => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'inventory-item-slot';
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image.src;
+                    slotDiv.appendChild(img);
+                } else {
+                    slotDiv.textContent = item.name;
+                }
+                this.mercInventory.appendChild(slotDiv);
+            });
+        }
+
         this.mercDetailPanel.classList.remove('hidden');
+        if (this.gameState) this.gameState.isPaused = true;
     }
 
     hideMercenaryDetail() {
         if (this.mercDetailPanel) {
             this.mercDetailPanel.classList.add('hidden');
         }
+        if (this.gameState) this.gameState.isPaused = false;
     }
 
     showCharacterSheet(entity) {
@@ -178,6 +204,9 @@ export class UIManager {
         if (panelId === 'inventory' && this.inventoryPanel) {
             this.inventoryPanel.classList.remove('hidden');
             if (this.gameState) this.renderInventory(this.gameState);
+        } else if (panelId === 'mercenary-panel' && this.mercenaryPanel) {
+            this.mercenaryPanel.classList.remove('hidden');
+            if (this.mercenaryManager) this.renderMercenaryList();
         } else if (panelId === 'character-sheet-panel' && this.characterSheetPanel) {
             this.characterSheetPanel.classList.remove('hidden');
         }
@@ -186,6 +215,8 @@ export class UIManager {
     hidePanel(panelId) {
         if (panelId === 'inventory' && this.inventoryPanel) {
             this.inventoryPanel.classList.add('hidden');
+        } else if (panelId === 'mercenary-panel' && this.mercenaryPanel) {
+            this.mercenaryPanel.classList.add('hidden');
         } else if (panelId === 'character-sheet-panel' && this.characterSheetPanel) {
             this.characterSheetPanel.classList.add('hidden');
         }
@@ -349,6 +380,23 @@ export class UIManager {
         if (this.equipTargetPanel) {
             this.equipTargetPanel.classList.add('hidden');
         }
+    }
+
+    renderMercenaryList() {
+        if (!this.mercenaryList) return;
+        this.mercenaryList.innerHTML = '';
+        const mercs = this.mercenaryManager ? this.mercenaryManager.mercenaries : [];
+        if (mercs.length === 0) {
+            this.mercenaryList.textContent = '고용한 용병이 없습니다.';
+            return;
+        }
+        mercs.forEach((merc, idx) => {
+            const div = document.createElement('div');
+            div.className = 'merc-entry';
+            div.textContent = `${idx + 1}. ${merc.constructor.name} (Lv.${merc.stats.get('level')})`;
+            div.onclick = () => this.showMercenaryDetail(merc);
+            this.mercenaryList.appendChild(div);
+        });
     }
 
     renderHpBars(ctx, player, monsters, mercenaries) {
