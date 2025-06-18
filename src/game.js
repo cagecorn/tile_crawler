@@ -318,6 +318,7 @@ export class Game {
         eventManager.subscribe('skill_used', (data) => {
             const { caster, skill } = data;
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
+            this.vfxManager.castEffect(caster, skill);
 
             if (skill.tags.includes('attack')) {
                 const range = skill.range || Infinity;
