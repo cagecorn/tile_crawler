@@ -5,6 +5,12 @@ export class MonsterManager {
         this.factory = factory;
         this.monsters = [];
         console.log("[MonsterManager] Initialized");
+
+        if (this.eventManager) {
+            this.eventManager.subscribe('entity_removed', (data) => {
+                this.monsters = this.monsters.filter(m => m.id !== data.victimId);
+            });
+        }
     }
 
     getMonsterAt(x, y) {
