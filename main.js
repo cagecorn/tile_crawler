@@ -5,7 +5,16 @@ import { EventManager } from './src/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './src/logManager.js';
 import { CombatCalculator } from './src/combat.js';
 import { MapManager } from './src/map.js';
-import { MercenaryManager, MonsterManager, UIManager, ItemManager, EquipmentManager } from './src/managers.js';
+import {
+    MonsterManager,
+    MercenaryManager,
+    ItemManager,
+    EquipmentManager,
+    UIManager,
+    VFXManager,
+    SkillManager,
+    SoundManager,
+} from './src/managers/index.js';
 import { AssetLoader } from './src/assetLoader.js';
 import { MetaAIManager, STRATEGY } from './src/ai-managers.js';
 import { SaveLoadManager } from './src/saveLoadManager.js';
@@ -34,33 +43,33 @@ window.onload = function() {
         const layerManager = new LayerManager();
         const canvas = layerManager.layers.mapBase;
 
-        // === 1. 핵심 객체들 생성 ===
+        // === 1. 모든 매니저 및 시스템 생성 ===
         const eventManager = new EventManager();
-        const factory = new CharacterFactory(assets);
-        const itemFactory = new ItemFactory(assets);
-        const equipmentManager = new EquipmentManager(eventManager);
-        ItemManager.prototype._spawnItems = function(count) {
-            for(let i=0; i<count; i++) {
-                const pos = this.mapManager.getRandomFloorPosition();
-                this.items.push(itemFactory.create('short_sword', pos.x, pos.y, this.mapManager.tileSize));
-            }
-        };
         const combatLogManager = new CombatLogManager(eventManager);
         const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator(eventManager);
         const mapManager = new MapManager();
+        const saveLoadManager = new SaveLoadManager();
+        const turnManager = new TurnManager();
+        const narrativeManager = new NarrativeManager();
+        const factory = new CharacterFactory(assets);
+
+        // --- 새로 추가된 매니저들 생성 ---
+        const monsterManager = new MonsterManager();
+        const mercenaryManager = new MercenaryManager();
+        const itemManager = new ItemManager();
+        const equipmentManager = new EquipmentManager();
+        const uiManager = new UIManager();
+        const vfxManager = new VFXManager();
+        const skillManager = new SkillManager();
+        const soundManager = new SoundManager();
+
+        const itemFactory = new ItemFactory(assets);
         const pathfindingManager = new PathfindingManager(mapManager);
         const fogManager = new FogManager(mapManager.width, mapManager.height);
-        const monsterManager = new MonsterManager(7, mapManager, assets, eventManager, factory);
-        const mercenaryManager = new MercenaryManager(assets, factory);
-        const itemManager = new ItemManager(20, mapManager, assets);
-        const uiManager = new UIManager();
-        const narrativeManager = new NarrativeManager();
-        const turnManager = new TurnManager();
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         uiManager.mercenaryManager = mercenaryManager;
         const metaAIManager = new MetaAIManager(eventManager);
-        const saveLoadManager = new SaveLoadManager();
 
         const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);

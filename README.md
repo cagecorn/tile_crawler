@@ -15,7 +15,7 @@ This project is a browser-based dungeon crawler. It lets players explore levels,
 
 1.  **단일 책임 원칙 (Single Responsibility Principle)**
     * 모든 자바스크립트 파일과 클래스는 단 하나의 명확한 책임을 가집니다.
-    * 예: `map.js`는 맵 데이터 생성 및 관리를, `entities.js`는 플레이어/몬스터 등 개체의 기본 설계를, `managers.js`는 게임의 주요 로직 관리를 담당합니다.
+    * 예: `map.js`는 맵 데이터 생성 및 관리를, `entities.js`는 플레이어/몬스터 등 개체의 기본 설계를, `src/managers` 폴더의 각 매니저 클래스는 게임의 주요 로직을 나누어 담당합니다.
 
 2.  **관리자 패턴 (Manager Pattern)**
     * 게임의 복잡한 로직(맵, 몬스터, UI, 시각 효과 등)은 각각의 '매니저(Manager)' 클래스가 전담하여 처리합니다.
