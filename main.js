@@ -1,5 +1,8 @@
 // main.js
 
+import { SETTINGS } from './config/gameSettings.js';
+import { GameLoop } from './src/gameLoop.js';
+import { InputHandler } from './src/inputHandler.js';
 import { CharacterFactory, ItemFactory } from './src/factory.js';
 import { EventManager } from './src/eventManager.js';
 import { CombatLogManager, SystemLogManager } from './src/logManager.js';
@@ -46,6 +49,7 @@ window.onload = function() {
 
         // === 1. 모든 매니저 및 시스템 생성 ===
         const eventManager = new EventManager();
+        const inputHandler = new InputHandler(eventManager);
         const combatLogManager = new CombatLogManager(eventManager);
         const systemLogManager = new SystemLogManager(eventManager);
         const combatCalculator = new CombatCalculator(eventManager);
@@ -93,7 +97,7 @@ window.onload = function() {
             statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
-            zoomLevel: 0.5,
+            zoomLevel: SETTINGS.DEFAULT_ZOOM,
             isPaused: false
         };
         playerGroup.addMember(player);
@@ -244,13 +248,13 @@ window.onload = function() {
             return nearest;
         }
 
-        const keysPressed = {};
-        document.addEventListener('keydown', (event) => {
-            if (gameState.isPaused || gameState.isGameOver) return;
-            keysPressed[event.key] = true;
 
-            if (['1', '2', '3', '4'].includes(event.key)) {
-                const skillIndex = parseInt(event.key) - 1;
+        eventManager.subscribe('key_pressed', (data) => {
+            const key = data.key;
+            if (gameState.isPaused || gameState.isGameOver) return;
+
+            if (['1', '2', '3', '4'].includes(key)) {
+                const skillIndex = parseInt(key) - 1;
                 const player = gameState.player;
                 const skillId = player.skills[skillIndex];
 
@@ -261,12 +265,11 @@ window.onload = function() {
                         player.skillCooldowns[skillId] = skillData.cooldown;
                         eventManager.publish('skill_used', { caster: player, skill: skillData });
                     } else {
-                        eventManager.publish('log', { message: '마나가 부족합니다.'});
+                        eventManager.publish('log', { message: '마나가 부족합니다.' });
                     }
                 }
             }
         });
-        document.addEventListener('keyup', e => { delete keysPressed[e.key]; });
 
         function render() {
             if (gameState.isGameOver) return;
@@ -313,7 +316,7 @@ window.onload = function() {
             uiManager.updateUI(gameState);
         }
 
-       function update() {
+       function update(deltaTime) {
            if (gameState.isPaused || gameState.isGameOver) return;
 
             const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
@@ -323,10 +326,10 @@ window.onload = function() {
             const player = gameState.player;
             if (player.attackCooldown > 0) player.attackCooldown--;
             let moveX = 0, moveY = 0;
-            if (keysPressed['ArrowUp']) moveY -= player.speed;
-            if (keysPressed['ArrowDown']) moveY += player.speed;
-            if (keysPressed['ArrowLeft']) moveX -= player.speed;
-            if (keysPressed['ArrowRight']) moveX += player.speed;
+            if (inputHandler.keysPressed['ArrowUp']) moveY -= player.speed;
+            if (inputHandler.keysPressed['ArrowDown']) moveY += player.speed;
+            if (inputHandler.keysPressed['ArrowLeft']) moveX -= player.speed;
+            if (inputHandler.keysPressed['ArrowRight']) moveX += player.speed;
             if (moveX !== 0 || moveY !== 0) {
                 const targetX = player.x + moveX;
                 const targetY = player.y + moveY;
@@ -436,12 +439,7 @@ window.onload = function() {
             // 나중에 몬스터 클릭 시 정보창 띄우는 로직도 여기에 추가 가능
         });
 
-       function gameLoop() {
-            if (!gameState.isPaused) update();
-            render();
-            requestAnimationFrame(gameLoop);
-       }
-
-        gameLoop();
+        const gameLoop = new GameLoop(update, render);
+        gameLoop.start();
     });
 };
