@@ -22,6 +22,7 @@ class Entity {
         this.isPlayer = false;
         this.isFriendly = false;
         this.ai = null;
+        this.unitType = 'generic'; // 기본 유닛 타입을 '일반'으로 설정
 
         // --- 장비창(Equipment) 추가 ---
         this.equipment = {
@@ -77,6 +78,7 @@ export class Player extends Entity {
         super(config);
         this.isPlayer = true;
         this.isFriendly = true;
+        this.unitType = 'human'; // 플레이어의 타입은 '인간'
     }
 }
 
@@ -84,6 +86,7 @@ export class Mercenary extends Entity {
     constructor(config) {
         super(config);
         this.isFriendly = true;
+        this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
     }
 }
@@ -92,6 +95,8 @@ export class Monster extends Entity {
     constructor(config) {
         super(config);
         this.isFriendly = false;
+        // 나중에 몬스터 종류에 따라 'undead', 'beast' 등으로 설정 가능
+        this.unitType = 'monster'; 
         this.ai = new MeleeAI();
     }
 }
