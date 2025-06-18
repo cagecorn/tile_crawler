@@ -331,3 +331,20 @@ body, html {
 .skill-slot > span { position: absolute; top: 2px; left: 4px; color: white; font-size: 10px; text-shadow: 1px 1px 2px black; }
 .skill-cooldown { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: bold; }
 
+.sheet-container { display: flex; gap: 15px; }
+.sheet-left { flex-basis: 300px; flex-shrink: 0; }
+.sheet-right { flex-grow: 1; }
+
+#sheet-equipment .equip-slot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px; margin-bottom: 5px; background-color: rgba(0,0,0,0.1);
+}
+#sheet-inventory {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 5px; padding: 5px; background-color: rgba(0,0,0,0.2); min-height: 200px;
+}
+.stat-tabs { display: flex; margin-bottom: 10px; }
+.stat-tab-btn { flex-grow: 1; padding: 8px; border: 1px solid #555; background: #888; cursor: pointer; }
+.stat-tab-btn.active { background: #eee; color: #333; }
+.stat-page.hidden { display: none; }
+
