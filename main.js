@@ -159,7 +159,8 @@ window.onload = function() {
             eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.`, color: 'red' });
 
             if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
-                eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
+                // 용병이 처치해도 경험치는 플레이어가 획득한다.
+                eventManager.publish('exp_gained', { player: gameState.player, exp: victim.expValue });
             }
         });
 
