@@ -259,10 +259,15 @@ export class Game {
         // 피해량 계산 완료 이벤트를 받아 실제 피해 적용
         eventManager.subscribe('damage_calculated', (data) => {
             data.defender.takeDamage(data.damage);
+            eventManager.publish('entity_damaged', { attacker: data.attacker, defender: data.defender, damage: data.damage });
             if (data.defender.hp <= 0) {
                 eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
                 eventManager.publish('entity_removed', { victimId: data.defender.id });
             }
+        });
+
+        eventManager.subscribe('entity_damaged', (data) => {
+            this.vfxManager.flashEntity(data.defender);
         });
 
         // 죽음 이벤트가 발생하면 경험치 이벤트를 발행
