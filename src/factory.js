@@ -76,6 +76,9 @@ export class ItemFactory {
         item.baseId = itemId;
         item.type = baseItem.type;
         item.tags = [...baseItem.tags];
+        if (baseItem.stats) {
+            item.stats.add(baseItem.stats);
+        }
 
         if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
