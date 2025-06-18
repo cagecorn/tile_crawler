@@ -1,4 +1,4 @@
-import { MeleeAI } from '../src/ai.js';
+import { MeleeAI, RangedAI } from '../src/ai.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running AI Tests ---");
@@ -35,4 +35,25 @@ test('MeleeAI - 플레이어 추적', () => {
     const action = ai.decideAction(self, context);
     assert.strictEqual(action.type, 'move');
     assert.strictEqual(action.target, player);
+});
+
+// RangedAI specific behavior
+test('RangedAI - 가까운 적에게서 거리 벌림', () => {
+    const ai = new RangedAI();
+    const self = { x: 0, y: 0, visionRange: 100, attackRange: 20, speed: 5, tileSize: 1 };
+    const enemy = { x: 5, y: 0 };
+    const context = { player: {}, allies: [], enemies: [enemy], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'move');
+    assert.ok(action.target.x < self.x);
+});
+
+test('RangedAI - 사정거리 밖 적에게 접근', () => {
+    const ai = new RangedAI();
+    const self = { x: 0, y: 0, visionRange: 100, attackRange: 20, speed: 5, tileSize: 1 };
+    const enemy = { x: 50, y: 0 };
+    const context = { player: {}, allies: [], enemies: [enemy], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'move');
+    assert.strictEqual(action.target, enemy);
 });
