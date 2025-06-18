@@ -1,6 +1,9 @@
+import { Particle } from '../particle.js';
+
 export class VFXManager {
     constructor() {
         this.effects = [];
+        this.particles = [];
         console.log("[VFXManager] Initialized");
     }
 
@@ -23,6 +26,20 @@ export class VFXManager {
             blendMode: 'lighter',
         };
         this.effects.push(effect);
+    }
+
+    /**
+     * 작은 사각형 파티클 여러 개를 한 번에 생성합니다.
+     * @param {number} x
+     * @param {number} y
+     * @param {object} [options]
+     */
+    addParticleBurst(x, y, options = {}) {
+        const count = options.count || 8;
+        const color = options.color || 'yellow';
+        for (let i = 0; i < count; i++) {
+            this.particles.push(new Particle(x, y, color));
+        }
     }
 
     /**
@@ -85,6 +102,14 @@ export class VFXManager {
                 }
             }
         }
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.update();
+            if (p.lifespan <= 0) {
+                this.particles.splice(i, 1);
+            }
+        }
     }
 
     render(ctx) {
@@ -124,5 +149,10 @@ export class VFXManager {
                 ctx.restore();
             }
         }
+
+        for (const p of this.particles) {
+            p.render(ctx);
+        }
     }
 }
+
