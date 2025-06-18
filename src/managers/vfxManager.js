@@ -100,6 +100,36 @@ export class VFXManager {
     }
 
     /**
+     * 시전 이펙트: 지정 유닛 주변에서 파티클이 모여드는 애니메이션을 생성합니다.
+     * 시전 속도가 빠를수록 파티클이 더 빠르게 모여듭니다.
+     * 색상은 스킬 태그에 따라 달라집니다.
+     * @param {object} caster Entity casting the skill
+     * @param {object} skill Skill data object
+     */
+    castEffect(caster, skill) {
+        const centerX = caster.x + caster.width / 2;
+        const centerY = caster.y + caster.height / 2;
+        let color = 'white';
+        if (skill && Array.isArray(skill.tags)) {
+            if (skill.tags.includes('fire')) color = 'orange';
+            else if (skill.tags.includes('ice')) color = 'cyan';
+            else if (skill.tags.includes('holy')) color = 'yellow';
+        }
+        const radius = Math.max(caster.width, caster.height);
+        const strength = 0.03 * (caster.stats.get('castingSpeed') || 1);
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            const sx = centerX + Math.cos(angle) * radius;
+            const sy = centerY + Math.sin(angle) * radius;
+            this.addHomingBurst(sx, sy, caster, {
+                count: 6,
+                color,
+                particleOptions: { homingStrength: strength, gravity: 0 }
+            });
+        }
+    }
+
+    /**
      * 지정한 이미터를 제거합니다.
      * @param {object} emitter
      */

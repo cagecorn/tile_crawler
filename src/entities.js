@@ -44,6 +44,7 @@ class Entity {
     get expValue() { return this.stats.get('expValue'); }
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
+    get castingSpeed() { return this.stats.get('castingSpeed'); }
 
     // --- AI를 동적으로 변경하는 메서드 추가 ---
     updateAI() {
