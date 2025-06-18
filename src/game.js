@@ -213,13 +213,13 @@ export class Game {
         eventManager.subscribe('game_over', () => {
             gameState.isGameOver = true;
             alert("게임 오버!");
-            this.combatLogManager.add('%c게임 오버!', 'magenta');
+            this.combatLogManager.add('%c게임 오버!');
         });
 
         eventManager.subscribe('exp_gained', (data) => {
             const { player, exp } = data;
             player.stats.addExp(exp);
-            this.combatLogManager.add(`%c${exp}의 경험치를 획득했습니다.`, 'yellow');
+            this.combatLogManager.add(`%c${exp}의 경험치를 획득했습니다.`);
             this.checkForLevelUp(player);
         });
 

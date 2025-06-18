@@ -3,6 +3,7 @@ export const ITEMS = {
     short_sword: {
         name: '단검',
         type: 'weapon',
+        damageDice: '1d6',
         tags: ['melee', 'sword'],
         imageKey: 'sword',
         stats: { attackPower: 2 },
@@ -10,6 +11,7 @@ export const ITEMS = {
     long_bow: {
         name: '장궁',
         type: 'weapon',
+        damageDice: '1d6',
         tags: ['ranged', 'bow'],
         imageKey: 'bow',
         stats: { attackPower: 2 },
