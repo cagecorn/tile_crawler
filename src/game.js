@@ -79,6 +79,7 @@ export class Game {
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
+        this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);
         this.fogManager = new FogManager(this.mapManager.width, this.mapManager.height);
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
@@ -269,10 +270,16 @@ export class Game {
                 const range = skill.range || Infinity;
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
                 if (nearestEnemy) {
-                    if (skill.projectile) {
-                        this.projectileManager.create(caster, nearestEnemy, skill);
-                    } else {
-                        eventManager.publish('entity_attack', { attacker: caster, defender: nearestEnemy, skill: skill });
+                    if (skill.dashRange) {
+                        this.motionManager.dashTowards(caster, nearestEnemy, skill.dashRange);
+                    }
+                    const hits = skill.hits || 1;
+                    for (let i = 0; i < hits; i++) {
+                        if (skill.projectile) {
+                            this.projectileManager.create(caster, nearestEnemy, skill);
+                        } else {
+                            eventManager.publish('entity_attack', { attacker: caster, defender: nearestEnemy, skill: skill });
+                        }
                     }
                 } else {
                     eventManager.publish('log', { message: '시야에 대상이 없습니다.' });

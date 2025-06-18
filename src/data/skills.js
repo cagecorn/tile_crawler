@@ -33,6 +33,8 @@ export const SKILLS = {
         description: '대시하여 적을 강하게 공격합니다.',
         manaCost: 8,
         cooldown: 180,
+        damageMultiplier: 1.5,
+        dashRange: 4,
         tags: ['skill', 'attack', 'melee', 'physical', 'dash', '근접', '물리'],
     },
     double_strike: {
@@ -41,6 +43,7 @@ export const SKILLS = {
         description: '두 번의 근접 공격을 빠르게 가합니다.',
         manaCost: 12,
         cooldown: 120,
+        hits: 2,
         tags: ['skill', 'attack', 'melee', 'physical', 'multi-hit', '근접', '물리'],
     },
     double_thrust: {

@@ -11,6 +11,7 @@ import { SkillManager } from './skillManager.js';
 import { SoundManager } from './soundManager.js';
 import { EffectManager } from './effectManager.js';
 import { ProjectileManager } from './projectileManager.js';
+import { MotionManager } from './motionManager.js';
 // ... (나중에 다른 매니저가 생기면 여기에 추가)
 
 export {
@@ -24,4 +25,5 @@ export {
     SoundManager,
     EffectManager,
     ProjectileManager,
+    MotionManager,
 };
