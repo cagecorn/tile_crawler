@@ -162,6 +162,18 @@ export class UIManager {
 
         const statsToShow = ['hp', 'maxHp', 'attackPower', 'strength', 'agility', 'endurance', 'movementSpeed'];
         this.mercStatsContainer.innerHTML = '';
+
+        // 레벨 및 경험치 표시
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'stat-line';
+        levelDiv.textContent = `레벨: ${mercenary.stats.get('level')}`;
+        this.mercStatsContainer.appendChild(levelDiv);
+
+        const expDiv = document.createElement('div');
+        expDiv.className = 'stat-line';
+        expDiv.textContent = `EXP: ${mercenary.stats.get('exp')} / ${mercenary.stats.get('expNeeded')}`;
+        this.mercStatsContainer.appendChild(expDiv);
+
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';

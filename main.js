@@ -159,7 +159,15 @@ window.onload = function() {
             eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.`, color: 'red' });
 
             if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
-                eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
+                if (attacker.isPlayer) {
+                    // 플레이어가 직접 처치한 경우 전체 경험치 지급
+                    eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
+                } else if (attacker.isFriendly) {
+                    // 용병이 처치한 경우 용병과 플레이어가 경험치를 절반씩 나눔
+                    const sharedExp = victim.expValue / 2;
+                    eventManager.publish('exp_gained', { player: attacker, exp: sharedExp });
+                    eventManager.publish('exp_gained', { player: gameState.player, exp: sharedExp });
+                }
             }
         });
 

@@ -25,7 +25,8 @@ export class CharacterFactory {
         // 2. 기본 스탯 설정 (직업, 몬스터 종류, 출신 보너스 등)
         const baseStats = { ...(config.baseStats || {}) };
         if (type === 'monster' && baseStats.expValue === undefined) {
-            baseStats.expValue = 5;
+            // 기본 몬스터 경험치를 10으로 상향
+            baseStats.expValue = 10;
         }
         const originBonus = ORIGINS[originId].stat_bonuses;
         for (const stat in originBonus) {
