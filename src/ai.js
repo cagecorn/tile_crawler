@@ -55,7 +55,8 @@ export class MeleeAI extends AIArchetype {
         } else if (self.isFriendly && !self.isPlayer) {
             // 아군이고, 적이 없으면 플레이어를 따라다님
             const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
-            if (playerDistance > self.tileSize * 2) { // 플레이어와 2타일 이상 멀어지면
+            // 플레이어와 일정 거리 이상 벌어지면 따라간다 (한 타일 이상)
+            if (playerDistance > self.tileSize) {
                 return { type: 'move', target: player };
             }
         }
