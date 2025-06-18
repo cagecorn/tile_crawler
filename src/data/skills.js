@@ -34,7 +34,7 @@ export const SKILLS = {
         manaCost: 8,
         cooldown: 180,
         damageMultiplier: 1.5,
-        dashRange: 4,
+        dashRange: 8,
         tags: ['skill', 'attack', 'melee', 'physical', 'dash', '근접', '물리'],
     },
     double_strike: {

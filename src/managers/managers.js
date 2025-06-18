@@ -407,7 +407,7 @@ export class UIManager {
     }
 
     _drawHpBar(ctx, entity) {
-        if (entity.hp >= entity.maxHp || entity.hp <= 0) return;
+        if (Math.abs(entity.hp - entity.maxHp) < 0.01 || entity.hp <= 0) return;
         const barWidth = entity.width;
         const barHeight = 8;
         const x = entity.x;
