@@ -6,7 +6,8 @@ const TILE_TYPES = {
 };
 
 export class MapManager {
-    constructor() {
+    constructor(seed = Math.floor(Math.random() * 2 ** 32)) {
+        this._seed = seed >>> 0;
         this.width = 41;
         this.height = 31;
         this.tileSize = 192;
@@ -14,6 +15,13 @@ export class MapManager {
         this.rooms = [];
         this.corridorWidth = 5; // 전역적으로 사용할 통로 너비
         this.map = this._generateMaze();
+    }
+
+    _random() {
+        const a = 1664525;
+        const c = 1013904223;
+        this._seed = (a * this._seed + c) >>> 0;
+        return this._seed / 2 ** 32;
     }
 
     _generateMaze() {
@@ -41,10 +49,10 @@ export class MapManager {
         const maxRoomSize = 7;
         
         for (let i = 0; i < roomCount; i++) {
-            const roomW = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
-            const roomH = Math.floor(Math.random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
-            const roomX = Math.floor(Math.random() * (this.width - roomW - 2)) + 1;
-            const roomY = Math.floor(Math.random() * (this.height - roomH - 2)) + 1;
+            const roomW = Math.floor(this._random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
+            const roomH = Math.floor(this._random() * (maxRoomSize - minRoomSize + 1)) + minRoomSize;
+            const roomX = Math.floor(this._random() * (this.width - roomW - 2)) + 1;
+            const roomY = Math.floor(this._random() * (this.height - roomH - 2)) + 1;
 
             // 겹침 체크
             const overlaps = this.rooms.some(room =>
@@ -105,7 +113,7 @@ export class MapManager {
                 { x: -step, y: 0 }, 
                 { x: step, y: 0 }
             ];
-            directions.sort(() => Math.random() - 0.5);
+            directions.sort(() => this._random() - 0.5);
 
             let moved = false;
             for (const dir of directions) {
@@ -263,13 +271,13 @@ export class MapManager {
                     }
                     
                     // 막다른 길인 경우 (1개 방향으로만 열림)
-                    if (openDirections === 1 && Math.random() < chance) {
+                    if (openDirections === 1 && this._random() < chance) {
                         const availableDirections = directions.filter(dir => 
                             map[y + dir.y] && map[y + dir.y][x + dir.x] === this.tileTypes.WALL
                         );
                         
                         if (availableDirections.length > 0) {
-                            const randomDir = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+                            const randomDir = availableDirections[Math.floor(this._random() * availableDirections.length)];
                             this._carveWideCorridor(map, x, y, x + randomDir.x * this.corridorWidth, y + randomDir.y * this.corridorWidth, this.corridorWidth);
                         }
                     }
@@ -282,8 +290,8 @@ export class MapManager {
     getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
         let attempts = 0;
         while (attempts < 50) {
-            const x = Math.floor(Math.random() * (this.width - sizeInTiles.w));
-            const y = Math.floor(Math.random() * (this.height - sizeInTiles.h));
+            const x = Math.floor(this._random() * (this.width - sizeInTiles.w));
+            const y = Math.floor(this._random() * (this.height - sizeInTiles.h));
             let canPlace = true;
             for (let i = 0; i < sizeInTiles.w; i++) {
                 for (let j = 0; j < sizeInTiles.h; j++) {
