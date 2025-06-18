@@ -22,3 +22,32 @@ export function rollOnTable(table) {
 
     return null; // 혹시 모를 오류 방지
 }
+
+/**
+ * "1d8+2" 같은 주사위 표기법을 굴립니다.
+ * @param {string} notation - 예: "2d6", "1d20+5"
+ * @returns {number} - 주사위를 굴린 최종 값
+ */
+export function rollDiceNotation(notation) {
+    if (!notation) return 0;
+    let total = 0;
+    const parts = notation.split('+');
+
+    // 주사위 부분 (e.g., "2d6")
+    const dicePart = parts[0];
+    const match = dicePart.match(/(\d+)d(\d+)/);
+    if (match) {
+        const numDice = parseInt(match[1], 10);
+        const numSides = parseInt(match[2], 10);
+        for (let i = 0; i < numDice; i++) {
+            total += Math.floor(Math.random() * numSides) + 1;
+        }
+    }
+
+    // 추가 보너스 부분 (e.g., "+5")
+    if (parts[1]) {
+        total += parseInt(parts[1], 10);
+    }
+
+    return total;
+}

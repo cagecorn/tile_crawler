@@ -1,4 +1,4 @@
-import { rollOnTable } from '../src/utils/random.js';
+import { rollOnTable, rollDiceNotation } from '../src/utils/random.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running Random (DiceBot) Tests ---");
@@ -10,4 +10,13 @@ test('가중치 기반 롤링', () => {
     ];
     const result = rollOnTable(testTable);
     assert.strictEqual(result, 'success');
+});
+
+test('주사위 표기법 굴리기', () => {
+    const originalRandom = Math.random;
+    Math.random = () => 0; // 항상 최소값
+    const result = rollDiceNotation('2d6+3');
+    Math.random = originalRandom;
+    // 2d6 with roll 1 each -> 2 + 3 = 5
+    assert.strictEqual(result, 5);
 });

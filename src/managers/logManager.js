@@ -10,35 +10,43 @@ export class CombatLogManager {
 
         // 'damage_calculated' 이벤트를 구독하여 전투 로그를 남긴다.
         eventManager.subscribe('damage_calculated', (data) => {
-            const { attacker, defender, damage } = data;
-            this.add(`${attacker.constructor.name}가 ${defender.constructor.name}을(를) 공격하여 ${damage}의 피해를 입혔습니다.`);
+            const { attacker, defender, damage, details } = data;
+            this.add(
+                `${attacker.constructor.name}가 ${defender.constructor.name}을(를) 공격하여 <span class="damage" title="클릭하여 상세 정보 보기">${damage}</span>의 피해를 입혔습니다.`,
+                'combat',
+                details
+            );
         });
 
         eventManager.subscribe('entity_death', (data) => {
             const { victim } = data;
-            this.add(`%c${victim.constructor.name} (이)가 쓰러졌습니다.`, 'red');
+            this.add(`%c${victim.constructor.name} (이)가 쓰러졌습니다.`);
         });
 
         eventManager.subscribe('exp_gained', (data) => {
-            this.add(`%c${data.exp}의 경험치를 획득했습니다.`, 'yellow');
+            this.add(`%c${data.exp}의 경험치를 획득했습니다.`);
         });
 
         eventManager.subscribe('level_up', (data) => {
-            this.add(`%c레벨 업! LV ${data.level} 달성!`, 'cyan');
+            this.add(`%c레벨 업! LV ${data.level} 달성!`);
         });
     }
 
-    add(message, color = 'white') {
-        this.logs.push({ message, color });
+    add(message, type = 'combat', details = null) {
+        this.logs.push({ message, type, details });
         if (this.logs.length > 20) this.logs.shift();
         this.render();
     }
 
     render() {
         const isAtBottom = Math.abs(this.logElement.scrollHeight - this.logElement.clientHeight - this.logElement.scrollTop) < 5;
-        this.logElement.innerHTML = this.logs.map(log =>
-            `<span style="color: ${log.color};">${log.message}</span>`
-        ).join('<br>');
+        this.logElement.innerHTML = this.logs.map(log => {
+            if (log.type === 'combat' && log.details) {
+                const detailString = `계산 내역:\n- 주사위 (${log.details.diceRoll}) + 스탯 보너스 (+${log.details.statBonus}) - 방어력 (${log.details.defenseReduction}) = 최종 피해량: ${log.details.finalDamage}`;
+                return `<span class="clickable" onclick="alert('${detailString}')">${log.message}</span>`;
+            }
+            return `<span>${log.message}</span>`;
+        }).join('<br>');
         if (isAtBottom) {
             setTimeout(() => {
                 this.logElement.scrollTop = this.logElement.scrollHeight;
