@@ -39,6 +39,8 @@ export class Game {
         this.loader.loadImage('bow', 'assets/images/bow.png');
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
+        this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
+        this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -239,6 +241,19 @@ export class Game {
         // 공격 이벤트가 발생하면 CombatCalculator에 계산을 요청
         eventManager.subscribe('entity_attack', (data) => {
             combatCalculator.handleAttack(data);
+
+            const { attacker, defender, skill } = data;
+            if (!skill || !skill.projectile) {
+                const img = assets['strike-effect'];
+                if (img) {
+                    this.vfxManager.addSpriteEffect(
+                        img,
+                        defender.x + defender.width / 2,
+                        defender.y + defender.height / 2,
+                        { width: defender.width, height: defender.height }
+                    );
+                }
+            }
         });
 
         // 피해량 계산 완료 이벤트를 받아 실제 피해 적용

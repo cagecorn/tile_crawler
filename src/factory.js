@@ -50,6 +50,7 @@ export class CharacterFactory {
             case 'player':
                 const player = new Player(finalConfig);
                 player.skills.push(SKILLS.fireball.id);
+                player.skills.push(SKILLS.iceball.id);
                 return player;
             case 'mercenary':
                 if (config.jobId && JOBS[config.jobId]) {
