@@ -56,18 +56,8 @@ window.onload = function() {
         const uiManager = new UIManager();
         const narrativeManager = new NarrativeManager();
         const turnManager = new TurnManager();
-        const originalUseItem = uiManager.useItem.bind(uiManager);
-        uiManager.useItem = function(itemIndex, gameState) {
-            const item = gameState.inventory[itemIndex];
-            if (!item) return;
-            if (item.type === 'weapon' || item.type === 'armor') {
-                equipmentManager.equip(gameState.player, item);
-                gameState.inventory.splice(itemIndex, 1);
-                this.updateUI(gameState);
-            } else {
-                originalUseItem(itemIndex, gameState);
-            }
-        };
+        // UIManager가 mercenaryManager에 접근할 수 있도록 설정
+        uiManager.mercenaryManager = mercenaryManager;
         const metaAIManager = new MetaAIManager(eventManager);
         const saveLoadManager = new SaveLoadManager();
 
@@ -305,14 +295,24 @@ window.onload = function() {
             }
         }
 
-        uiManager.init(stat => {
+        function handleStatUp(stat) {
             if (gameState.statPoints > 0) {
                 gameState.statPoints--;
                 gameState.player.stats.allocatePoint(stat);
                 gameState.player.stats.recalculate();
             }
+        }
 
+        uiManager.init(handleStatUp, (entity, item) => {
+            equipmentManager.equip(entity, item, gameState.inventory);
+            gameState.inventory = gameState.inventory.filter(i => i !== item);
         });
+
+        // 용병 상세창 닫기 버튼 이벤트 핸들러 추가
+        uiManager.closeMercDetailBtn.onclick = () => uiManager.hideMercenaryDetail();
+        // 장착 대상 선택창 닫기 버튼 이벤트 핸들러 추가
+        const closeEquipBtn = document.getElementById('close-equip-target-btn');
+        if (closeEquipBtn) closeEquipBtn.onclick = () => uiManager.hideEquipTargetPanel();
 
         // === 캔버스 클릭 이벤트 추가 (가장 상단 weather-canvas에 연결) ===
         layerManager.layers.weather.addEventListener('click', (event) => {
