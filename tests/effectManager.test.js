@@ -1,18 +1,19 @@
 import { EffectManager } from '../src/managers/effectManager.js';
 import { EventManager } from '../src/eventManager.js';
+import { test, assert } from './helpers.js';
 
 console.log("--- Running EffectManager Tests ---");
-try {
+
+test('버프 추가', () => {
     const eventManager = new EventManager();
     const effectManager = new EffectManager(eventManager);
     const mockTarget = { effects: [], stats: { recalculate: () => {} } };
+    let eventFired = false;
+    eventManager.subscribe('stats_changed', () => { eventFired = true; });
 
     effectManager.addEffect(mockTarget, 'strength_buff');
 
-    if (mockTarget.effects.length !== 1 || mockTarget.effects[0].id !== 'strength_buff') {
-        throw new Error("버프가 정상적으로 추가되지 않음");
-    }
-    console.log("✅ PASSED: 버프 추가");
-} catch (e) {
-    console.error(`❌ FAILED: 버프 추가 - ${e.message}`);
-}
+    assert.strictEqual(mockTarget.effects.length, 1);
+    assert.strictEqual(mockTarget.effects[0].name, '힘의 축복');
+    assert.ok(eventFired, 'stats_changed 이벤트');
+});

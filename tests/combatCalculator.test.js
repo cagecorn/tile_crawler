@@ -1,17 +1,21 @@
 import { CombatCalculator } from '../src/combat.js';
+import { EventManager } from '../src/eventManager.js';
+import { test, assert } from './helpers.js';
 
 console.log("--- Running CombatCalculator Tests ---");
-try {
-    const calculator = new CombatCalculator(null); // 지금은 eventManager가 필요없음
+
+test('피해량 계산 이벤트', () => {
+    const eventManager = new EventManager();
+    const calculator = new CombatCalculator(eventManager);
+    let eventData = null;
+    eventManager.subscribe('damage_calculated', data => { eventData = data; });
+
     const attacker = { attackPower: 10 };
-    const defender = { defense: 3 }; // 나중에 방어력 스탯 추가 대비
+    const defender = {};
+    calculator.handleAttack({ attacker, defender });
 
-    const damage = calculator.calculateDamage(attacker, defender);
-
-    if (damage !== 10) {
-        throw new Error(`예상 피해량 10, 실제 피해량 ${damage}`);
-    }
-    console.log("✅ PASSED: 피해량 계산");
-} catch (e) {
-    console.error(`❌ FAILED: 피해량 계산 - ${e.message}`);
-}
+    assert.ok(eventData, '이벤트 수신 여부');
+    assert.strictEqual(eventData.damage, 10);
+    assert.strictEqual(eventData.attacker, attacker);
+    assert.strictEqual(eventData.defender, defender);
+});
