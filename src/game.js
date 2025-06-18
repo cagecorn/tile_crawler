@@ -118,6 +118,18 @@ export class Game {
         };
         this.playerGroup.addMember(player);
 
+        // 초기 아이템 배치
+        const potion = new Item(player.x + this.mapManager.tileSize,
+                                player.y,
+                                this.mapManager.tileSize,
+                                'potion', assets.potion);
+        const dagger = this.itemFactory.create('short_sword',
+                                player.x - this.mapManager.tileSize,
+                                player.y,
+                                this.mapManager.tileSize);
+        this.itemManager.addItem(potion);
+        if (dagger) this.itemManager.addItem(dagger);
+
         // === 3. 몬스터 생성 ===
         const monsters = [];
         for (let i = 0; i < 20; i++) {
@@ -344,8 +356,11 @@ export class Game {
             );
 
             if (clickedMerc) {
-                this.uiManager.showCharacterSheet(clickedMerc);
-                this.gameState.isPaused = true;
+                if (this.uiManager.showMercenaryDetail) {
+                    this.uiManager.showMercenaryDetail(clickedMerc);
+                    if (this.uiManager.mercDetailPanel)
+                        this.gameState.isPaused = true;
+                }
                 return; // 용병을 클릭했으면 더 이상 진행 안 함
             }
 

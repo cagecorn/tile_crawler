@@ -69,9 +69,11 @@ export class MetaAIManager {
                     targetX = next.x * tileSize;
                     targetY = next.y * tileSize;
                 } else {
-                    // pathfinding 실패 시 직접 목표 지점을 향해 이동 시도
                     targetX = action.target.x;
                     targetY = action.target.y;
+                    if (context.mapManager.isWallAt(targetX, targetY, entity.width, entity.height)) {
+                        break; // 이동 불가한 목표
+                    }
                 }
 
                 const dx = targetX - entity.x;
