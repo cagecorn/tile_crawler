@@ -3,7 +3,7 @@ import { MapManager } from '../src/map.js';
 console.log("--- Running MapManager Tests ---");
 
 try {
-    const mapManager = new MapManager();
+    const mapManager = new MapManager(12345);
     const map = mapManager.map;
     const { width, height } = mapManager;
     const TILE_TYPES = mapManager.tileTypes;
