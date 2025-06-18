@@ -19,6 +19,7 @@ import { FogManager } from './managers/fogManager.js';
 import { NarrativeManager } from './managers/narrativeManager.js';
 import { TurnManager } from './managers/turnManager.js';
 import { SKILLS } from './data/skills.js';
+import { Item } from './entities.js';
 
 export class Game {
     constructor() {
@@ -83,6 +84,15 @@ export class Game {
         this.uiManager.mercenaryManager = this.mercenaryManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
 
+        for (let i = 0; i < 20; i++) {
+            const pos = this.mapManager.getRandomFloorPosition();
+            if (pos) {
+                const isGold = Math.random() < 0.6;
+                const itemName = isGold ? 'gold' : 'potion';
+                this.itemManager.addItem(new Item(pos.x, pos.y, this.mapManager.tileSize, itemName, assets[itemName]));
+            }
+        }
+
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         this.monsterGroup = this.metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
@@ -94,12 +104,12 @@ export class Game {
             tileSize: this.mapManager.tileSize,
             groupId: this.playerGroup.id,
             image: assets.player,
-            baseStats: { strength: 5, agility: 5, endurance: 5, movement: 5 }
+            baseStats: { strength: 5, agility: 5, endurance: 15, movement: 10 }
         });
         this.gameState = {
             player,
             inventory: [],
-            gold: 100,
+            gold: 1000,
             statPoints: 5,
             camera: { x: 0, y: 0 },
             isGameOver: false,
@@ -110,7 +120,7 @@ export class Game {
 
         // === 3. 몬스터 생성 ===
         const monsters = [];
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 20; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
                 const monster = this.factory.create('monster', {
