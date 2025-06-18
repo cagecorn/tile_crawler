@@ -1,5 +1,5 @@
 import { CombatCalculator } from '../src/combat.js';
-import { EventManager } from '../src/eventManager.js';
+import { EventManager } from '../src/managers/eventManager.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running CombatCalculator Tests ---");

@@ -1,4 +1,4 @@
-import { TurnManager } from '../src/turnManager.js';
+import { TurnManager } from '../src/managers/turnManager.js';
 import { test, assert } from './helpers.js';
 
 console.log("--- Running TurnManager Tests ---");
