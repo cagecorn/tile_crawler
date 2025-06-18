@@ -36,3 +36,8 @@
 * 추후 힐러 용병이 등장해 포션을 쓰지 못하더라도, 힐러가 회복을 마쳤다면 테스트 실패로 보지 않습니다.
 * 엠바고 테스트를 실행할 때마다 챗GPT 코덱스가 해당 테스트의 특이사항을 `엠바고-리뷰.md`에 기록합니다.
 * 새 패치를 적용하기 전에는 항상 `엠바고-리뷰.md`를 정독해 최신 메모를 확인합니다.
+
+## Additional Documentation
+
+For detailed gameplay instructions, see [GAMEPLAY_GUIDE.md](GAMEPLAY_GUIDE.md).
+
