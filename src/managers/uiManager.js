@@ -1,3 +1,5 @@
+import { SKILLS } from '../data/skills.js';
+
 export class UIManager {
     constructor() {
         this.levelElement = document.getElementById('ui-player-level');
