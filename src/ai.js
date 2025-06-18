@@ -31,27 +31,26 @@ export class MeleeAI extends AIArchetype {
         }
 
         // 2. 행동 결정
-        if (nearestTarget &&
-            minDistance < self.visionRange &&
-            hasLineOfSight(
+        if (nearestTarget && minDistance < self.visionRange) {
+            const hasLOS = hasLineOfSight(
                 Math.floor(self.x / mapManager.tileSize),
                 Math.floor(self.y / mapManager.tileSize),
                 Math.floor(nearestTarget.x / mapManager.tileSize),
                 Math.floor(nearestTarget.y / mapManager.tileSize),
                 mapManager
-            )) {
-            // 적이 시야 안에 있을 경우
-            if (minDistance < self.attackRange) {
+            );
+            if (hasLOS && minDistance < self.attackRange) {
                 // 공격 범위 안에 있으면 공격
                 return { type: 'attack', target: nearestTarget };
-            } else {
-            // === 이동 로직 수정 ===
-            // 목표와의 거리가 자신의 속도보다 같거나 작으면, 더 이상 접근하지 않고 대기
-            if (minDistance <= self.speed) {
+            }
+
+            if (hasLOS && minDistance <= self.speed) {
+                // 너무 가까우면 더 이상 다가가지 않음
                 return { type: 'idle' };
             }
-                return { type: 'move', target: nearestTarget };
-            }
+
+            // 목표 지점을 향해 이동 (시야가 가려져 있어도 탐색)
+            return { type: 'move', target: nearestTarget };
         } else if (self.isFriendly && !self.isPlayer) {
             // 아군이고, 적이 없으면 플레이어를 따라다님
             const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
