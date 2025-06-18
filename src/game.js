@@ -250,7 +250,16 @@ export class Game {
                         img,
                         defender.x + defender.width / 2,
                         defender.y + defender.height / 2,
-                        { width: defender.width, height: defender.height }
+                        {
+                            width: defender.width,
+                            height: defender.height,
+                            blendMode: 'screen'
+                        }
+                    );
+                    this.vfxManager.addParticleBurst(
+                        defender.x + defender.width / 2,
+                        defender.y + defender.height / 2,
+                        { color: 'orange', count: 12 }
                     );
                 }
             }
