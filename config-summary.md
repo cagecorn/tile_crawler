@@ -82,7 +82,7 @@
 **공격 관련:**
 - 치명타 확률 (Critical Hit Chance)
 - 치명타 피해량 (Critical Hit Damage)
-- 공격 속도 (Attack Speed)
+- 공격 속도 (Attack Speed) - 실시간 전투에서 우선권을 결정
 - 시전 속도 (Casting Speed)
 - 생명력 흡수 (Life Steal)
 - 피해 반사 (Damage Reflect)

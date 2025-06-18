@@ -10,6 +10,7 @@ test('초기 스탯 설정', () => {
     assert.strictEqual(stats.get('strength'), 5);
     assert.strictEqual(stats.get('endurance'), 10);
     assert.strictEqual(stats.get('castingSpeed'), 1);
+    assert.strictEqual(stats.get('attackSpeed'), 1);
 });
 
 // 파생 스탯(maxHp, attackPower)이 올바르게 계산되는가?

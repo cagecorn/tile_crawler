@@ -500,7 +500,8 @@ export class MetaAIManager extends BaseMetaAI {
                     } else {
                         onPlayerAttack(entity.attackPower);
                     }
-                    entity.attackCooldown = 60;
+                    const baseCd = 60;
+                    entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
             case 'move':
@@ -532,7 +533,8 @@ export class MetaAIManager extends BaseMetaAI {
     update(context) {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
-            for (const member of group.members) {
+            const membersSorted = [...group.members].sort((a,b)=>(b.attackSpeed||1)-(a.attackSpeed||1));
+            for (const member of membersSorted) {
                 if (typeof member.update === 'function') {
                     member.update({ ...context, metaAIManager: this });
                 } else {

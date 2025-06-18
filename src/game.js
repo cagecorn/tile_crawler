@@ -469,7 +469,8 @@ export class Game {
             );
             if (monsterToAttack && player.attackCooldown === 0) {
                 this.handleAttack(player, monsterToAttack, null);
-                player.attackCooldown = 30;
+                const baseCd = 30;
+                player.attackCooldown = Math.max(1, Math.round(baseCd / (player.attackSpeed || 1)));
             } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                 player.x = targetX;
                 player.y = targetY;
