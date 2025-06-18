@@ -25,7 +25,8 @@ export class ProjectileManager {
             image: this.assets[imageKey],
             width: 64,
             height: 64,
-            blendMode: 'lighter', // 마법 투사체는 밝게 표현
+            // 파이어볼 및 아이스볼 투사체는 스크린 블렌드 모드로 표현
+            blendMode: 'screen',
             enableGlow: true,
             vfxManager: this.vfxManager,
         };
