@@ -88,6 +88,7 @@ export class Mercenary extends Entity {
         this.isFriendly = true;
         this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
+        this.inventory = [];
     }
 
     render(ctx) {
