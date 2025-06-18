@@ -20,9 +20,10 @@ export class StatManager {
             visionRange: config.visionRange || 192 * 4,
             attackRange: config.attackRange || 192,
             castingSpeed: config.castingSpeed || 1,
+            attackSpeed: config.attackSpeed || 1,
         };
         this._pointsAllocated = {
-            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0, castingSpeed: 0,
+            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0, castingSpeed: 0, attackSpeed: 0,
         };
 
         // 장비로부터 적용되는 스탯 저장용

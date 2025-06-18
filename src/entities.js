@@ -45,6 +45,7 @@ class Entity {
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
     get castingSpeed() { return this.stats.get('castingSpeed'); }
+    get attackSpeed() { return this.stats.get('attackSpeed'); }
 
     // --- AI를 동적으로 변경하는 메서드 추가 ---
     updateAI() {

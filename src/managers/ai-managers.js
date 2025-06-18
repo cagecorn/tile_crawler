@@ -58,7 +58,8 @@ export class MetaAIManager {
                 if (entity.attackCooldown === 0) {
                     // 공격 이벤트를 발행
                     eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
-                    entity.attackCooldown = 60;
+                    const baseCd = 60;
+                    entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
             case 'skill':
@@ -71,7 +72,8 @@ export class MetaAIManager {
                     entity.mp -= skill.manaCost;
                     entity.skillCooldowns[action.skillId] = skill.cooldown;
                     eventManager.publish('skill_used', { caster: entity, skill });
-                    entity.attackCooldown = 60;
+                    const baseCd = 60;
+                    entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
             case 'move':
@@ -151,7 +153,8 @@ export class MetaAIManager {
                 enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
             };
 
-            for (const member of [...group.members]) { // 복사본 순회!
+            const membersSorted = [...group.members].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
+            for (const member of membersSorted) {
                 if (member.hp <= 0) continue;
                 if (member.attackCooldown > 0) member.attackCooldown--;
 
