@@ -251,7 +251,8 @@ export class UIManager {
         const item = gameState.inventory[itemIndex];
         if (!item) return;
 
-        if (item.tags.includes('weapon') || item.tags.includes('armor')) {
+        if (item.tags.includes('weapon') || item.tags.includes('armor') ||
+            item.type === 'weapon' || item.type === 'armor') {
             this._showEquipTargetPanel(item, gameState);
         } else if (item.name === 'potion') {
             const player = gameState.player;
