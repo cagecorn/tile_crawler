@@ -329,8 +329,9 @@ window.onload = function() {
                 }
                 uiManager.renderInventory(gameState);
             },
-            onEquipItem: (entity, item) => {
-                equipmentManager.equip(entity, item, gameState.inventory);
+           onEquipItem: (entity, item) => {
+                const targetInventory = entity.isPlayer ? gameState.inventory : (entity.inventory || gameState.inventory);
+                equipmentManager.equip(entity, item, targetInventory);
                 gameState.inventory = gameState.inventory.filter(i => i !== item);
                 uiManager.renderInventory(gameState);
             }
