@@ -90,6 +90,13 @@ export class MetaAIManager {
                     if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
                         entity.x = newX;
                         entity.y = newY;
+                    } else {
+                        // Slide along walls when diagonal movement is blocked
+                        if (!context.mapManager.isWallAt(newX, entity.y, entity.width, entity.height)) {
+                            entity.x = newX;
+                        } else if (!context.mapManager.isWallAt(entity.x, newY, entity.width, entity.height)) {
+                            entity.y = newY;
+                        }
                     }
                 }
                 break;
