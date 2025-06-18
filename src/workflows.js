@@ -10,6 +10,12 @@ export function monsterDeathWorkflow(context) {
     // 2. "경험치 획득!" 이벤트를 방송한다.
     if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
         const exp = victim.expValue;
+
+        // 실제 경험치를 즉시 적용하여 테스트에서도 검증 가능하도록 한다.
+        if (attacker.stats && typeof attacker.stats.addExp === 'function') {
+            attacker.stats.addExp(exp);
+        }
+
         eventManager.publish('exp_gained', { player: attacker, exp });
     }
     
