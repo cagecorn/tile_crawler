@@ -178,9 +178,22 @@ export class Projectile {
         this.height = config.height || 32;
         this.damage = config.damage;
         this.caster = config.caster;
+        // 밝게 그려야 하는 마법 투사체의 경우 blendMode를 'lighter'로 설정할 수 있다
+        this.blendMode = config.blendMode || null;
+
+        this.vfxManager = config.vfxManager || null;
+        this.enableGlow = config.enableGlow || false;
     }
 
     update() {
+        // 주기적으로 파티클을 생성하여 이동 경로에 잔상을 남김
+        if (this.enableGlow && this.vfxManager) {
+            this.vfxManager.addGlow(
+                this.x + this.width / 2,
+                this.y + this.height / 2
+            );
+        }
+
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
         const distance = Math.hypot(dx, dy);
@@ -191,12 +204,22 @@ export class Projectile {
 
         this.x += (dx / distance) * this.speed;
         this.y += (dy / distance) * this.speed;
+
         return { collided: false };
     }
 
     render(ctx) {
+        ctx.save();
+
+        if (this.blendMode) {
+            ctx.globalCompositeOperation = this.blendMode;
+        }
+
         if (this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
+
+        ctx.restore();
     }
+
 }

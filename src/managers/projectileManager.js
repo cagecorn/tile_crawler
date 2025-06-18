@@ -1,23 +1,29 @@
 import { Projectile } from "../entities.js";
 
 export class ProjectileManager {
-    constructor(eventManager, assets) {
+    constructor(eventManager, assets, vfxManager = null) {
         this.projectiles = [];
         this.eventManager = eventManager;
         this.assets = assets;
+        this.vfxManager = vfxManager;
         console.log("[ProjectileManager] Initialized");
     }
 
     create(caster, target, skill) {
+        const imageKey = skill.projectile === 'fireball' ? 'fire-ball' : skill.projectile;
+
         const config = {
             x: caster.x,
             y: caster.y,
             target: target,
             caster: caster,
             damage: skill.damage,
-            image: this.assets['fire-ball'],
+            image: this.assets[imageKey],
             width: 64,
             height: 64,
+            blendMode: 'lighter', // 마법 투사체는 밝게 표현
+            enableGlow: true,
+            vfxManager: this.vfxManager,
         };
         this.projectiles.push(new Projectile(config));
     }
