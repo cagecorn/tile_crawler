@@ -122,14 +122,18 @@ export class UIManager {
         this.mercDetailName = document.getElementById('merc-detail-name');
         this.mercStatsContainer = document.getElementById('merc-stats-container');
         this.closeMercDetailBtn = document.getElementById('close-merc-detail-btn');
+        // 장착 대상 선택 패널 요소
+        this.equipTargetPanel = document.getElementById('equipment-target-panel');
+        this.equipTargetList = document.getElementById('equipment-target-list');
         this._lastInventory = [];
         this._statUpCallback = null;
         this._isInitialized = false;
     }
 
-    init(onStatUp) {
+    init(onStatUp, onEquipItem) {
         if (this._isInitialized) return;
         this._statUpCallback = onStatUp;
+        this.onEquipItem = onEquipItem;
         if (this.statUpButtonsContainer) {
             this.statUpButtonsContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('stat-up-btn') || event.target.classList.contains('stat-plus')) {
@@ -244,14 +248,47 @@ export class UIManager {
     }
 
     useItem(itemIndex, gameState) {
-        const player = gameState.player;
         const item = gameState.inventory[itemIndex];
-        if (item.name === 'potion') {
+        if (!item) return;
+
+        if (item.tags.includes('weapon') || item.tags.includes('armor')) {
+            this._showEquipTargetPanel(item, gameState);
+        } else if (item.name === 'potion') {
+            const player = gameState.player;
             player.hp = Math.min(player.maxHp, player.hp + 5);
             console.log(`포션을 사용했습니다! HP +5`);
+            gameState.inventory.splice(itemIndex, 1);
+            this.updateUI(gameState);
         }
-        gameState.inventory.splice(itemIndex, 1);
-        this.updateUI(gameState);
+    }
+
+    _showEquipTargetPanel(item, gameState) {
+        if (!this.equipTargetPanel) return;
+
+        this.equipTargetList.innerHTML = '';
+        const targets = [gameState.player, ...(this.mercenaryManager ? this.mercenaryManager.mercenaries : [])];
+
+        targets.forEach((target, idx) => {
+            const button = document.createElement('button');
+            if (target.isPlayer) {
+                button.textContent = '플레이어';
+            } else {
+                button.textContent = `용병 ${idx}`;
+            }
+            button.onclick = () => {
+                if (this.onEquipItem) this.onEquipItem(target, item);
+                this.hideEquipTargetPanel();
+            };
+            this.equipTargetList.appendChild(button);
+        });
+
+        this.equipTargetPanel.classList.remove('hidden');
+    }
+
+    hideEquipTargetPanel() {
+        if (this.equipTargetPanel) {
+            this.equipTargetPanel.classList.add('hidden');
+        }
     }
 
     renderHpBars(ctx, player, monsters, mercenaries) {
@@ -316,13 +353,32 @@ export class EquipmentManager {
         this.eventManager = eventManager;
     }
 
-    equip(entity, item) {
-        if (item.type === 'weapon') {
-            entity.equipment.weapon = item;
-            entity.updateAI();
-            this.eventManager.publish('log', { message: `${entity.constructor.name} (이)가 ${item.name} (을)를 장착했다.` });
+    equip(entity, item, inventory) {
+        const slot = this._getSlotForItem(item);
+        if (!slot) return;
+
+        // 기존 아이템이 있었다면 인벤토리로 반환
+        const oldItem = entity.equipment[slot];
+        if (oldItem && inventory) {
+            inventory.push(oldItem);
         }
-        // ... (나중에 armor, accessory 처리 로직 추가)
+
+        // 새 아이템 장착
+        entity.equipment[slot] = item;
+
+        // 장비 변경 후 스탯과 AI 업데이트
+        if (entity.stats.updateEquipmentStats) {
+            entity.stats.updateEquipmentStats();
+        }
+        if (entity.updateAI) entity.updateAI();
+
+        this.eventManager.publish('log', { message: `${entity.constructor.name} (이)가 ${item.name} (을)를 장착했습니다.` });
+    }
+
+    _getSlotForItem(item) {
+        if (item.tags.includes('weapon') || item.type === 'weapon') return 'weapon';
+        if (item.tags.includes('armor') || item.type === 'armor') return 'armor';
+        return null;
     }
 }
 

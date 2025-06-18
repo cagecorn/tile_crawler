@@ -1,7 +1,8 @@
 // src/stats.js
 
 export class StatManager {
-    constructor(config = {}, entity) {
+    constructor(entity, config = {}) {
+        // entity 자신을 참조할 수 있도록 저장
         this.entity = entity;
         this._baseStats = {
             level: config.level || 1,
@@ -22,6 +23,10 @@ export class StatManager {
         this._pointsAllocated = {
             strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0,
         };
+
+        // 장비로부터 적용되는 스탯 저장용
+        this._fromEquipment = {};
+
         this.derivedStats = {};
         this.recalculate();
     }
@@ -32,10 +37,28 @@ export class StatManager {
         }
     }
 
+    // 장비 스탯을 업데이트하는 함수
+    updateEquipmentStats() {
+        this._fromEquipment = {};
+        if (!this.entity || !this.entity.equipment) return;
+
+        for (const slot in this.entity.equipment) {
+            const item = this.entity.equipment[slot];
+            if (item && item.stats) {
+                for (const [stat, value] of item.stats.entries()) {
+                    this._fromEquipment[stat] = (this._fromEquipment[stat] || 0) + value;
+                }
+            }
+        }
+        this.recalculate();
+    }
+
     recalculate() {
         const final = {};
         for (const stat in this._baseStats) {
-            final[stat] = (this._baseStats[stat] || 0) + (this._pointsAllocated[stat] || 0);
+            final[stat] = (this._baseStats[stat] || 0)
+                       + (this._pointsAllocated[stat] || 0)
+                       + (this._fromEquipment[stat] || 0);
         }
 
         final.maxHp = 10 + final.endurance * 5;

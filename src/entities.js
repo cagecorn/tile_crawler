@@ -13,7 +13,8 @@ class Entity {
         this.image = image;
         this.tileSize = tileSize;
         this.properties = properties || {};
-        this.stats = new StatManager(stats || {}, this);
+        // StatManager가 entity 자신을 참조하도록 첫 번째 인자로 전달
+        this.stats = new StatManager(this, stats || {});
         this.width = this.stats.get('sizeInTiles_w') * tileSize;
         this.height = this.stats.get('sizeInTiles_h') * tileSize;
         this.hp = this.stats.get('maxHp');
