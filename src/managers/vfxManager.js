@@ -4,6 +4,7 @@ export class VFXManager {
     constructor() {
         this.effects = [];
         this.particles = [];
+        this.emitters = [];
         console.log("[VFXManager] Initialized");
     }
 
@@ -38,7 +39,74 @@ export class VFXManager {
         const count = options.count || 8;
         const color = options.color || 'yellow';
         for (let i = 0; i < count; i++) {
-            this.particles.push(new Particle(x, y, color));
+            this.particles.push(new Particle(x, y, color, options));
+        }
+    }
+
+    /**
+     * 지속적으로 파티클을 생성하는 이미터를 추가합니다.
+     * @param {number} x
+     * @param {number} y
+     * @param {object} [options]
+     * @returns {object} emitter handle
+     */
+    addEmitter(x, y, options = {}) {
+        const emitter = {
+            x,
+            y,
+            spawnRate: options.spawnRate || 2,
+            duration: options.duration !== undefined ? options.duration : 60,
+            particleOptions: options.particleOptions || {},
+            followTarget: options.followTarget || null,
+            offsetX: options.offsetX || 0,
+            offsetY: options.offsetY || 0,
+        };
+        this.emitters.push(emitter);
+        return emitter;
+    }
+
+    /**
+     * 이동체의 위치를 따라가는 궤적 이미터를 생성합니다.
+     * @param {object} target Entity or object with x,y properties
+     * @param {object} [options]
+     */
+    createTrail(target, options = {}) {
+        return this.addEmitter(target.x, target.y, {
+            followTarget: target,
+            spawnRate: options.spawnRate || 1,
+            duration: options.duration !== undefined ? options.duration : -1,
+            particleOptions: options.particleOptions || {},
+            offsetX: options.offsetX || target.width / 2 || 0,
+            offsetY: options.offsetY || target.height / 2 || 0,
+        });
+    }
+
+    /**
+     * 목표 지점을 향해 수집되는 파티클들을 생성합니다.
+     * @param {number} x
+     * @param {number} y
+     * @param {object} target Object with x,y
+     * @param {object} [options]
+     */
+    addHomingBurst(x, y, target, options = {}) {
+        const count = options.count || 12;
+        const particleOpts = {
+            ...options.particleOptions,
+            homingTarget: target,
+        };
+        for (let i = 0; i < count; i++) {
+            this.particles.push(new Particle(x, y, options.color || 'white', particleOpts));
+        }
+    }
+
+    /**
+     * 지정한 이미터를 제거합니다.
+     * @param {object} emitter
+     */
+    removeEmitter(emitter) {
+        const idx = this.emitters.indexOf(emitter);
+        if (idx >= 0) {
+            this.emitters.splice(idx, 1);
         }
     }
 
@@ -82,6 +150,25 @@ export class VFXManager {
     }
 
     update() {
+        for (let i = this.emitters.length - 1; i >= 0; i--) {
+            const e = this.emitters[i];
+            if (e.followTarget) {
+                e.x = e.followTarget.x + e.offsetX;
+                e.y = e.followTarget.y + e.offsetY;
+            }
+
+            for (let j = 0; j < e.spawnRate; j++) {
+                this.particles.push(new Particle(e.x, e.y, e.particleOptions.color || 'white', e.particleOptions));
+            }
+
+            if (e.duration > 0) {
+                e.duration--;
+                if (e.duration <= 0) {
+                    this.emitters.splice(i, 1);
+                }
+            }
+        }
+
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
             if (effect.type === 'glow') {
