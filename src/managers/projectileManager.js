@@ -10,7 +10,11 @@ export class ProjectileManager {
     }
 
     create(caster, target, skill) {
-        const imageKey = skill.projectile === 'fireball' ? 'fire-ball' : skill.projectile;
+        const keyMap = {
+            fireball: 'fire-ball',
+            iceball: 'ice-ball'
+        };
+        const imageKey = keyMap[skill.projectile] || skill.projectile;
 
         const config = {
             x: caster.x,
