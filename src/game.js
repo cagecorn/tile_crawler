@@ -147,13 +147,22 @@ export class Game {
             this.eventManager.publish('log', { message: '게임 상태 스냅샷이 콘솔에 저장되었습니다.' });
         };
 
-        // === 메뉴 버튼 이벤트 리스너 추가 ===
-        document.querySelectorAll('.menu-btn').forEach(button => {
-            button.onclick = () => {
-                const panelId = button.dataset.panelId;
-                this.uiManager.showPanel(panelId);
+        // === 메뉴 버튼 이벤트 리스너 수정 ===
+        const playerInfoBtn = document.querySelector('.menu-btn[data-panel-id="character-sheet-panel"]');
+        if (playerInfoBtn) {
+            playerInfoBtn.onclick = () => {
+                this.uiManager.showCharacterSheet(this.gameState.player);
                 this.gameState.isPaused = true;
             };
+        }
+        document.querySelectorAll('.menu-btn').forEach(button => {
+            if (button.dataset.panelId !== 'character-sheet-panel') {
+                button.onclick = () => {
+                    const panelId = button.dataset.panelId;
+                    this.uiManager.showPanel(panelId);
+                    this.gameState.isPaused = true;
+                };
+            }
         });
 
         this.setupEventListeners(assets, canvas);
@@ -280,11 +289,14 @@ export class Game {
             }
         });
 
-        // 용병 상세창 닫기 버튼 이벤트 핸들러 추가
-        this.uiManager.closeMercDetailBtn.onclick = () => this.uiManager.hideMercenaryDetail();
-        // 장착 대상 선택창 닫기 버튼 이벤트 핸들러 추가
-        const closeEquipBtn = document.getElementById('close-equip-target-btn');
-        if (closeEquipBtn) closeEquipBtn.onclick = () => this.uiManager.hideEquipTargetPanel();
+        // 닫기 버튼 공통 로직 수정
+        document.querySelectorAll('.close-btn').forEach(button => {
+            button.onclick = () => {
+                const panel = button.closest('.modal-panel');
+                if (panel) panel.classList.add('hidden');
+                this.gameState.isPaused = false;
+            };
+        });
 
         // === 캔버스 클릭 이벤트 추가 (가장 상단 weather-canvas에 연결) ===
         this.layerManager.layers.weather.addEventListener('click', (event) => {
@@ -301,7 +313,8 @@ export class Game {
             );
 
             if (clickedMerc) {
-                this.uiManager.showMercenaryDetail(clickedMerc);
+                this.uiManager.showCharacterSheet(clickedMerc);
+                this.gameState.isPaused = true;
                 return; // 용병을 클릭했으면 더 이상 진행 안 함
             }
 

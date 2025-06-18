@@ -28,6 +28,10 @@ export class UIManager {
         this.inventoryPanel = document.getElementById('inventory-panel');
         this.equippedItemsContainer = document.getElementById('equipped-items');
         this.inventoryListContainer = document.getElementById('inventory-list');
+        this.characterSheetPanel = document.getElementById('character-sheet-panel');
+        this.sheetCharacterName = document.getElementById('sheet-character-name');
+        this.sheetEquipment = document.getElementById('sheet-equipment');
+        this.sheetInventory = document.getElementById('sheet-inventory');
         this.callbacks = {};
         this._lastInventory = [];
         this._statUpCallback = null;
@@ -59,6 +63,19 @@ export class UIManager {
         if (this.inventoryPanel) {
             const closeBtn = this.inventoryPanel.querySelector('.close-btn');
             if (closeBtn) closeBtn.onclick = () => this.hidePanel('inventory');
+        }
+        if (this.characterSheetPanel) {
+            const closeBtn = this.characterSheetPanel.querySelector('.close-btn');
+            if (closeBtn) closeBtn.onclick = () => this.hidePanel('character-sheet-panel');
+            this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(b => b.classList.remove('active'));
+                    this.characterSheetPanel.querySelectorAll('.stat-page').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    const page = this.characterSheetPanel.querySelector(`#stat-page-${btn.dataset.tab}`);
+                    if (page) page.classList.add('active');
+                };
+            });
         }
         this._isInitialized = true;
     }
@@ -106,18 +123,71 @@ export class UIManager {
         }
     }
 
+    showCharacterSheet(entity) {
+        if (!this.characterSheetPanel) return;
+        this.renderCharacterSheet(entity);
+        this.showPanel('character-sheet-panel');
+    }
+
+    renderCharacterSheet(entity) {
+        if (!this.characterSheetPanel) return;
+        if (this.sheetCharacterName)
+            this.sheetCharacterName.textContent = `${entity.constructor.name} (Lv.${entity.stats.get('level')})`;
+
+        if (this.sheetEquipment) {
+            this.sheetEquipment.querySelectorAll('.equip-slot').forEach(div => {
+                const slot = div.dataset.slot;
+                const baseLabel = div.querySelector('span') ? div.querySelector('span').textContent : slot;
+                div.innerHTML = `<span>${baseLabel}</span> <span>${(entity.equipment && entity.equipment[slot]) ? entity.equipment[slot].name : '없음'}</span>`;
+            });
+        }
+
+        if (this.sheetInventory) {
+            this.sheetInventory.innerHTML = '';
+            const inventory = entity.inventory || [];
+            inventory.forEach(item => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'inventory-item-slot';
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image.src;
+                    slotDiv.appendChild(img);
+                } else {
+                    slotDiv.textContent = item.name;
+                }
+                this.sheetInventory.appendChild(slotDiv);
+            });
+        }
+
+        const page1 = this.characterSheetPanel.querySelector('#stat-page-1');
+        if (page1) {
+            page1.innerHTML = '';
+            const statsToShow = ['strength','agility','endurance','focus','intelligence','movement','maxHp','maxMp','attackPower','movementSpeed'];
+            statsToShow.forEach(stat => {
+                const line = document.createElement('div');
+                line.className = 'stat-line';
+                line.innerHTML = `<span>${stat}:</span> <span>${entity.stats.get(stat)}</span>`;
+                page1.appendChild(line);
+            });
+        }
+    }
+
     showPanel(panelId) {
         if (panelId === 'inventory' && this.inventoryPanel) {
             this.inventoryPanel.classList.remove('hidden');
             if (this.gameState) this.renderInventory(this.gameState);
+        } else if (panelId === 'character-sheet-panel' && this.characterSheetPanel) {
+            this.characterSheetPanel.classList.remove('hidden');
         }
     }
 
     hidePanel(panelId) {
         if (panelId === 'inventory' && this.inventoryPanel) {
             this.inventoryPanel.classList.add('hidden');
-            if (this.gameState) this.gameState.isPaused = false;
+        } else if (panelId === 'character-sheet-panel' && this.characterSheetPanel) {
+            this.characterSheetPanel.classList.add('hidden');
         }
+        if (this.gameState) this.gameState.isPaused = false;
     }
 
     renderInventory(gameState) {
@@ -150,8 +220,8 @@ export class UIManager {
         this.gameState = gameState;
         const player = gameState.player;
         const stats = player.stats;
-        this.levelElement.textContent = stats.get('level');
-        this.statPointsElement.textContent = gameState.statPoints;
+        if (this.levelElement) this.levelElement.textContent = stats.get('level');
+        if (this.statPointsElement) this.statPointsElement.textContent = gameState.statPoints;
         const primaryStats = ['strength', 'agility', 'endurance', 'focus', 'intelligence', 'movement'];
         primaryStats.forEach(stat => {
             const valueElement = document.getElementById(`ui-player-${stat}`);
@@ -161,23 +231,23 @@ export class UIManager {
                 buttonElement.style.display = gameState.statPoints > 0 ? 'inline-block' : 'none';
             }
         });
-        this.hpElement.textContent = Math.ceil(player.hp);
-        this.maxHpElement.textContent = stats.get('maxHp');
+        if (this.hpElement) this.hpElement.textContent = Math.ceil(player.hp);
+        if (this.maxHpElement) this.maxHpElement.textContent = stats.get('maxHp');
         if (this.mpElement) this.mpElement.textContent = Math.ceil(player.mp);
         if (this.maxMpElement) this.maxMpElement.textContent = stats.get('maxMp');
-        this.attackPowerElement.textContent = stats.get('attackPower');
-        this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
-        this.goldElement.textContent = gameState.gold;
+        if (this.attackPowerElement) this.attackPowerElement.textContent = stats.get('attackPower');
+        if (this.movementSpeedElement) this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
+        if (this.goldElement) this.goldElement.textContent = gameState.gold;
         const hpRatio = player.hp / player.maxHp;
-        this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
+        if (this.hpBarFillElement) this.hpBarFillElement.style.width = `${hpRatio * 100}%`;
         if (this.mpBarFillElement) {
             const mpRatio = player.mp / player.maxMp;
             this.mpBarFillElement.style.width = `${mpRatio * 100}%`;
         }
         const expRatio = stats.get('exp') / stats.get('expNeeded');
-        this.expBarFillElement.style.width = `${expRatio * 100}%`;
-        this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
-        if (this._hasInventoryChanged(gameState.inventory)) {
+        if (this.expBarFillElement) this.expBarFillElement.style.width = `${expRatio * 100}%`;
+        if (this.expTextElement) this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
+        if (this.inventorySlotsElement && this._hasInventoryChanged(gameState.inventory)) {
             this.inventorySlotsElement.innerHTML = '';
             gameState.inventory.forEach((item, index) => {
                 const slot = document.createElement('div');
