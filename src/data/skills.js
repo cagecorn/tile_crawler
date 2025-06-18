@@ -9,4 +9,14 @@ export const SKILLS = {
         icon: 'assets/images/fire-nova-effect.png',
         tags: ['skill', 'attack', 'melee', 'single_target'],
     },
+    fireball: {
+        id: 'fireball',
+        name: '파이어볼',
+        description: '화염 구체를 날려 적에게 피해를 입힙니다.',
+        manaCost: 15,
+        cooldown: 90,
+        damage: 10,
+        projectile: 'fireball',
+        tags: ['skill', 'attack', 'magic', 'ranged', 'fire'],
+    },
 };

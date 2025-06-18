@@ -6,3 +6,4 @@ export { UIManager } from './uiManager.js';
 export { VFXManager } from './vfxManager.js';
 export { SkillManager } from './skillManager.js';
 export { SoundManager } from './soundManager.js';
+export { ProjectileManager } from './projectileManager.js';
