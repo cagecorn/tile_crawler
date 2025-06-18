@@ -131,8 +131,13 @@ export class Game {
                                 player.x - this.mapManager.tileSize,
                                 player.y,
                                 this.mapManager.tileSize);
+        const bow = this.itemFactory.create('long_bow',
+                                player.x,
+                                player.y + this.mapManager.tileSize,
+                                this.mapManager.tileSize);
         this.itemManager.addItem(potion);
         if (dagger) this.itemManager.addItem(dagger);
+        if (bow) this.itemManager.addItem(bow);
 
         // === 3. 몬스터 생성 ===
         const monsters = [];
@@ -474,6 +479,12 @@ export class Game {
             } else if (!mapManager.isWallAt(targetX, targetY, player.width, player.height)) {
                 player.x = targetX;
                 player.y = targetY;
+            } else {
+                if (!mapManager.isWallAt(targetX, player.y, player.width, player.height)) {
+                    player.x = targetX;
+                } else if (!mapManager.isWallAt(player.x, targetY, player.width, player.height)) {
+                    player.y = targetY;
+                }
             }
         }
         const itemToPick = this.itemManager.items.find(item =>
