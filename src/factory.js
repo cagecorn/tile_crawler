@@ -6,6 +6,7 @@ import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
 import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
+import { JOBS } from './data/jobs.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -47,6 +48,9 @@ export class CharacterFactory {
             case 'player':
                 return new Player(finalConfig);
             case 'mercenary':
+                if (config.jobId && JOBS[config.jobId]) {
+                    finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
+                }
                 return new Mercenary(finalConfig);
             case 'monster':
                 return new Monster(finalConfig);

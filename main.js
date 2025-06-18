@@ -51,7 +51,7 @@ window.onload = function() {
         const pathfindingManager = new PathfindingManager(mapManager);
         const fogManager = new FogManager(mapManager.width, mapManager.height);
         const monsterManager = new MonsterManager(7, mapManager, assets, eventManager, factory);
-        const mercenaryManager = new MercenaryManager(assets);
+        const mercenaryManager = new MercenaryManager(assets, factory);
         const itemManager = new ItemManager(20, mapManager, assets);
         const uiManager = new UIManager();
         const narrativeManager = new NarrativeManager();
@@ -109,16 +109,20 @@ window.onload = function() {
         document.getElementById('hire-mercenary').onclick = () => {
             if (gameState.gold >= 50) {
                 gameState.gold -= 50;
-                const newMerc = factory.create('mercenary', {
-                    x: gameState.player.x,
-                    y: gameState.player.y,
-                    tileSize: mapManager.tileSize,
-                    groupId: playerGroup.id,
-                    image: assets.mercenary,
-                    baseStats: { strength: 2, agility: 2, endurance: 2, movement: 4 }
-                });
-                mercenaryManager.hire(newMerc);
-                playerGroup.addMember(newMerc);
+                const newMerc = mercenaryManager.hireMercenary(
+                    'warrior',
+                    gameState.player.x + mapManager.tileSize,
+                    gameState.player.y,
+                    mapManager.tileSize,
+                    'player_party'
+                );
+
+                if (newMerc) {
+                    playerGroup.addMember(newMerc);
+                    eventManager.publish('log', { message: `전사 용병을 고용했습니다.` });
+                }
+            } else {
+                eventManager.publish('log', { message: `골드가 부족합니다.` });
             }
         };
 

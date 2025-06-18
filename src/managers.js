@@ -86,14 +86,26 @@ export class MonsterManager {
 }
 
 export class MercenaryManager {
-    constructor(assets) {
+    constructor(assets, factory) {
         this.mercenaries = [];
         this.assets = assets;
+        this.factory = factory;
     }
 
-    hire(mercenary) {
-        this.mercenaries.push(mercenary);
-        return mercenary;
+    hireMercenary(jobId, x, y, tileSize, groupId) {
+        const newMerc = this.factory.create('mercenary', {
+            x,
+            y,
+            tileSize,
+            groupId,
+            jobId,
+            image: this.assets.mercenary
+        });
+
+        if (newMerc) {
+            this.mercenaries.push(newMerc);
+        }
+        return newMerc;
     }
 
     render(ctx) {
