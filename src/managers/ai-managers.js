@@ -36,7 +36,11 @@ export class MetaAIManager {
         return this.groups[id];
     }
     
-    setGroupStrategy(id, strategy) { /* ... */ }
+    setGroupStrategy(id, strategy) {
+        if (this.groups[id]) {
+            this.groups[id].strategy = strategy;
+        }
+    }
 
     executeAction(entity, action, context) {
         if (!action || !action.type || action.type === 'idle') return;
@@ -117,10 +121,12 @@ export class MetaAIManager {
             for (const member of [...group.members]) { // 복사본 순회!
                 if (member.hp <= 0) continue;
                 if (member.attackCooldown > 0) member.attackCooldown--;
-                if (member.ai) {
-                    const action = member.ai.decideAction(member, currentContext);
-                    this.executeAction(member, action, currentContext);
+
+                let action = { type: 'idle' };
+                if (group.strategy !== STRATEGY.IDLE && member.ai) {
+                    action = member.ai.decideAction(member, currentContext);
                 }
+                this.executeAction(member, action, currentContext);
             }
         }
     }
