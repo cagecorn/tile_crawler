@@ -49,6 +49,21 @@ export class VFXManager {
         this.effects.push(effect);
     }
 
+    /**
+     * 대상 엔티티 이미지를 잠깐 색상으로 덮어씌워 번쩍이는 효과를 줍니다.
+     * @param {object} entity - Entity instance (player, monster 등)
+     * @param {object} [options]
+     */
+    flashEntity(entity, options = {}) {
+        const effect = {
+            type: 'flash',
+            entity,
+            duration: options.duration || 6,
+            color: options.color || 'rgba(255,0,0,0.5)'
+        };
+        this.effects.push(effect);
+    }
+
     update() {
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
@@ -61,6 +76,11 @@ export class VFXManager {
                 effect.duration--;
                 effect.alpha -= effect.fade;
                 if (effect.duration <= 0 || effect.alpha <= 0) {
+                    this.effects.splice(i, 1);
+                }
+            } else if (effect.type === 'flash') {
+                effect.duration--;
+                if (effect.duration <= 0) {
                     this.effects.splice(i, 1);
                 }
             }
@@ -93,6 +113,14 @@ export class VFXManager {
                     effect.width,
                     effect.height
                 );
+                ctx.restore();
+            } else if (effect.type === 'flash') {
+                const { entity } = effect;
+                ctx.save();
+                ctx.drawImage(entity.image, entity.x, entity.y, entity.width, entity.height);
+                ctx.globalCompositeOperation = 'source-atop';
+                ctx.fillStyle = effect.color;
+                ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
                 ctx.restore();
             }
         }
