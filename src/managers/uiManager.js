@@ -128,6 +128,16 @@ export class UIManager {
         mpDiv.textContent = `MP: ${mercenary.mp.toFixed(1)} / ${mercenary.maxMp}`;
         this.mercStatsContainer.appendChild(mpDiv);
 
+        const fullDiv = document.createElement('div');
+        fullDiv.className = 'stat-line';
+        fullDiv.textContent = `🍗 배부름: ${mercenary.fullness.toFixed(1)} / ${mercenary.maxFullness}`;
+        this.mercStatsContainer.appendChild(fullDiv);
+
+        const affinityDiv = document.createElement('div');
+        affinityDiv.className = 'stat-line';
+        affinityDiv.textContent = `💕 호감도: ${mercenary.affinity.toFixed(1)} / ${mercenary.maxAffinity}`;
+        this.mercStatsContainer.appendChild(affinityDiv);
+
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
@@ -243,6 +253,19 @@ export class UIManager {
                 line.innerHTML = `<span>${stat}:</span> <span>${entity.stats.get(stat)}</span>`;
                 page1.appendChild(line);
             });
+
+            if (entity.fullness !== undefined) {
+                const fLine = document.createElement('div');
+                fLine.className = 'stat-line';
+                fLine.innerHTML = `<span>fullness:</span> <span>${entity.fullness.toFixed(1)} / ${entity.maxFullness}</span>`;
+                page1.appendChild(fLine);
+            }
+            if (entity.affinity !== undefined) {
+                const aLine = document.createElement('div');
+                aLine.className = 'stat-line';
+                aLine.innerHTML = `<span>affinity:</span> <span>${entity.affinity.toFixed(1)} / ${entity.maxAffinity}</span>`;
+                page1.appendChild(aLine);
+            }
         }
     }
 

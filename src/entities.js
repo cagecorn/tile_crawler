@@ -29,6 +29,14 @@ class Entity {
         this.effects = []; // 적용중인 효과 목록 배열 추가
         this.unitType = 'generic'; // 기본 유닛 타입을 '일반'으로 설정
 
+        // --- 생존 관련 수치 ---
+        this.maxFullness = config.maxFullness ?? 100;
+        this.fullness = config.fullness ?? this.maxFullness;
+        this.maxAffinity = config.maxAffinity ?? 200;
+        if (config.affinity !== undefined) {
+            this.affinity = config.affinity;
+        }
+
         // --- 장비창(Equipment) 추가 ---
         this.equipment = {
             weapon: null,
@@ -122,6 +130,7 @@ export class Player extends Entity {
         this.isPlayer = true;
         this.isFriendly = true;
         this.unitType = 'human'; // 플레이어의 타입은 '인간'
+        this.fullness = this.maxFullness;
     }
 
     render(ctx) {
@@ -150,6 +159,8 @@ export class Mercenary extends Entity {
         this.isFriendly = true;
         this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
+        this.fullness = this.maxFullness;
+        this.affinity = this.maxAffinity;
         this.consumables = [];
         this.consumableCapacity = 4;
 
@@ -232,6 +243,8 @@ export class Monster extends Entity {
         // 나중에 몬스터 종류에 따라 'undead', 'beast' 등으로 설정 가능
         this.unitType = 'monster';
         this.ai = new MeleeAI();
+        this.fullness = this.maxFullness;
+        if (this.isFriendly) this.affinity = this.maxAffinity;
         this.consumables = [];
         this.consumableCapacity = 4;
     }
