@@ -1,7 +1,7 @@
 import { TurnManager } from '../src/managers/turnManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running TurnManager Tests ---");
+describe('Managers', () => {
 
 test('턴 카운트 증가', () => {
     const turnManager = new TurnManager();
@@ -10,4 +10,6 @@ test('턴 카운트 증가', () => {
         turnManager.update([]);
     }
     assert.strictEqual(turnManager.turnCount, 1);
+});
+
 });

@@ -1,7 +1,7 @@
 import { PathfindingManager } from '../src/managers/pathfindingManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running PathfindingManager Tests ---");
+describe('Managers', () => {
 
 test('생성', () => {
     const pfManager = new PathfindingManager(null);
@@ -75,4 +75,6 @@ test('탈출 경로 탐색', () => {
     const pfManager = new PathfindingManager(mapManager);
     const escape = pfManager.findEscapeRoute(1,1, () => false);
     assert.deepStrictEqual(escape, {x:2,y:1});
+});
+
 });

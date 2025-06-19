@@ -1,9 +1,9 @@
 import { CombatCalculator } from '../src/combat.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { TagManager } from '../src/managers/tagManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running CombatCalculator Tests ---");
+describe('Combat', () => {
 
 test('피해량 계산 이벤트', () => {
     const eventManager = new EventManager();
@@ -31,4 +31,6 @@ test('피해량 계산 이벤트', () => {
     assert.strictEqual(eventData.attacker, attacker);
     assert.strictEqual(eventData.defender, defender);
     assert.ok(eventData.details);
+});
+
 });

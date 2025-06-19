@@ -2,9 +2,9 @@ import { Mercenary, Item } from '../src/entities.js';
 import { EquipmentManager } from '../src/managers/equipmentManager.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { MeleeAI, RangedAI } from '../src/ai.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running AI Update Tests ---");
+describe('AI', () => {
 
 test('AI switches based on equipped weapon tags', () => {
     const em = new EventManager();
@@ -21,4 +21,6 @@ test('AI switches based on equipped weapon tags', () => {
 
     eqManager.equip(merc, sword, []);
     assert.ok(merc.ai instanceof MeleeAI);
+});
+
 });

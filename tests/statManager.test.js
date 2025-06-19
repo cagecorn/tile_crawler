@@ -1,7 +1,7 @@
 import { StatManager } from '../src/stats.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running StatManager Tests ---");
+describe('StatManager', () => {
 
 // 초기 스탯이 올바르게 설정되는가?
 test('초기 스탯 설정', () => {
@@ -42,4 +42,4 @@ test('레벨 업', () => {
     assert.strictEqual(stats.get('endurance'), 2);
 });
 
-console.log("--- StatManager Tests Finished ---");
+});

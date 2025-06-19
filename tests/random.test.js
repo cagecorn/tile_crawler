@@ -1,7 +1,7 @@
 import { rollOnTable, rollDiceNotation } from '../src/utils/random.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running Random (DiceBot) Tests ---");
+describe('Utility', () => {
 
 test('가중치 기반 롤링', () => {
     const testTable = [
@@ -19,4 +19,6 @@ test('주사위 표기법 굴리기', () => {
     Math.random = originalRandom;
     // 2d6 with roll 1 each -> 2 + 3 = 5
     assert.strictEqual(result, 5);
+});
+
 });
