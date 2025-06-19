@@ -1,7 +1,12 @@
 export class EquipmentManager {
     constructor(eventManager = null) {
         this.eventManager = eventManager;
+        this.tagManager = null;
         console.log('[EquipmentManager] Initialized');
+    }
+
+    setTagManager(tagManager) {
+        this.tagManager = tagManager;
     }
 
     equip(entity, item, inventory) {
@@ -20,6 +25,9 @@ export class EquipmentManager {
         }
         if (typeof entity.updateAI === 'function') {
             entity.updateAI();
+        }
+        if (this.tagManager && typeof this.tagManager.applyWeaponTags === 'function') {
+            this.tagManager.applyWeaponTags(entity);
         }
 
         if (this.eventManager) {

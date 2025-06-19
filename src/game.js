@@ -82,6 +82,10 @@ export class Game {
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
 
+        // 매니저 간 의존성 연결
+        this.skillManager.setEffectManager(this.effectManager);
+        this.equipmentManager.setTagManager(this.tagManager);
+
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
         this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);

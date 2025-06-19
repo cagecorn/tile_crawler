@@ -25,12 +25,10 @@ export class CombatCalculator {
             }
             finalDamage += details.fromSkill;
 
-            // 3. 태그에 의한 추가 데미지 (미래를 위한 구멍)
-            const weapon = attacker.equipment.weapon;
-            if (this.tagManager.hasTag(weapon, 'fire_stone') && this.tagManager.hasTag(skill, 'fire')) {
-                details.fromTags = 5; // 화염석 보너스 +5
-                finalDamage += details.fromTags;
-            }
+            // 3. 태그 조합에 따른 추가 데미지
+            const bonus = this.tagManager.calculateDamageBonus(attacker, skill);
+            details.fromTags = bonus;
+            finalDamage += bonus;
         }
 
         // 4. 방어력에 의한 피해 감소
