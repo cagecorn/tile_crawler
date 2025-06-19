@@ -23,6 +23,18 @@ export const JOBS = {
             attackPower: 15,
         }
     },
-    // 나중에 여기에 'healer' 등을 추가
+    healer: {
+        name: '힐러',
+        description: '아군을 치유하고 지원하는 전문가입니다.',
+        stats: {
+            strength: 3,
+            agility: 5,
+            endurance: 4,
+            focus: 8,
+            movement: 10,
+            hp: 28,
+            attackPower: 10,
+        }
+    },
 };
 
