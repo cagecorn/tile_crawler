@@ -105,14 +105,21 @@ export class HealerAI extends AIArchetype {
             self.mp >= healSkill.manaCost &&
             (self.skillCooldowns[healId] || 0) <= 0;
 
-        // 체력이 부족한 아군 목록
-        const candidates = allies.filter(a => a.hp < a.maxHp);
+        const mbti = self.properties?.mbti || '';
+        // 성향에 따라 치유 시점 결정
+        let healThreshold = 0.7;
+        if (mbti.includes('S')) healThreshold = 0.9;
+        else if (mbti.includes('N')) healThreshold = 0.5;
+
+        // 체력이 일정 비율 이하로 떨어진 아군만 후보로 선정
+        const candidates = allies.filter(
+            a => a.hp < a.maxHp && a.hp / a.maxHp <= healThreshold
+        );
         if (candidates.length === 0) {
             return { type: 'idle' };
         }
 
         // MBTI 성향에 따른 대상 선택
-        const mbti = self.properties?.mbti || '';
         let target = null;
         if (mbti.includes('I')) {
             target = candidates.find(c => c === self) || candidates[0];

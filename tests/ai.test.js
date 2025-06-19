@@ -84,4 +84,29 @@ test('HealerAI - idle when everyone healthy', () => {
     assert.strictEqual(action.type, 'idle');
 });
 
+test('HealerAI - sensing types heal earlier', () => {
+    const ai = new HealerAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ISFP' }
+    };
+    const ally = { x: 5, y: 0, hp: 17, maxHp: 20 };
+    const context = { player: {}, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'skill');
+    assert.strictEqual(action.target, ally);
+});
+
+test('HealerAI - intuitive types wait for lower hp', () => {
+    const ai = new HealerAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'INFP' }
+    };
+    const ally = { x: 5, y: 0, hp: 7, maxHp: 10 };
+    const context = { player: {}, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'idle');
+});
+
 });
