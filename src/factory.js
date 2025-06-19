@@ -63,6 +63,8 @@ export class CharacterFactory {
                     merc.skills.push(rangedSkill);
                     merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow'] };
                     merc.ai = new RangedAI();
+                } else if (config.jobId === 'warrior') {
+                    merc.skills.push(SKILLS.charge_attack.id);
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);

@@ -99,6 +99,19 @@ export class VFXManager {
         }
     }
 
+    createDashTrail(fromX, fromY, toX, toY) {
+        const particleCount = 10;
+        for (let i = 0; i < particleCount; i++) {
+            const progress = i / particleCount;
+            const x = fromX + (toX - fromX) * progress;
+            const y = fromY + (toY - fromY) * progress;
+            const particle = new Particle(x, y, 'rgba(255, 255, 255, 0.5)');
+            particle.lifespan = 20;
+            particle.gravity = 0;
+            this.particles.push(particle);
+        }
+    }
+
     /**
      * 시전 이펙트: 지정 유닛 주변에서 파티클이 모여드는 애니메이션을 생성합니다.
      * 시전 속도가 빠를수록 파티클이 더 빠르게 모여듭니다.

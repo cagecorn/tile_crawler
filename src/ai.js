@@ -40,6 +40,20 @@ export class MeleeAI extends AIArchetype {
                 Math.floor(nearestTarget.y / mapManager.tileSize),
                 mapManager
             );
+            const chargeSkill = Array.isArray(self.skills)
+                ? self.skills.map(id => SKILLS[id]).find(s => s && s.tags && s.tags.includes('charge'))
+                : null;
+
+            if (
+                chargeSkill &&
+                minDistance > self.attackRange &&
+                minDistance <= chargeSkill.chargeRange &&
+                self.mp >= chargeSkill.manaCost &&
+                (self.skillCooldowns[chargeSkill.id] || 0) <= 0
+            ) {
+                return { type: 'charge_attack', target: nearestTarget, skill: chargeSkill };
+            }
+
             if (hasLOS && minDistance < self.attackRange) {
                 // 사용할 수 있는 스킬이 있다면 스킬 사용
                 const skillId = self.skills && self.skills[0];

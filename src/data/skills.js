@@ -30,12 +30,12 @@ export const SKILLS = {
     charge_attack: {
         id: 'charge_attack',
         name: '돌진 공격',
-        description: '대시하여 적을 강하게 공격합니다.',
-        manaCost: 8,
-        cooldown: 180,
+        description: '적에게 빠르게 돌진하여 강력한 피해를 입힙니다.',
+        manaCost: 15,
+        cooldown: 300,
         damageMultiplier: 1.5,
-        dashRange: 8,
-        tags: ['skill', 'attack', 'melee', 'physical', 'dash', '근접', '물리'],
+        chargeRange: 192 * 4,
+        tags: ['skill', 'attack', 'melee', 'movement', 'charge'],
     },
     double_strike: {
         id: 'double_strike',

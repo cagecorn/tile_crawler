@@ -76,6 +76,24 @@ export class MetaAIManager {
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
+            case 'charge_attack': {
+                const { eventManager: ev } = context;
+                const { target, skill } = action;
+                ev.publish('vfx_request', {
+                    type: 'dash_trail',
+                    from: { x: entity.x, y: entity.y },
+                    to: { x: target.x, y: target.y }
+                });
+                const dx = target.x - entity.x;
+                const dy = target.y - entity.y;
+                const dist = Math.hypot(dx, dy) || 1;
+                entity.x = target.x - (dx / dist) * entity.width;
+                entity.y = target.y - (dy / dist) * entity.height;
+                ev.publish('entity_attack', { attacker: entity, defender: target, skill });
+                entity.mp -= skill.manaCost;
+                entity.skillCooldowns[skill.id] = skill.cooldown;
+                entity.attackCooldown = Math.max(1, Math.round(60 / (entity.attackSpeed || 1)));
+                break; }
             case 'move':
                 const { movementManager } = context;
                 if (movementManager) {
