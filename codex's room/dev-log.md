@@ -9,3 +9,8 @@
 - 힐러 직업과 `HealerAI` 구현.
 - 고유 스킬 `heal`을 사용해 아군을 회복하도록 테스트 추가.
 - `CharacterFactory`가 `jobId: 'healer'`를 처리하도록 수정.
+
+## 세션 3
+- MBTI 데이터 테이블 추가.
+- `CharacterFactory`가 무작위 MBTI를 부여하도록 수정.
+- 해당 기능을 검증하는 테스트 `mbti.test.js` 작성.
