@@ -221,7 +221,8 @@ export class Game {
                 });
                 monster.equipmentRenderManager = this.equipmentRenderManager;
                 // 몬스터 초기 장비 및 소지품 설정
-                monster.inventory = [];
+                monster.consumables = [];
+                monster.consumableCapacity = 4;
                 const itemCount = Math.floor(Math.random() * 3) + 1;
                 for (let j = 0; j < itemCount; j++) {
                     const id = rollOnTable(getMonsterLootTable());
@@ -240,7 +241,7 @@ export class Game {
                     ) {
                         this.equipmentManager.equip(monster, item, null);
                     } else {
-                        monster.inventory.push(item);
+                        monster.addConsumable(item);
                     }
                 }
                 monsters.push(monster);
@@ -431,7 +432,7 @@ export class Game {
 
             if (victim.unitType === 'monster') {
                 const dropPool = [];
-                if (victim.inventory) dropPool.push(...victim.inventory);
+                if (victim.consumables) dropPool.push(...victim.consumables);
                 if (victim.equipment) {
                     for (const slot in victim.equipment) {
                         const it = victim.equipment[slot];
@@ -620,7 +621,7 @@ export class Game {
                 this.uiManager.renderInventory(gameState);
             },
             onEquipItem: (entity, item) => {
-                const targetInventory = entity.isPlayer ? gameState.inventory : (entity.inventory || gameState.inventory);
+                const targetInventory = entity.isPlayer ? gameState.inventory : (entity.consumables || entity.inventory || gameState.inventory);
                 this.equipmentManager.equip(entity, item, targetInventory);
                 gameState.inventory = gameState.inventory.filter(i => i !== item);
                 this.uiManager.renderInventory(gameState);
