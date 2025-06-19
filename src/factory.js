@@ -116,6 +116,9 @@ export class ItemFactory {
         item.baseId = itemId;
         item.type = baseItem.type;
         item.tags = [...baseItem.tags];
+        if (baseItem.range) {
+            item.range = baseItem.range;
+        }
         if (baseItem.stats) {
             item.stats.add(baseItem.stats);
         }

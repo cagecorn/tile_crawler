@@ -45,10 +45,11 @@ export const ITEMS = {
 
     // 기본 소모품 및 화폐
     potion: {
-        name: 'potion',
+        name: '힐링 포션',
         type: 'consumable',
-        tags: ['consumable'],
+        tags: ['consumable', 'healing_item', '체력 회복 아이템'],
         imageKey: 'potion',
+        range: 192,
     },
     gold: {
         name: 'gold',

@@ -39,6 +39,24 @@ export class ProjectileManager {
         }
     }
 
+    throwItem(caster, target, item) {
+        const config = {
+            x: caster.x + caster.width / 2,
+            y: caster.y + caster.height / 2,
+            target,
+            caster,
+            damage: 0,
+            image: item.image,
+            width: item.width,
+            height: item.height,
+            blendMode: null,
+            enableGlow: false,
+            vfxManager: this.vfxManager,
+        };
+        const projectile = new Projectile(config);
+        this.projectiles.push(projectile);
+    }
+
     update() {
         this.projectiles.forEach((proj, index) => {
             const result = proj.update();

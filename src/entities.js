@@ -264,6 +264,7 @@ export class Item {
         this.quantity = 1;
         this.baseId = '';
         this.tags = [];
+        this.range = 0;
         const statsMap = new Map();
         statsMap.add = function(statObj) {
             for (const key in statObj) {
