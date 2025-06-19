@@ -1,18 +1,18 @@
-import { FileLogManager } from '../src/managers/fileLogManager.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import fs from 'fs';
+import { FileLogManager } from '../src/managers/fileLogManager.js';
+import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { describe, test, assert } from './helpers.js';
 
-const LOG_FILE = 'test-combat.log';
+const LOG_PATH = './tests/tmp-combat.log';
 
 describe('FileLogManager', () => {
     test('writes log messages to file', () => {
-        if (fs.existsSync(LOG_FILE)) fs.unlinkSync(LOG_FILE);
+        if (existsSync(LOG_PATH)) unlinkSync(LOG_PATH);
         const eventManager = new EventManager();
-        const fileLogger = new FileLogManager(eventManager, LOG_FILE);
-        eventManager.publish('log', { message: 'hello world' });
-        const content = fs.readFileSync(LOG_FILE, 'utf8');
-        assert.ok(content.includes('hello world'));
-        fs.unlinkSync(LOG_FILE);
+        new FileLogManager(eventManager, LOG_PATH);
+        eventManager.publish('log', { message: 'File log test' });
+        const content = readFileSync(LOG_PATH, 'utf-8').trim();
+        assert.strictEqual(content, 'File log test');
+        unlinkSync(LOG_PATH);
     });
 });
