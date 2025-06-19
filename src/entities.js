@@ -218,8 +218,25 @@ export class Monster extends Entity {
         super(config);
         this.isFriendly = false;
         // 나중에 몬스터 종류에 따라 'undead', 'beast' 등으로 설정 가능
-        this.unitType = 'monster'; 
+        this.unitType = 'monster';
         this.ai = new MeleeAI();
+        this.inventory = [];
+    }
+
+    render(ctx) {
+        super.render(ctx);
+        if (this.equipmentRenderManager) {
+            this.equipmentRenderManager.drawWeapon(ctx, this);
+        } else {
+            const weapon = this.equipment.weapon;
+            if (weapon && weapon.image) {
+                const drawX = this.x + this.width * 0.3;
+                const drawY = this.y + this.height * 0.3;
+                const drawW = this.width * 0.8;
+                const drawH = this.height * 0.8;
+                ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
+            }
+        }
     }
 }
 
