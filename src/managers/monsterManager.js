@@ -26,7 +26,7 @@ export class MonsterManager {
     }
 
     render(ctx) {
-        for (const monster of this.monsters) {
+        for (const monster of this.monsters.filter(m => !m.isDying)) {
             if (monster.render) monster.render(ctx);
         }
     }
