@@ -4,6 +4,7 @@ export class MercenaryManager {
         this.assets = assets;
         this.factory = factory;
         this.mercenaries = [];
+        this.equipmentRenderManager = null;
         console.log("[MercenaryManager] Initialized");
     }
 
@@ -19,7 +20,12 @@ export class MercenaryManager {
             jobId,
             image: this.assets.mercenary,
         });
-        if (merc) this.mercenaries.push(merc);
+        if (merc) {
+            if (this.equipmentRenderManager) {
+                merc.equipmentRenderManager = this.equipmentRenderManager;
+            }
+            this.mercenaries.push(merc);
+        }
         return merc;
     }
 

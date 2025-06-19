@@ -79,6 +79,8 @@ export class Game {
         this.effectManager = this.managers.EffectManager;
         this.projectileManager = this.managers.ProjectileManager;
         this.projectileManager.vfxManager = this.vfxManager;
+        this.equipmentRenderManager = this.managers.EquipmentRenderManager;
+        this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
@@ -110,6 +112,7 @@ export class Game {
             image: assets.player,
             baseStats: { strength: 5, agility: 5, endurance: 15, movement: 10 }
         });
+        player.equipmentRenderManager = this.equipmentRenderManager;
         this.gameState = {
             player,
             inventory: [],
