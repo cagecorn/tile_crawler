@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="top-menu-bar">
+    <div id="top-menu-bar" class="ui-frame">
         <button class="menu-btn" data-panel-id="inventory">인벤토리</button>
         <button class="menu-btn" data-panel-id="mercenary-panel">용병 부대</button>
     </div>
@@ -18,9 +18,9 @@
         <canvas id="vfx-canvas" class="game-layer"></canvas>
         <canvas id="weather-canvas" class="game-layer"></canvas>
     </div>
-    <canvas id="minimap-canvas"></canvas>
+    <canvas id="minimap-canvas" class="ui-frame"></canvas>
 
-    <div id="ui-panel">
+    <div id="ui-panel" class="ui-frame">
         <h2>플레이어 상태</h2>
         <div class="stats-content-box">
             <div id="player-stats-container">
@@ -109,15 +109,15 @@
             </div>
         </div>
     </div>
-    <div id="combat-log-panel">
+    <div id="combat-log-panel" class="ui-frame">
         <div id="combat-log-content"></div>
     </div>
 
-    <div id="system-log-panel">
+    <div id="system-log-panel" class="ui-frame">
         <div class="log-title">-- SYSTEM LOG --</div>
         <div id="system-log-content"></div>
     </div>
-    <div id="mercenary-detail-panel" class="modal-panel hidden">
+    <div id="mercenary-detail-panel" class="modal-panel ui-frame hidden">
         <button id="close-merc-detail-btn" class="close-btn">X</button>
         <h2 id="merc-detail-name">용병 이름</h2>
         <div class="stats-content-box">
@@ -143,14 +143,14 @@
         </div>
     </div>
 
-    <div id="equipment-target-panel" class="modal-panel hidden">
+    <div id="equipment-target-panel" class="modal-panel ui-frame hidden">
         <button id="close-equip-target-btn" class="close-btn">X</button>
         <h2>누구에게 장착하시겠습니까?</h2>
         <div id="equipment-target-list">
         </div>
     </div>
 
-    <div id="inventory-panel" class="modal-panel wide hidden">
+    <div id="inventory-panel" class="modal-panel wide ui-frame hidden">
         <button class="close-btn" data-panel-id="inventory">X</button>
         <h2>🎒 인벤토리</h2>
         <div class="inventory-container">
@@ -177,7 +177,7 @@
         </div>
     </div>
 
-    <div id="mercenary-panel" class="modal-panel wide hidden">
+    <div id="mercenary-panel" class="modal-panel wide ui-frame hidden">
         <button class="close-btn" data-panel-id="mercenary-panel">X</button>
         <h2>🗡️ 용병 부대</h2>
         <div id="mercenary-list"></div>
@@ -185,13 +185,13 @@
 
 
 
-    <div id="skill-bar">
+    <div id="skill-bar" class="ui-frame">
         <div class="skill-slot" data-slot-index="0"><span>1</span></div>
         <div class="skill-slot" data-slot-index="1"><span>2</span></div>
         <div class="skill-slot" data-slot-index="2"><span>3</span></div>
     </div>
 
-    <div id="tooltip" class="tooltip hidden"></div>
+    <div id="tooltip" class="tooltip ui-frame hidden"></div>
 
     <script type="module" src="main.js"></script>
 </body>
