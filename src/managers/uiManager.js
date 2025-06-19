@@ -582,12 +582,35 @@ export class UIManager {
 
     _getMBTITooltip(mbti) {
         const info = MBTI_INFO[mbti] || '';
-        return `<strong>${mbti}</strong><br>${info}`;
+        const map = {
+            E: '버프/회복을 아군에게 집중',
+            I: '버프/회복을 자신에게 사용',
+            S: '도구와 스킬을 즉시 사용',
+            N: '도구와 스킬 사용을 아껴 둠',
+            T: '약한 적을 우선 공격',
+            F: '아군과 같은 적을 공격',
+            P: '적을 보면 돌격',
+            J: '거리를 유지하며 전투'
+        };
+        const behavior = mbti
+            .split('')
+            .map(l => map[l])
+            .filter(Boolean)
+            .join(', ');
+        return `<strong>${mbti}</strong><br>${info}` +
+               (behavior ? `<br><em>AI 경향: ${behavior}</em>` : '');
     }
 
     _getFaithTooltip(faithId) {
         const data = FAITHS[faithId] || FAITHS.NONE;
-        return `<strong>${data.name}</strong><br>${data.description}`;
+        let html = `<strong>${data.name}</strong><br>${data.description}`;
+        if (data.statBonuses) {
+            const bonusText = Object.entries(data.statBonuses)
+                .map(([k, v]) => `${k} ${v > 0 ? '+' : ''}${v}`)
+                .join(', ');
+            if (bonusText) html += `<br><em>보너스: ${bonusText}</em>`;
+        }
+        return html;
     }
 
     _attachTooltip(element, html) {
