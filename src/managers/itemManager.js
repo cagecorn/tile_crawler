@@ -16,6 +16,14 @@ export class ItemManager {
         }
     }
 
+    update() {
+        for (const item of this.items) {
+            if (typeof item.update === 'function') {
+                item.update();
+            }
+        }
+    }
+
     render(ctx) {
         for (const item of this.items) {
             item.render(ctx);
