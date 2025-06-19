@@ -14,7 +14,7 @@ export const ITEMS = {
         damageDice: '1d6',
         tags: ['ranged', 'bow'],
         imageKey: 'bow',
-        stats: { attackPower: 2 },
+        stats: { attackPower: 2, attackRange: 384 },
     },
 
     // 방어구
