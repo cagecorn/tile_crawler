@@ -219,6 +219,30 @@ export class Game {
                     image: assets.monster,
                     baseStats: {}
                 });
+                monster.equipmentRenderManager = this.equipmentRenderManager;
+                // 몬스터 초기 장비 및 소지품 설정
+                monster.inventory = [];
+                const itemCount = Math.floor(Math.random() * 3) + 1;
+                for (let j = 0; j < itemCount; j++) {
+                    const id = rollOnTable(LOOT_DROP_TABLE);
+                    const item = this.itemFactory.create(
+                        id,
+                        monster.x,
+                        monster.y,
+                        this.mapManager.tileSize
+                    );
+                    if (!item) continue;
+                    if (
+                        item.tags.includes('weapon') ||
+                        item.type === 'weapon' ||
+                        item.tags.includes('armor') ||
+                        item.type === 'armor'
+                    ) {
+                        this.equipmentManager.equip(monster, item, null);
+                    } else {
+                        monster.inventory.push(item);
+                    }
+                }
                 monsters.push(monster);
             }
         }
@@ -404,6 +428,28 @@ export class Game {
             this.vfxManager.addDeathAnimation(victim, 'explode');
 
             eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.`, color: 'red' });
+
+            if (victim.unitType === 'monster') {
+                const dropPool = [];
+                if (victim.inventory) dropPool.push(...victim.inventory);
+                if (victim.equipment) {
+                    for (const slot in victim.equipment) {
+                        const it = victim.equipment[slot];
+                        if (it) dropPool.push(it);
+                    }
+                }
+                const dropCount = Math.min(dropPool.length, Math.floor(Math.random() * 6));
+                for (let i = 0; i < dropCount; i++) {
+                    const idx = Math.floor(Math.random() * dropPool.length);
+                    const item = dropPool.splice(idx, 1)[0];
+                    const startPos = { x: victim.x, y: victim.y };
+                    const endPos = this.findRandomEmptyAdjacentTile(victim.x, victim.y) || startPos;
+                    item.x = endPos.x;
+                    item.y = endPos.y;
+                    this.itemManager.addItem(item);
+                    this.vfxManager.addItemPopAnimation(item, startPos, endPos);
+                }
+            }
 
             if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
                 if (attacker.isPlayer) {
@@ -609,7 +655,18 @@ export class Game {
                 return; // 용병을 클릭했으면 더 이상 진행 안 함
             }
 
-            // 나중에 몬스터 클릭 시 정보창 띄우는 로직도 여기에 추가 가능
+            const clickedMonster = [...monsterManager.monsters].reverse().find(mon =>
+                worldX >= mon.x && worldX <= mon.x + mon.width &&
+                worldY >= mon.y && worldY <= mon.y + mon.height
+            );
+
+            if (clickedMonster) {
+                if (this.uiManager.showCharacterSheet) {
+                    this.uiManager.showCharacterSheet(clickedMonster);
+                    this.gameState.isPaused = true;
+                }
+                return;
+            }
         });
     }
 
