@@ -1,5 +1,6 @@
 import { SKILLS } from '../data/skills.js';
 import { MBTI_INFO } from '../data/mbti.js';
+import { FAITHS } from '../data/faiths.js';
 
 export class UIManager {
     constructor() {
@@ -148,6 +149,16 @@ export class UIManager {
         mbtiDiv.appendChild(mbtiSpan);
         this.mercStatsContainer.appendChild(mbtiDiv);
 
+        const faithDiv = document.createElement('div');
+        faithDiv.className = 'stat-line';
+        const faithSpan = document.createElement('span');
+        const fId = mercenary.properties.faith;
+        faithSpan.textContent = fId ? FAITHS[fId].name : FAITHS.NONE.name;
+        this._attachTooltip(faithSpan, this._getFaithTooltip(fId));
+        faithDiv.innerHTML = '신앙: ';
+        faithDiv.appendChild(faithSpan);
+        this.mercStatsContainer.appendChild(faithDiv);
+
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
@@ -277,16 +288,28 @@ export class UIManager {
                 page1.appendChild(aLine);
             }
 
-            if (entity.properties && entity.properties.mbti) {
-                const mLine = document.createElement('div');
-                mLine.className = 'stat-line';
-                const span = document.createElement('span');
-                span.textContent = entity.properties.mbti;
-                this._attachTooltip(span, this._getMBTITooltip(entity.properties.mbti));
-                mLine.innerHTML = 'MBTI: ';
-                mLine.appendChild(span);
-                page1.appendChild(mLine);
-            }
+        if (entity.properties && entity.properties.mbti) {
+            const mLine = document.createElement('div');
+            mLine.className = 'stat-line';
+            const span = document.createElement('span');
+            span.textContent = entity.properties.mbti;
+            this._attachTooltip(span, this._getMBTITooltip(entity.properties.mbti));
+            mLine.innerHTML = 'MBTI: ';
+            mLine.appendChild(span);
+            page1.appendChild(mLine);
+        }
+
+        if (entity.properties && entity.properties.faith) {
+            const fLine2 = document.createElement('div');
+            fLine2.className = 'stat-line';
+            const span2 = document.createElement('span');
+            const fId2 = entity.properties.faith;
+            span2.textContent = FAITHS[fId2].name;
+            this._attachTooltip(span2, this._getFaithTooltip(fId2));
+            fLine2.innerHTML = 'faith: ';
+            fLine2.appendChild(span2);
+            page1.appendChild(fLine2);
+        }
         }
     }
 
@@ -560,6 +583,11 @@ export class UIManager {
     _getMBTITooltip(mbti) {
         const info = MBTI_INFO[mbti] || '';
         return `<strong>${mbti}</strong><br>${info}`;
+    }
+
+    _getFaithTooltip(faithId) {
+        const data = FAITHS[faithId] || FAITHS.NONE;
+        return `<strong>${data.name}</strong><br>${data.description}`;
     }
 
     _attachTooltip(element, html) {

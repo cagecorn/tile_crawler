@@ -21,8 +21,11 @@ export class CharacterFactory {
 
         // 1. 모든 유닛의 공통 속성을 여기서 랜덤으로 결정
         const mbti = this._rollMBTI();
-        const faithId = this._rollRandomKey(FAITHS);
         const originId = this._rollRandomKey(ORIGINS);
+        let faithId = null;
+        if (type !== 'player') {
+            faithId = this._rollRandomKey(FAITHS);
+        }
         const traits = [this._rollRandomKey(TRAITS)];
         const stars = this._rollStars();
 
@@ -39,11 +42,14 @@ export class CharacterFactory {
         baseStats.stars = stars;
 
         // 3. 최종 설정 객체 생성
+        const properties = { mbti, origin: originId, traits };
+        if (faithId) properties.faith = faithId;
+
         const finalConfig = {
             ...config,
             x, y, tileSize, groupId,
             stats: baseStats,
-            properties: { mbti, faith: faithId, origin: originId, traits },
+            properties,
         };
 
         // 4. 타입에 맞는 캐릭터 생성 및 반환
