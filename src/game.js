@@ -15,6 +15,7 @@ import { MetaAIManager, STRATEGY } from './managers/ai-managers.js';
 import { SaveLoadManager } from './managers/saveLoadManager.js';
 import { LayerManager } from './managers/layerManager.js';
 import { PathfindingManager } from './managers/pathfindingManager.js';
+import { MovementManager } from './managers/movementManager.js';
 import { FogManager } from './managers/fogManager.js';
 import { NarrativeManager } from './managers/narrativeManager.js';
 import { TurnManager } from './managers/turnManager.js';
@@ -89,6 +90,7 @@ export class Game {
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
         this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);
+        this.movementManager = new MovementManager(this.mapManager);
         this.fogManager = new FogManager(this.mapManager.width, this.mapManager.height);
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
@@ -511,7 +513,7 @@ export class Game {
             this.itemManager.removeItem(itemToPick);
         }
         this.fogManager.update(player, mapManager);
-        const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager };
+        const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager, movementManager: this.movementManager };
         metaAIManager.update(context);
         this.projectileManager.update();
         this.vfxManager.update();

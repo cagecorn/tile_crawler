@@ -77,68 +77,9 @@ export class MetaAIManager {
                 }
                 break;
             case 'move':
-                const tileSize = context.mapManager.tileSize;
-                const startX = Math.floor(entity.x / tileSize);
-                const startY = Math.floor(entity.y / tileSize);
-                const endX = Math.floor(action.target.x / tileSize);
-                const endY = Math.floor(action.target.y / tileSize);
-
-                const allEntities = [
-                    context.player,
-                    ...context.monsterManager.monsters,
-                    ...context.mercenaryManager.mercenaries
-                ];
-                const isBlocked = (x, y) => {
-                    for (const e of allEntities) {
-                        if (e === entity) continue;
-                        const ex = Math.floor(e.x / tileSize);
-                        const ey = Math.floor(e.y / tileSize);
-                        if (ex === x && ey === y) {
-                            if (x === endX && y === endY) return false;
-                            return true;
-                        }
-                    }
-                    return false;
-                };
-
-                const path = context.pathfindingManager.findPath(startX, startY, endX, endY, isBlocked);
-                let targetX, targetY;
-                if (path.length > 0) {
-                    const next = path[0];
-                    targetX = next.x * tileSize;
-                    targetY = next.y * tileSize;
-                } else {
-                    targetX = action.target.x;
-                    targetY = action.target.y;
-                    if (context.mapManager.isWallAt(targetX, targetY, entity.width, entity.height)) {
-                        break; // 이동 불가한 목표
-                    }
-                }
-
-                const dx = targetX - entity.x;
-                const dy = targetY - entity.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= entity.speed) {
-                    if (!context.mapManager.isWallAt(targetX, targetY, entity.width, entity.height)) {
-                        entity.x = targetX;
-                        entity.y = targetY;
-                    }
-                } else {
-                    let moveX = (dx / distance) * entity.speed;
-                    let moveY = (dy / distance) * entity.speed;
-                    const newX = entity.x + moveX;
-                    const newY = entity.y + moveY;
-                    if (!context.mapManager.isWallAt(newX, newY, entity.width, entity.height)) {
-                        entity.x = newX;
-                        entity.y = newY;
-                    } else {
-                        // Slide along walls when diagonal movement is blocked
-                        if (!context.mapManager.isWallAt(newX, entity.y, entity.width, entity.height)) {
-                            entity.x = newX;
-                        } else if (!context.mapManager.isWallAt(entity.x, newY, entity.width, entity.height)) {
-                            entity.y = newY;
-                        }
-                    }
+                const { movementManager } = context;
+                if (movementManager) {
+                    movementManager.moveEntityTowards(entity, action.target);
                 }
                 break;
         }
