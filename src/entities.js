@@ -237,6 +237,7 @@ export class Projectile {
         this.y = config.y;
         this.target = config.target;
         this.speed = config.speed || 10;
+        this.acceleration = config.acceleration || 0;
         this.image = config.image;
         this.width = config.width || 32;
         this.height = config.height || 32;
@@ -257,6 +258,9 @@ export class Projectile {
                 this.y + this.height / 2
             );
         }
+
+        // 가속도 적용
+        this.speed += this.acceleration;
 
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
