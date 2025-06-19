@@ -44,6 +44,8 @@ export class UIManager {
         this._lastInventory = [];
         this._statUpCallback = null;
         this._isInitialized = false;
+        this.particleDecoratorManager = null;
+        this.vfxManager = null;
     }
 
     init(callbacks) {
@@ -416,6 +418,9 @@ export class UIManager {
             console.log(`포션을 사용했습니다! HP +5`);
             if (this.particleDecoratorManager) {
                 this.particleDecoratorManager.playHealingEffect(player);
+            }
+            if (this.vfxManager) {
+                this.vfxManager.addItemUseEffect(player, item.image);
             }
             if (item.quantity > 1) {
                 item.quantity -= 1;

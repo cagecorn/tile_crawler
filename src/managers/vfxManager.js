@@ -151,6 +151,28 @@ export class VFXManager {
     }
 
     /**
+     * 소모품 사용 시 해당 아이콘이 머리 위에 나타났다 사라지는 효과를 추가합니다.
+     * @param {object} entity - 아이템을 사용한 유닛
+     * @param {HTMLImageElement} image - 아이템 이미지
+     */
+    addItemUseEffect(entity, image) {
+        if (!image) return;
+        const effect = {
+            type: 'item_use',
+            image,
+            x: entity.x + entity.width / 2,
+            y: entity.y - entity.height * 0.5,
+            duration: 30,
+            life: 30,
+            startScale: 0.5,
+            endScale: 1.5,
+            scale: 0.5,
+            alpha: 1.0,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
      * 시전 이펙트: 지정 유닛 주변에서 파티클이 모여드는 애니메이션을 생성합니다.
      * 시전 속도가 빠를수록 파티클이 더 빠르게 모여듭니다.
      * 색상은 스킬 태그에 따라 달라집니다.
@@ -303,6 +325,17 @@ export class VFXManager {
                 continue;
             }
 
+            if (effect.type === 'item_use') {
+                effect.life--;
+                const progress = 1 - effect.life / effect.duration;
+                effect.scale = effect.startScale + (effect.endScale - effect.startScale) * progress;
+                effect.alpha = 1 - progress;
+                if (effect.life <= 0) {
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
 
             if (effect.type === 'glow') {
                 effect.alpha -= effect.decay;
@@ -364,6 +397,13 @@ export class VFXManager {
                 const currentY = startPos.y + (endPos.y - startPos.y) * progress;
                 const arc = Math.sin(progress * Math.PI) * popHeight;
                 ctx.drawImage(item.image, currentX, currentY - arc, item.width, item.height);
+            } else if (effect.type === 'item_use') {
+                const w = effect.image.width * effect.scale;
+                const h = effect.image.height * effect.scale;
+                ctx.save();
+                ctx.globalAlpha = effect.alpha;
+                ctx.drawImage(effect.image, effect.x - w / 2, effect.y - h / 2, w, h);
+                ctx.restore();
             } else if (effect.type === 'glow') {
                 const { x, y, radius } = effect;
                 const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
