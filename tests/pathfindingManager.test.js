@@ -55,3 +55,24 @@ test('동적 장애물 회피', () => {
         {x:2,y:0}
     ]);
 });
+
+test('탈출 경로 탐색', () => {
+    const mapManager = {
+        map: [
+            [1,1,1],
+            [1,0,0],
+            [1,1,1]
+        ],
+        width:3,
+        height:3,
+        tileSize:1,
+        tileTypes:{FLOOR:0,WALL:1},
+        isWallAt(x,y){
+            const tx=Math.floor(x/1); const ty=Math.floor(y/1);
+            return this.map[ty][tx]===this.tileTypes.WALL;
+        }
+    };
+    const pfManager = new PathfindingManager(mapManager);
+    const escape = pfManager.findEscapeRoute(1,1, () => false);
+    assert.deepStrictEqual(escape, {x:2,y:1});
+});

@@ -80,4 +80,40 @@ export class PathfindingManager {
 
         return bestPath;
     }
+
+    // 현재 위치에서 가장 가까운 탈출 지점을 찾는다.
+    findEscapeRoute(startX, startY, isBlocked = () => false) {
+        const { map, width, height, tileTypes } = this.mapManager;
+
+        const visited = new Set([`${startX},${startY}`]);
+        const queue = [{ x: startX, y: startY }];
+        const dirs = [
+            { x: 1, y: 0 }, { x: -1, y: 0 },
+            { x: 0, y: 1 }, { x: 0, y: -1 }
+        ];
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            for (const dir of dirs) {
+                const nx = current.x + dir.x;
+                const ny = current.y + dir.y;
+                const key = `${nx},${ny}`;
+
+                if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                if (visited.has(key)) continue;
+                if (map[ny][nx] === tileTypes.WALL) {
+                    visited.add(key);
+                    continue;
+                }
+                if (!isBlocked(nx, ny)) {
+                    return { x: nx, y: ny };
+                }
+                visited.add(key);
+                queue.push({ x: nx, y: ny });
+            }
+        }
+
+        return null;
+    }
 }
