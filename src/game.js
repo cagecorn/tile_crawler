@@ -76,7 +76,11 @@ export class Game {
 
         // --- 매니저 생성 부분 수정 ---
         this.managers = {};
-        for (const managerName in Managers) {
+        // VFXManager는 이벤트 매니저만 필요하므로 먼저 생성
+        this.managers.VFXManager = new Managers.VFXManager(this.eventManager);
+
+        const otherManagerNames = Object.keys(Managers).filter(name => name !== 'VFXManager');
+        for (const managerName of otherManagerNames) {
             this.managers[managerName] = new Managers[managerName](this.eventManager, assets, this.factory);
         }
 
@@ -366,7 +370,6 @@ export class Game {
             eventManager.publish('entity_damaged', { attacker: data.attacker, defender: data.defender, damage: data.damage });
             if (data.defender.hp <= 0) {
                 eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
-                eventManager.publish('entity_removed', { victimId: data.defender.id });
             }
         });
 
@@ -374,9 +377,13 @@ export class Game {
             this.vfxManager.flashEntity(data.defender);
         });
 
-        // 죽음 이벤트가 발생하면 경험치 이벤트를 발행
+        // 죽음 이벤트가 발생하면 경험치 획득 및 애니메이션을 시작
         eventManager.subscribe('entity_death', (data) => {
             const { attacker, victim } = data;
+
+            victim.isDying = true;
+            this.vfxManager.addDeathAnimation(victim, 'explode');
+
             eventManager.publish('log', { message: `${victim.constructor.name}가 쓰러졌습니다.`, color: 'red' });
 
             if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {

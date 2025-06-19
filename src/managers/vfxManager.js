@@ -1,10 +1,11 @@
 import { Particle } from '../particle.js';
 
 export class VFXManager {
-    constructor() {
+    constructor(eventManager = null) {
         this.effects = [];
         this.particles = [];
         this.emitters = [];
+        this.eventManager = eventManager;
         console.log("[VFXManager] Initialized");
     }
 
@@ -159,6 +160,32 @@ export class VFXManager {
     }
 
     /**
+     * 몬스터가 죽는 애니메이션을 추가한다.
+     * 애니메이션이 끝나면 entity_removed 이벤트를 발행한다.
+     * @param {object} entity - 사망한 엔티티
+     * @param {string} [type] - explode 또는 fade
+     */
+    addDeathAnimation(entity, type = 'explode') {
+        const effect = {
+            type: 'death_animation',
+            entity,
+            animationType: type,
+            duration: 30,
+            life: 30,
+        };
+
+        if (type === 'explode') {
+            this.addParticleBurst(
+                entity.x + entity.width / 2,
+                entity.y + entity.height / 2,
+                { color: 'white', count: 30, speed: 5 }
+            );
+        }
+
+        this.effects.push(effect);
+    }
+
+    /**
      * 지정한 이미터를 제거합니다.
      * @param {object} emitter
      */
@@ -230,6 +257,19 @@ export class VFXManager {
 
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
+
+            if (effect.type === 'death_animation') {
+                effect.life--;
+                if (effect.life <= 0) {
+                    if (this.eventManager) {
+                        this.eventManager.publish('entity_removed', { victimId: effect.entity.id });
+                    }
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
+
             if (effect.type === 'glow') {
                 effect.alpha -= effect.decay;
                 if (effect.alpha <= 0) {
@@ -265,7 +305,25 @@ export class VFXManager {
 
     render(ctx) {
         for (const effect of this.effects) {
-            if (effect.type === 'glow') {
+            if (effect.type === 'death_animation') {
+                const { entity, animationType, life, duration } = effect;
+                const progress = life / duration;
+
+                ctx.save();
+                if (animationType === 'explode') {
+                    if (progress > 0.66) {
+                        ctx.globalAlpha = (1 - progress) * 3;
+                        ctx.drawImage(entity.image, entity.x, entity.y, entity.width, entity.height);
+                        ctx.globalCompositeOperation = 'source-atop';
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                    }
+                } else if (animationType === 'fade') {
+                    ctx.globalAlpha = progress;
+                    ctx.drawImage(entity.image, entity.x, entity.y, entity.width, entity.height);
+                }
+                ctx.restore();
+            } else if (effect.type === 'glow') {
                 const { x, y, radius } = effect;
                 const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
                 gradient.addColorStop(0, effect.colorInner.replace('ALPHA', effect.alpha.toFixed(2)));

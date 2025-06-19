@@ -21,7 +21,7 @@ describe('Aquarium', () => {
         const monsterManager = new MonsterManager(0, new AquariumMapManager(), assets, eventManager, new CharacterFactory(assets));
         const itemManager = new ItemManager(0, monsterManager.mapManager, assets);
         const factory = new CharacterFactory(assets);
-        const vfx = new VFXManager();
+        const vfx = new VFXManager(eventManager);
         const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx);
         aquariumManager.addTestingFeature({ type:'monster', image:{} });
         const inspector = new AquariumInspector(aquariumManager);
@@ -34,7 +34,7 @@ describe('Aquarium', () => {
         const monsterManager = new MonsterManager(0, new AquariumMapManager(), assets, eventManager, new CharacterFactory(assets));
         const itemManager = new ItemManager(0, monsterManager.mapManager, assets);
         const factory = new CharacterFactory(assets);
-        const vfx = new VFXManager();
+        const vfx = new VFXManager(eventManager);
         const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx);
         aquariumManager.addTestingFeature({ type: 'bubble' });
         assert.strictEqual(vfx.emitters.length, 1);
