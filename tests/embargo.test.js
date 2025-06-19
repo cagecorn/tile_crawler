@@ -1,5 +1,5 @@
 import { MapManager } from '../src/map.js';
-import { CharacterFactory } from '../src/factory.js';
+import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
 import { PathfindingManager } from '../src/managers/pathfindingManager.js';
@@ -37,9 +37,14 @@ class AutoPlayerAI extends MeleeAI {
 }
 
 test('차지 어택과 포션 사용 시나리오', () => {
-    const assets = { player:{}, monster:{}, potion:{}, sword:{}, leather_armor:{} };
+    const assets = { player:{}, monster:{}, potion:{}, sword:{}, leather_armor:{}, 'violin-bow':{}, 'plate-armor':{} };
     const mapManager = new MapManager(1);
     const factory = new CharacterFactory(assets);
+    const itemFactory = new ItemFactory(assets);
+    const violinBow = itemFactory.create('violin_bow', 0, 0, mapManager.tileSize);
+    const plateArmor = itemFactory.create('plate_armor', 0, 0, mapManager.tileSize);
+    assert.ok(violinBow.tags.includes('song'), '바이올린 보우 태그 누락');
+    assert.ok(plateArmor.stats.get('maxHp') >= 10, '플레이트 아머 스탯 이상');
     const eventManager = new EventManager();
     const pathfindingManager = new PathfindingManager(mapManager);
     const aiManager = new MetaAIManager(eventManager);
