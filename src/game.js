@@ -54,6 +54,7 @@ export class Game {
         this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
         this.loader.loadImage('healing-effect', 'assets/images/healing-effect.png');
+        this.loader.loadImage('corpse', 'assets/images/corpse.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -408,6 +409,21 @@ export class Game {
                     eventManager.publish('exp_gained', { player: attacker, exp: sharedExp });
                     eventManager.publish('exp_gained', { player: gameState.player, exp: sharedExp });
                 }
+            }
+
+            // 몬스터 시체 생성
+            if (victim.unitType === 'monster' && assets.corpse) {
+                const corpse = new Item(
+                    victim.x,
+                    victim.y,
+                    this.mapManager.tileSize,
+                    'corpse',
+                    assets.corpse
+                );
+                corpse.bobbingSpeed = 0;
+                corpse.bobbingAmount = 0;
+                corpse.baseY = victim.y;
+                this.itemManager.addItem(corpse);
             }
         });
 
