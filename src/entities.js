@@ -237,6 +237,20 @@ export class Item {
         };
         this.stats = statsMap;
         this.sockets = [];
+
+        // Animation properties
+        this.baseY = y;
+        this.bobbingAngle = Math.random() * Math.PI * 2;
+        this.bobbingSpeed = 0.05;
+        this.bobbingAmount = 4;
+    }
+
+    update() {
+        this.bobbingAngle += this.bobbingSpeed;
+        if (this.bobbingAngle > Math.PI * 2) {
+            this.bobbingAngle -= Math.PI * 2;
+        }
+        this.y = this.baseY + Math.sin(this.bobbingAngle) * this.bobbingAmount;
     }
 
     render(ctx) {

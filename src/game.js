@@ -584,13 +584,14 @@ export class Game {
     }
 
     update = (deltaTime) => {
-        const { gameState, mercenaryManager, monsterManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager } = this;
+        const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager } = this;
         if (gameState.isPaused || gameState.isGameOver) return;
 
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
         turnManager.update(allEntities); // 턴 매니저 업데이트
+        itemManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
         const player = gameState.player;
         if (player.attackCooldown > 0) player.attackCooldown--;
