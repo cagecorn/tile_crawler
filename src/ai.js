@@ -10,6 +10,43 @@ class AIArchetype {
         // 기본적으로는 아무것도 하지 않음 (자식 클래스에서 재정의)
         return { type: 'idle' };
     }
+
+    // 플레이어 주변을 랜덤하게 배회하도록 목표 위치를 계산
+    _getWanderPosition(self, player, allies, mapManager) {
+        const reached = self.wanderTarget &&
+            Math.hypot(self.wanderTarget.x - self.x, self.wanderTarget.y - self.y) < self.tileSize * 0.3;
+        if (!self.wanderTarget || reached || self.wanderCooldown <= 0) {
+            const base = mapManager ? mapManager.tileSize : self.tileSize;
+            const angle = Math.random() * Math.PI * 2;
+            const dist = base * (1 + Math.random() * 1.5);
+            let x = player.x + Math.cos(angle) * dist;
+            let y = player.y + Math.sin(angle) * dist;
+
+            // 동료와 너무 가까우면 살짝 밀어내기
+            for (const ally of allies) {
+                if (ally === self) continue;
+                const dx = x - ally.x;
+                const dy = y - ally.y;
+                const d = Math.hypot(dx, dy);
+                if (d > 0 && d < base) {
+                    x += (dx / d) * base;
+                    y += (dy / d) * base;
+                }
+            }
+
+            if (mapManager && mapManager.isWallAt(x, y, self.width, self.height)) {
+                x = player.x;
+                y = player.y;
+            }
+
+            self.wanderTarget = { x, y };
+            self.wanderCooldown = 60 + Math.floor(Math.random() * 60);
+        } else {
+            self.wanderCooldown--;
+        }
+
+        return self.wanderTarget || player;
+    }
 }
 
 // --- 전사형 AI ---
@@ -85,11 +122,9 @@ export class MeleeAI extends AIArchetype {
             // 목표 지점을 향해 이동 (시야가 가려져 있어도 탐색)
             return { type: 'move', target: nearestTarget };
         } else if (self.isFriendly && !self.isPlayer) {
-            // 아군이고, 적이 없으면 플레이어를 따라다님
-            const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
-            // 플레이어와 일정 거리 이상 벌어지면 따라간다 (한 타일 이상)
-            if (playerDistance > self.tileSize) {
-                return { type: 'move', target: player };
+            const target = this._getWanderPosition(self, player, allies, mapManager);
+            if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                return { type: 'move', target };
             }
         }
         
@@ -124,9 +159,9 @@ export class HealerAI extends AIArchetype {
         );
         if (candidates.length === 0) {
             if (self.isFriendly && !self.isPlayer && player) {
-                const dist = Math.hypot(player.x - self.x, player.y - self.y);
-                if (dist > self.tileSize) {
-                    return { type: 'move', target: player };
+                const target = this._getWanderPosition(self, player, allies, mapManager);
+                if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                    return { type: 'move', target };
                 }
             }
             return { type: 'idle' };
@@ -188,9 +223,9 @@ export class RangedAI extends AIArchetype {
                 mapManager
             );
             if (!hasLOS && self.isFriendly && !self.isPlayer) {
-                const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
-                if (playerDistance > self.tileSize) {
-                    return { type: "move", target: player };
+                const target = this._getWanderPosition(self, player, allies, mapManager);
+                if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                    return { type: 'move', target };
                 }
             }
 
@@ -217,9 +252,9 @@ export class RangedAI extends AIArchetype {
 
             return { type: 'move', target: nearestTarget };
         } else if (self.isFriendly && !self.isPlayer) {
-            const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
-            if (playerDistance > self.tileSize) {
-                return { type: 'move', target: player };
+            const target = this._getWanderPosition(self, player, allies, mapManager);
+            if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                return { type: 'move', target };
             }
         }
 

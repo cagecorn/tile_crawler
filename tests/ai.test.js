@@ -32,9 +32,12 @@ test('MeleeAI - 플레이어 추적', () => {
     const self = { x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1, isFriendly: true, isPlayer: false };
     const player = { x: 10, y: 0 };
     const context = { player, allies: [], enemies: [], mapManager: mapStub };
+    const orig = Math.random;
+    Math.random = () => 0;
     const action = ai.decideAction(self, context);
+    Math.random = orig;
     assert.strictEqual(action.type, 'move');
-    assert.strictEqual(action.target, player);
+    assert.deepStrictEqual(action.target, { x: 11, y: 0 });
 });
 
 // RangedAI specific behavior
@@ -83,9 +86,12 @@ test('HealerAI - follows player when everyone healthy', () => {
     };
     const ally = { x: 5, y: 0, hp: 10, maxHp: 10 };
     const context = { player, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const orig = Math.random;
+    Math.random = () => 0;
     const action = ai.decideAction(self, context);
+    Math.random = orig;
     assert.strictEqual(action.type, 'move');
-    assert.strictEqual(action.target, player);
+    assert.deepStrictEqual(action.target, { x: 11, y: 0 });
 });
 
 test('HealerAI - sensing types heal earlier', () => {
@@ -111,9 +117,12 @@ test('HealerAI - intuitive types still follow player when no healing needed', ()
     };
     const ally = { x: 5, y: 0, hp: 7, maxHp: 10 };
     const context = { player, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const orig = Math.random;
+    Math.random = () => 0;
     const action = ai.decideAction(self, context);
+    Math.random = orig;
     assert.strictEqual(action.type, 'move');
-    assert.strictEqual(action.target, player);
+    assert.deepStrictEqual(action.target, { x: 9, y: 0 });
 });
 
 test('RangedAI - follows player when no line of sight to enemy', () => {
@@ -123,9 +132,12 @@ test('RangedAI - follows player when no line of sight to enemy', () => {
     const self = { x: 0, y: 0, visionRange: 100, attackRange: 20, speed: 5, tileSize: 1, isFriendly: true, isPlayer: false };
     const enemy = { x: 2, y: 0 };
     const context = { player, allies: [self], enemies: [enemy], mapManager: mapWithWall };
+    const orig = Math.random;
+    Math.random = () => 0;
     const action = ai.decideAction(self, context);
+    Math.random = orig;
     assert.strictEqual(action.type, 'move');
-    assert.strictEqual(action.target, player);
+    assert.deepStrictEqual(action.target, { x: 1, y: 2 });
 });
 
 });
