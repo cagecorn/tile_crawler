@@ -36,5 +36,19 @@ export const JOBS = {
             attackPower: 10,
         }
     },
+    wizard: {
+        name: '마법사',
+        description: '원소 마법으로 적을 제압하는 전문가입니다.',
+        stats: {
+            strength: 2,
+            agility: 4,
+            endurance: 3,
+            focus: 9,
+            intelligence: 8,
+            movement: 10,
+            hp: 24,
+            attackPower: 12,
+        }
+    },
 };
 

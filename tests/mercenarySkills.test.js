@@ -40,4 +40,14 @@ test('궁수 스킬 부여 - hawk_eye', () => {
     assert.strictEqual(merc.skills[0], SKILLS.hawk_eye.id);
 });
 
+test('마법사 스킬 부여 - fireball', () => {
+    const merc = createMerc('wizard', 0.1);
+    assert.strictEqual(merc.skills[0], SKILLS.fireball.id);
+});
+
+test('마법사 스킬 부여 - iceball', () => {
+    const merc = createMerc('wizard', 0.9);
+    assert.strictEqual(merc.skills[0], SKILLS.iceball.id);
+});
+
 });

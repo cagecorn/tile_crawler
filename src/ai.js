@@ -207,3 +207,8 @@ export class RangedAI extends AIArchetype {
         return { type: 'idle' };
     }
 }
+
+// --- 마법사형 AI (현재는 RangedAI와 동일하게 동작)
+export class WizardAI extends RangedAI {
+    // 추가적인 마법사 전용 로직이 들어갈 수 있습니다
+}
