@@ -138,6 +138,7 @@ export class Player extends Entity {
             }
         }
     }
+
 }
 
 export class Mercenary extends Entity {
@@ -146,7 +147,8 @@ export class Mercenary extends Entity {
         this.isFriendly = true;
         this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
-        this.inventory = [];
+        this.consumables = [];
+        this.consumableCapacity = 4;
 
         this.stuckCounter = 0;
         this.maxStuckCount = 5;
@@ -211,6 +213,13 @@ export class Mercenary extends Entity {
             this.stuckCounter = 0;
         }
     }
+
+    addConsumable(item) {
+        if (this.consumables.length >= this.consumableCapacity) return false;
+        item.quantity = 1;
+        this.consumables.push(item);
+        return true;
+    }
 }
 
 export class Monster extends Entity {
@@ -220,7 +229,8 @@ export class Monster extends Entity {
         // 나중에 몬스터 종류에 따라 'undead', 'beast' 등으로 설정 가능
         this.unitType = 'monster';
         this.ai = new MeleeAI();
-        this.inventory = [];
+        this.consumables = [];
+        this.consumableCapacity = 4;
     }
 
     render(ctx) {
@@ -237,6 +247,13 @@ export class Monster extends Entity {
                 ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
             }
         }
+    }
+
+    addConsumable(item) {
+        if (this.consumables.length >= this.consumableCapacity) return false;
+        item.quantity = 1;
+        this.consumables.push(item);
+        return true;
     }
 }
 

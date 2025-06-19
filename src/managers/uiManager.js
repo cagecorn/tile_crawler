@@ -154,7 +154,7 @@ export class UIManager {
 
         if (this.mercInventory) {
             this.mercInventory.innerHTML = '';
-            const inventory = mercenary.inventory || [];
+            const inventory = mercenary.consumables || mercenary.inventory || [];
             inventory.forEach(item => {
                 const slotDiv = document.createElement('div');
                 slotDiv.className = 'inventory-item-slot';
@@ -216,7 +216,7 @@ export class UIManager {
 
         if (this.sheetInventory) {
             this.sheetInventory.innerHTML = '';
-            const inventory = entity.inventory || [];
+            const inventory = entity.consumables || entity.inventory || [];
             inventory.forEach(item => {
                 const slotDiv = document.createElement('div');
                 slotDiv.className = 'inventory-item-slot';
