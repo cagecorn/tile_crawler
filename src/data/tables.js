@@ -7,8 +7,21 @@ export const MONSTER_SPAWN_TABLE = [
 ];
 
 // 아이템 드랍 확률 테이블 (미래를 위한 구멍)
+/**
+ * 기본 아이템 드랍 테이블입니다. monsterDeathWorkflow나 초기 장비 지급 시
+ * rollOnTable()과 함께 사용합니다. 몬스터 유형별로 세분화된 테이블을
+ * 만들고 싶다면 이 배열을 기반으로 커스텀 테이블을 반환하도록
+ * getMonsterLootTable()을 수정하세요.
+ */
 export const LOOT_DROP_TABLE = [
     { id: 'gold', weight: 70 },
     { id: 'potion', weight: 25 },
     { id: 'sword', weight: 5 },
 ];
+
+// 확장성을 위해 몬스터 타입을 매개변수로 받아 드랍 테이블을 반환하는 함수
+export function getMonsterLootTable(monsterType = '') {
+    // 현재는 모든 몬스터가 동일한 테이블을 사용하지만,
+    // 필요에 따라 switch문 등으로 monsterType에 따른 분기 가능
+    return LOOT_DROP_TABLE;
+}

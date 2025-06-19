@@ -27,6 +27,9 @@
 - 스킬과 아이템의 `tags` 배열이 비어 있지 않은지 확인합니다.
 새로운 데이터가 추가되면 이 파일에 검증 항목을 계속 추가하세요.
 
+드랍 테이블(`LOOT_DROP_TABLE`)은 `src/data/tables.js`에서 관리합니다. 몬스터별로
+다른 드랍 구성을 만들고 싶다면 `getMonsterLootTable` 함수를 수정하세요.
+
 ## 개발 방식
 이 프로젝트는 하루 단위의 "Content-First / Smoke-Test-Later" 흐름으로 개발됩니다.
 

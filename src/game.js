@@ -24,7 +24,7 @@ import { TurnManager } from './managers/turnManager.js';
 import { SKILLS } from './data/skills.js';
 import { Item } from './entities.js';
 import { rollOnTable } from './utils/random.js';
-import { LOOT_DROP_TABLE } from './data/tables.js';
+import { getMonsterLootTable } from './data/tables.js';
 
 export class Game {
     constructor() {
@@ -224,7 +224,7 @@ export class Game {
                 monster.inventory = [];
                 const itemCount = Math.floor(Math.random() * 3) + 1;
                 for (let j = 0; j < itemCount; j++) {
-                    const id = rollOnTable(LOOT_DROP_TABLE);
+                    const id = rollOnTable(getMonsterLootTable());
                     const item = this.itemFactory.create(
                         id,
                         monster.x,
@@ -494,7 +494,7 @@ export class Game {
         });
 
         eventManager.subscribe('drop_loot', (data) => {
-            const lootTable = LOOT_DROP_TABLE;
+            const lootTable = getMonsterLootTable(data.monsterType);
             const droppedId = rollOnTable(lootTable);
             if (!droppedId) return;
 
