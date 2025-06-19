@@ -15,6 +15,7 @@ export const SKILLS = {
         id: 'heal',
         name: '치유',
         description: '대상을 회복시켜 체력을 되찾게 합니다.',
+        healAmount: 10,
         manaCost: 10,
         cooldown: 90,
         tags: ['skill', 'support', 'healing', 'magic', '회복', '마법'],
