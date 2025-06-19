@@ -214,6 +214,29 @@ export class Game {
             };
         }
 
+        const healerBtn = document.getElementById('hire-healer');
+        if (healerBtn) {
+            healerBtn.onclick = () => {
+                if (this.gameState.gold >= 50) {
+                    this.gameState.gold -= 50;
+                    const newMerc = this.mercenaryManager.hireMercenary(
+                        'healer',
+                        this.gameState.player.x + this.mapManager.tileSize,
+                        this.gameState.player.y,
+                        this.mapManager.tileSize,
+                        'player_party'
+                    );
+
+                    if (newMerc) {
+                        this.playerGroup.addMember(newMerc);
+                        this.eventManager.publish('log', { message: `힐러 용병을 고용했습니다.` });
+                    }
+                } else {
+                    this.eventManager.publish('log', { message: `골드가 부족합니다.` });
+                }
+            };
+        }
+
         const saveBtn = document.getElementById('save-game-btn');
         if (saveBtn) {
             saveBtn.onclick = () => {
@@ -470,6 +493,7 @@ export class Game {
         if (gameState.isPaused || gameState.isGameOver) return;
 
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
+        gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
         turnManager.update(allEntities); // 턴 매니저 업데이트
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });

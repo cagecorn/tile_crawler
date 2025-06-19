@@ -21,6 +21,8 @@ export class StatManager {
             attackRange: config.attackRange || 192,
             castingSpeed: config.castingSpeed || 1,
             attackSpeed: config.attackSpeed || 1,
+            hpRegen: config.hpRegen || 0,
+            mpRegen: config.mpRegen || 0,
         };
         this._pointsAllocated = {
             strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0, castingSpeed: 0, attackSpeed: 0,
@@ -80,6 +82,8 @@ export class StatManager {
         final.attackPower = (final.attackPower || 0) + 1 + final.strength * 2;
         final.maxMp = 10 + final.focus * 10;
         final.movementSpeed = final.movement;
+        final.hpRegen = (final.hpRegen || 0) + final.endurance * 0.05;
+        final.mpRegen = (final.mpRegen || 0) + final.focus * 0.05;
 
         this.derivedStats = final;
     }
