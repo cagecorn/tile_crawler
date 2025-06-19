@@ -23,6 +23,8 @@ import { NarrativeManager } from './managers/narrativeManager.js';
 import { TurnManager } from './managers/turnManager.js';
 import { SKILLS } from './data/skills.js';
 import { Item } from './entities.js';
+import { rollOnTable } from './utils/random.js';
+import { LOOT_DROP_TABLE } from './data/tables.js';
 
 export class Game {
     constructor() {
@@ -79,10 +81,14 @@ export class Game {
 
         // --- 매니저 생성 부분 수정 ---
         this.managers = {};
-        // VFXManager는 이벤트 매니저만 필요하므로 먼저 생성
-        this.managers.VFXManager = new Managers.VFXManager(this.eventManager);
+        // ItemManager를 먼저 생성합니다.
+        this.itemManager = new Managers.ItemManager(this.eventManager, assets, this.factory);
+        this.managers.ItemManager = this.itemManager;
 
-        const otherManagerNames = Object.keys(Managers).filter(name => name !== 'VFXManager');
+        // VFXManager는 ItemManager와 EventManager가 모두 필요합니다.
+        this.managers.VFXManager = new Managers.VFXManager(this.eventManager, this.itemManager);
+
+        const otherManagerNames = Object.keys(Managers).filter(name => name !== 'VFXManager' && name !== 'ItemManager');
         for (const managerName of otherManagerNames) {
             this.managers[managerName] = new Managers[managerName](this.eventManager, assets, this.factory);
         }
@@ -442,7 +448,18 @@ export class Game {
         });
 
         eventManager.subscribe('drop_loot', (data) => {
-            console.log(`${data.position.x}, ${data.position.y} 위치에 아이템 드랍!`);
+            const lootTable = LOOT_DROP_TABLE;
+            const droppedId = rollOnTable(lootTable);
+            if (!droppedId) return;
+
+            const startPos = { x: data.position.x, y: data.position.y };
+            const endPos = this.findRandomEmptyAdjacentTile(startPos.x, startPos.y);
+            if (!endPos) return;
+
+            const item = this.itemFactory.create(droppedId, endPos.x, endPos.y, this.mapManager.tileSize);
+            if (!item) return;
+
+            this.vfxManager.addItemPopAnimation(item, startPos, endPos);
         });
 
         eventManager.subscribe('skill_used', (data) => {
@@ -757,6 +774,34 @@ export class Game {
             caster.y = y;
             this.eventManager.publish('log', { message: '🌀 이전 위치로 돌아왔습니다.' });
         }
+    }
+
+    /**
+     * 지정된 좌표 인근의 비어 있는 임의 타일을 찾는다.
+     * @param {number} centerX
+     * @param {number} centerY
+     * @returns {{x:number,y:number}|null}
+     */
+    findRandomEmptyAdjacentTile(centerX, centerY) {
+        const tileSize = this.mapManager.tileSize;
+        const baseX = Math.floor(centerX / tileSize);
+        const baseY = Math.floor(centerY / tileSize);
+        const dirs = [
+            { x: -1, y: -1 }, { x: 0, y: -1 }, { x: 1, y: -1 },
+            { x: -1, y: 0 },                   { x: 1, y: 0 },
+            { x: -1, y: 1 }, { x: 0, y: 1 }, { x: 1, y: 1 }
+        ];
+        dirs.sort(() => Math.random() - 0.5);
+        for (const d of dirs) {
+            const tileX = baseX + d.x;
+            const tileY = baseY + d.y;
+            const worldX = tileX * tileSize;
+            const worldY = tileY * tileSize;
+            if (!this.mapManager.isWallAt(worldX, worldY)) {
+                return { x: worldX, y: worldY };
+            }
+        }
+        return null;
     }
 
     handleStatUp = (stat) => {
