@@ -250,6 +250,9 @@ export class Projectile {
     constructor(config) {
         this.x = config.x;
         this.y = config.y;
+        // 처음 생성된 위치를 저장해 궤적을 그릴 때 사용한다
+        this.startX = config.x;
+        this.startY = config.y;
         this.target = config.target;
         this.speed = config.speed || 10;
         this.acceleration = config.acceleration || 0;
@@ -263,6 +266,7 @@ export class Projectile {
 
         this.vfxManager = config.vfxManager || null;
         this.enableGlow = config.enableGlow || false;
+        this.isDead = false;
     }
 
     update() {
@@ -282,6 +286,7 @@ export class Projectile {
         const distance = Math.hypot(dx, dy);
 
         if (distance < this.speed) {
+            this.isDead = true;
             return { collided: true, target: this.target };
         }
 

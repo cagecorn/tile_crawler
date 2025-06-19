@@ -9,6 +9,22 @@ export class VFXManager {
     }
 
     /**
+     * 화살이 날아갈 때 그 궤적을 선으로 그려주는 효과를 추가한다.
+     * @param {object} projectile Projectile instance
+     * @param {object} [options]
+     */
+    addArrowTrail(projectile, options = {}) {
+        const duration = options.duration || 60;
+        const effect = {
+            type: 'arrow_trail',
+            projectile,
+            duration,
+            life: duration,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
      * 간단한 빛나는 파티클을 추가합니다.
      * @param {number} x
      * @param {number} y
@@ -230,6 +246,11 @@ export class VFXManager {
                 if (effect.duration <= 0) {
                     this.effects.splice(i, 1);
                 }
+            } else if (effect.type === 'arrow_trail') {
+                effect.life--;
+                if (effect.life <= 0 || effect.projectile.isDead) {
+                    this.effects.splice(i, 1);
+                }
             }
         }
 
@@ -276,6 +297,17 @@ export class VFXManager {
                 ctx.globalCompositeOperation = 'source-atop';
                 ctx.fillStyle = effect.color;
                 ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                ctx.restore();
+            } else if (effect.type === 'arrow_trail') {
+                const p = effect.projectile;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(p.startX, p.startY);
+                ctx.lineTo(p.x + p.width / 2, p.y + p.height / 2);
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1.5;
+                ctx.globalAlpha = effect.life / effect.duration;
+                ctx.stroke();
                 ctx.restore();
             }
         }
