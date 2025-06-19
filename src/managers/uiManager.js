@@ -293,6 +293,12 @@ export class UIManager {
             const img = document.createElement('img');
             img.src = item.image.src;
             slotDiv.appendChild(img);
+            if (item.quantity > 1) {
+                const qty = document.createElement('span');
+                qty.className = 'item-qty';
+                qty.textContent = item.quantity;
+                slotDiv.appendChild(qty);
+            }
             this._attachTooltip(slotDiv, this._getItemTooltip(item));
             slotDiv.onclick = () => {
                 if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
@@ -340,6 +346,12 @@ export class UIManager {
                 const img = document.createElement('img');
                 img.src = item.image.src;
                 img.alt = item.name;
+                if (item.quantity > 1) {
+                    const qty = document.createElement('span');
+                    qty.className = 'item-qty';
+                    qty.textContent = item.quantity;
+                    slot.appendChild(qty);
+                }
                 this._attachTooltip(slot, this._getItemTooltip(item));
                 slot.onclick = () => {
                     if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
@@ -386,6 +398,7 @@ export class UIManager {
         if (current.length !== this._lastInventory.length) return true;
         for (let i = 0; i < current.length; i++) {
             if (current[i] !== this._lastInventory[i]) return true;
+            if (current[i].quantity !== this._lastInventory[i].quantity) return true;
         }
         return false;
     }
@@ -404,7 +417,11 @@ export class UIManager {
             if (this.particleDecoratorManager) {
                 this.particleDecoratorManager.playHealingEffect(player);
             }
-            gameState.inventory.splice(itemIndex, 1);
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+            } else {
+                gameState.inventory.splice(itemIndex, 1);
+            }
             this.updateUI(gameState);
         }
     }
