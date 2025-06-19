@@ -33,6 +33,12 @@ export class Game {
         this.loader.loadImage('player', 'assets/player.png');
         this.loader.loadImage('monster', 'assets/monster.png');
         this.loader.loadImage('epic_monster', 'assets/epic_monster.png');
+        // 병종별 용병 이미지를 로드한다
+        this.loader.loadImage('warrior', 'assets/images/warrior.png');
+        this.loader.loadImage('archer', 'assets/images/archer.png');
+        this.loader.loadImage('healer', 'assets/images/healer.png');
+        this.loader.loadImage('wizard', 'assets/images/wizard.png');
+        // 기존 호환성을 위해 기본 mercenary 키도 전사 이미지로 유지
         this.loader.loadImage('mercenary', 'assets/images/warrior.png');
         this.loader.loadImage('floor', 'assets/floor.png');
         this.loader.loadImage('wall', 'assets/wall.png');

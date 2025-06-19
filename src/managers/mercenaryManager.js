@@ -12,13 +12,14 @@ export class MercenaryManager {
         if (!this.factory || !this.assets) {
             return null;
         }
+        const imageKey = this.assets[jobId] ? jobId : 'mercenary';
         const merc = this.factory.create('mercenary', {
             x,
             y,
             tileSize,
             groupId,
             jobId,
-            image: this.assets.mercenary,
+            image: this.assets[imageKey],
         });
         if (merc) {
             if (this.equipmentRenderManager) {
