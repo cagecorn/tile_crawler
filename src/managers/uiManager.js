@@ -401,6 +401,9 @@ export class UIManager {
             const player = gameState.player;
             player.hp = Math.min(player.maxHp, player.hp + 5);
             console.log(`포션을 사용했습니다! HP +5`);
+            if (this.particleDecoratorManager) {
+                this.particleDecoratorManager.playHealingEffect(player);
+            }
             gameState.inventory.splice(itemIndex, 1);
             this.updateUI(gameState);
         }
