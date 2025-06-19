@@ -20,7 +20,10 @@ export class CharacterFactory {
         const { x, y, tileSize, groupId } = config;
 
         // 1. 모든 유닛의 공통 속성을 여기서 랜덤으로 결정
-        const mbti = this._rollMBTI();
+        let mbti = this._rollMBTI();
+        if (type === 'mercenary' && config.jobId === 'healer' && !mbti.includes('S')) {
+            mbti = 'ISFP';
+        }
         const originId = this._rollRandomKey(ORIGINS);
         let faithId = null;
         if (type !== 'player') {
