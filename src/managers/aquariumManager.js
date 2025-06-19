@@ -1,7 +1,8 @@
 // src/managers/aquariumManager.js
 // Manages patches and features placed on the Aquarium map
+import { TRAITS } from '../data/traits.js';
 export class AquariumManager {
-    constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null) {
+    constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null, traitManager = null) {
         this.eventManager = eventManager;
         this.monsterManager = monsterManager;
         this.itemManager = itemManager;
@@ -9,6 +10,7 @@ export class AquariumManager {
         this.charFactory = charFactory;
         this.itemFactory = itemFactory;
         this.vfxManager = vfxManager;
+        this.traitManager = traitManager;
         this.features = [];
     }
 
@@ -25,6 +27,9 @@ export class AquariumManager {
                     image: feature.image,
                     baseStats: feature.baseStats || {}
                 });
+                if (this.traitManager) {
+                    this.traitManager.applyTraits(monster, TRAITS);
+                }
                 this.monsterManager.monsters.push(monster);
             }
         } else if (feature.type === 'item') {
