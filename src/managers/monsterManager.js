@@ -1,9 +1,12 @@
+import { TRAITS } from '../data/traits.js';
+
 export class MonsterManager {
     constructor(eventManager = null, assets = null, factory = null) {
         this.eventManager = eventManager;
         this.assets = assets;
         this.factory = factory;
         this.monsters = [];
+        this.traitManager = null;
         console.log("[MonsterManager] Initialized");
 
         if (this.eventManager) {
@@ -11,6 +14,10 @@ export class MonsterManager {
                 this.monsters = this.monsters.filter(m => m.id !== data.victimId);
             });
         }
+    }
+
+    setTraitManager(traitManager) {
+        this.traitManager = traitManager;
     }
 
     getMonsterAt(x, y) {

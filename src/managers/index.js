@@ -16,6 +16,7 @@ import { MotionManager } from './motionManager.js';
 import { MovementManager } from './movementManager.js';
 import { EquipmentRenderManager } from './equipmentRenderManager.js';
 import { ParticleDecoratorManager } from './particleDecoratorManager.js';
+import { TraitManager } from './traitManager.js';
 // 파일 기반 로거는 Node 환경 전용이라 기본 묶음에서 제외한다
 // import { FileLogManager } from './fileLogManager.js';
 // ... (나중에 다른 매니저가 생기면 여기에 추가)
@@ -36,4 +37,5 @@ export {
     MovementManager,
     EquipmentRenderManager,
     ParticleDecoratorManager,
+    TraitManager,
 };

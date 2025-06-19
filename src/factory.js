@@ -26,7 +26,7 @@ export class CharacterFactory {
         if (type !== 'player') {
             faithId = this._rollRandomKey(FAITHS);
         }
-        const traits = [this._rollRandomKey(TRAITS)];
+        const traits = this._rollMultipleRandomKeys(TRAITS, 2);
         const stars = this._rollStars();
 
         // 2. 기본 스탯 설정 (직업, 몬스터 종류, 출신 보너스 등)
@@ -97,7 +97,20 @@ export class CharacterFactory {
         const idx = Math.floor(Math.random() * MBTI_TYPES.length);
         return MBTI_TYPES[idx];
     }
-    _rollRandomKey(obj) { const keys = Object.keys(obj); return keys[Math.floor(Math.random() * keys.length)]; }
+    _rollRandomKey(obj) {
+        const keys = Object.keys(obj);
+        return keys[Math.floor(Math.random() * keys.length)];
+    }
+
+    _rollMultipleRandomKeys(obj, count) {
+        const keys = Object.keys(obj);
+        const result = [];
+        while (result.length < count && keys.length) {
+            const idx = Math.floor(Math.random() * keys.length);
+            result.push(keys.splice(idx, 1)[0]);
+        }
+        return result;
+    }
     _rollStars() {
         // ... (별 갯수 랜덤 배분 로직) ...
         return { strength: 1, agility: 1, endurance: 1, focus: 1, intelligence: 1 };

@@ -111,6 +111,9 @@ export class Game {
         );
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
+        this.traitManager = this.managers.TraitManager;
+        this.mercenaryManager.setTraitManager(this.traitManager);
+        this.monsterManager.setTraitManager(this.traitManager);
 
         // 매니저 간 의존성 연결
         this.skillManager.setEffectManager(this.effectManager);
@@ -136,7 +139,8 @@ export class Game {
             this.mapManager,
             this.factory,
             this.itemFactory,
-            this.vfxManager
+            this.vfxManager,
+            this.traitManager
         );
         this.aquariumInspector = new AquariumInspector(this.aquariumManager);
 

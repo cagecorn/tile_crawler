@@ -1,3 +1,5 @@
+import { TRAITS } from '../data/traits.js';
+
 export class MercenaryManager {
     constructor(eventManager = null, assets = null, factory = null) {
         this.eventManager = eventManager;
@@ -5,7 +7,12 @@ export class MercenaryManager {
         this.factory = factory;
         this.mercenaries = [];
         this.equipmentRenderManager = null;
+        this.traitManager = null;
         console.log("[MercenaryManager] Initialized");
+    }
+
+    setTraitManager(traitManager) {
+        this.traitManager = traitManager;
     }
 
     hireMercenary(jobId, x, y, tileSize, groupId) {
@@ -24,6 +31,9 @@ export class MercenaryManager {
         if (merc) {
             if (this.equipmentRenderManager) {
                 merc.equipmentRenderManager = this.equipmentRenderManager;
+            }
+            if (this.traitManager) {
+                this.traitManager.applyTraits(merc, TRAITS);
             }
             this.mercenaries.push(merc);
         }
