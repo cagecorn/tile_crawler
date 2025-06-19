@@ -27,7 +27,15 @@ export class MonsterManager {
             if (monsterType === 'epic_monster') {
                 size = { w: 2, h: 2 };
                 image = this.assets.epic_monster;
-                config = { baseStats: {} };
+                config = { baseStats: {
+                    sizeInTiles_w: 2,
+                    sizeInTiles_h: 2,
+                    strength: 5,
+                    agility: 4,
+                    endurance: 20,
+                    movement: 6,
+                    expValue: 100,
+                } };
             } else {
                 size = { w: 1, h: 1 };
                 image = this.assets.monster;

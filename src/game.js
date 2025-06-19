@@ -158,6 +158,20 @@ export class Game {
                 baseStats: { }
             });
         }
+        // Add a single epic monster to highlight new boss-level enemies
+        this.aquariumManager.addTestingFeature({
+            type: 'monster',
+            image: assets.epic_monster,
+            baseStats: {
+                sizeInTiles_w: 2,
+                sizeInTiles_h: 2,
+                strength: 5,
+                agility: 4,
+                endurance: 20,
+                movement: 6,
+                expValue: 100
+            }
+        });
         this.aquariumInspector.run();
 
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
