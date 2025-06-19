@@ -28,3 +28,7 @@
 ## 세션 6
 - `HealerAI`가 MBTI 성향에 따라 치유 시점을 다르게 판단하도록 개선.
 - `ai.test.js`에 감각형/직관형 행동 테스트 두 가지를 추가.
+
+## 세션 7
+- `PathfindingManager.findPath`가 시작과 끝이 같을 때 바로 빈 배열을 반환하도록 수정.
+- `pathfindingManager.test.js`에 해당 케이스 테스트 추가.

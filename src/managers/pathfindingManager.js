@@ -56,6 +56,10 @@ export class PathfindingManager {
 
     // 타겟 주변의 이동 가능한 위치까지 경로를 찾는다.
     findPath(startX, startY, endX, endY, isBlocked = () => false) {
+        if (startX === endX && startY === endY) {
+            return [];
+        }
+
         console.log(`Pathfinding from (${startX},${startY}) to (${endX},${endY})`);
 
         const basePath = this._bfs(startX, startY, endX, endY, isBlocked);
