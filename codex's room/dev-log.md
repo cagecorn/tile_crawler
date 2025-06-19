@@ -37,3 +37,8 @@
 - 수족관 맵에서 환경 효과를 테스트하기 위해 `bubble` 피처 타입을 추가.
 - `AquariumManager`가 `bubble` 타입을 처리하여 VFX 이미터를 배치하도록 수정.
 - `aquarium.test.js`에 거품 이미터 생성 여부 테스트 추가.
+
+## 세션 9
+- ParasiteManager에 중복 기생체 결합 기능 구현.
+- Item 클래스에 rank 속성 추가 및 저장 상태 갱신.
+- 기생체 결합 로직 테스트 추가.

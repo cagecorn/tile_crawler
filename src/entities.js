@@ -281,6 +281,7 @@ export class Item {
         this.baseId = '';
         this.tags = [];
         this.range = 0;
+        this.rank = 1;
         const statsMap = new Map();
         statsMap.add = function(statObj) {
             for (const key in statObj) {
@@ -315,6 +316,7 @@ export class Item {
         return {
             name: this.name,
             quantity: this.quantity,
+            rank: this.rank,
             x: this.x,
             y: this.y,
         };
