@@ -69,6 +69,8 @@ Click the buttons in the *Hire Mercenary* panel to recruit warriors, archers, he
 Spend collected gold in the shop to purchase items. Bought gear is placed in your inventory and can boost your stats when equipped. All skills are unlocked from the start and can be assigned to the **Skill1** and **Skill2** slots.
 When defining skills, include a numeric `cooldown` property. Passive or always-available skills should set it to `0`.
 
+The newly added **Teleport** skill lets you mark your current position and return to it later. Use it once to save your location, again to warp back and a third time to return to where you warped from.
+
 ### Mercenary Skills
 
 Each mercenary receives one random skill upon hiring. Using that skill costs the

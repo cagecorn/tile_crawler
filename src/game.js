@@ -404,6 +404,10 @@ export class Game {
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
             this.vfxManager.castEffect(caster, skill);
 
+            if (skill.teleport) {
+                this.handleTeleportSkill(caster);
+            }
+
             if (skill.tags.includes('attack')) {
                 const range = skill.range || Infinity;
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
@@ -661,6 +665,24 @@ export class Game {
             player.mp = player.maxMp;
             this.gameState.statPoints += 5;
             this.eventManager.publish('level_up', { player: player, level: stats.get('level') });
+        }
+    }
+
+    handleTeleportSkill(caster) {
+        if (!caster.teleportSavedPos) {
+            caster.teleportSavedPos = { x: caster.x, y: caster.y };
+            this.eventManager.publish('log', { message: '🌀 위치를 저장했습니다.' });
+        } else if (!caster.teleportReturnPos) {
+            caster.teleportReturnPos = { x: caster.x, y: caster.y };
+            caster.x = caster.teleportSavedPos.x;
+            caster.y = caster.teleportSavedPos.y;
+            this.eventManager.publish('log', { message: '🌀 저장된 위치로 이동했습니다.' });
+        } else {
+            const { x, y } = caster.teleportReturnPos;
+            caster.teleportReturnPos = null;
+            caster.x = x;
+            caster.y = y;
+            this.eventManager.publish('log', { message: '🌀 이전 위치로 돌아왔습니다.' });
         }
     }
 
