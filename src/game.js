@@ -261,6 +261,29 @@ export class Game {
             };
         }
 
+        const wizardBtn = document.getElementById('hire-wizard');
+        if (wizardBtn) {
+            wizardBtn.onclick = () => {
+                if (this.gameState.gold >= 50) {
+                    this.gameState.gold -= 50;
+                    const newMerc = this.mercenaryManager.hireMercenary(
+                        'wizard',
+                        this.gameState.player.x + this.mapManager.tileSize,
+                        this.gameState.player.y,
+                        this.mapManager.tileSize,
+                        'player_party'
+                    );
+
+                    if (newMerc) {
+                        this.playerGroup.addMember(newMerc);
+                        this.eventManager.publish('log', { message: `마법사 용병을 고용했습니다.` });
+                    }
+                } else {
+                    this.eventManager.publish('log', { message: `골드가 부족합니다.` });
+                }
+            };
+        }
+
         const saveBtn = document.getElementById('save-game-btn');
         if (saveBtn) {
             saveBtn.onclick = () => {
