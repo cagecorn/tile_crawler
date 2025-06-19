@@ -54,7 +54,8 @@ class Entity {
         if (!this.ai) return;
 
         const weapon = this.equipment.weapon;
-        if (weapon && weapon.tags.includes('ranged')) {
+        const tags = Array.isArray(weapon?.tags) ? weapon.tags : [];
+        if (tags.includes('ranged')) {
             this.ai = new RangedAI();
         } else {
             this.ai = new MeleeAI();
