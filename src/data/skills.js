@@ -243,4 +243,13 @@ export const SKILLS = {
         tags: ['skill', 'debuff', 'resist_down', 'enemy', '디버프'],
         effects: { target: ['resist_down'] },
     },
+    teleport: {
+        id: 'teleport',
+        name: '텔레포트',
+        description: '위치를 저장하고 다시 그 위치로 순간 이동합니다.',
+        manaCost: 2,
+        cooldown: 60,
+        tags: ['skill', 'utility', 'teleport'],
+        teleport: true,
+    },
 };

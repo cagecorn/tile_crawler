@@ -35,6 +35,10 @@ class Entity {
             accessory1: null,
             accessory2: null,
         };
+
+        // 텔레포트 스킬 사용을 위한 위치 저장용 프로퍼티
+        this.teleportSavedPos = null;
+        this.teleportReturnPos = null;
     }
 
     get speed() { return this.stats.get('movementSpeed'); }
