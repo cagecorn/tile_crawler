@@ -67,4 +67,20 @@ export const ITEMS = {
         imageKey: 'sword',
         stats: { attackPower: 2 },
     },
+
+    // Parasite samples
+    parasite_leech: {
+        name: 'Leech',
+        type: 'parasite',
+        tags: ['parasite'],
+        imageKey: 'leech',
+        stats: { endurance: 1 },
+    },
+    parasite_worm: {
+        name: 'Mind Worm',
+        type: 'parasite',
+        tags: ['parasite'],
+        imageKey: 'worm',
+        stats: { intelligence: 1 },
+    },
 };

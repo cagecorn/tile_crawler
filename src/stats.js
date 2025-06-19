@@ -102,7 +102,11 @@ export class StatManager {
     }
 
     addExp(amount) {
-        this._baseStats.exp += amount;
+        let finalAmount = amount;
+        if (this.entity?.consumables?.some(i => i.type === 'parasite' || i.tags?.includes('parasite'))) {
+            finalAmount = Math.floor(amount * 0.8);
+        }
+        this._baseStats.exp += finalAmount;
         this.recalculate();
     }
 

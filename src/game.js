@@ -114,6 +114,7 @@ export class Game {
         this.traitManager = this.managers.TraitManager;
         this.mercenaryManager.setTraitManager(this.traitManager);
         this.monsterManager.setTraitManager(this.traitManager);
+        this.parasiteManager = this.managers.ParasiteManager;
 
         // 매니저 간 의존성 연결
         this.skillManager.setEffectManager(this.effectManager);
@@ -271,6 +272,16 @@ export class Game {
                     } else {
                         monster.addConsumable(item);
                     }
+                }
+                if (Math.random() < 0.15) {
+                    const pid = Math.random() < 0.5 ? 'parasite_leech' : 'parasite_worm';
+                    const pItem = this.itemFactory.create(
+                        pid,
+                        monster.x,
+                        monster.y,
+                        this.mapManager.tileSize
+                    );
+                    if (pItem) this.parasiteManager.equip(monster, pItem);
                 }
                 if (Math.random() < 0.3) {
                     const bow = this.itemFactory.create(
@@ -734,7 +745,7 @@ export class Game {
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
-        turnManager.update(allEntities, { eventManager, player: gameState.player }); // 턴 매니저 업데이트
+        turnManager.update(allEntities, { eventManager, player: gameState.player, parasiteManager: this.parasiteManager }); // 턴 매니저 업데이트
         itemManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
         const player = gameState.player;
