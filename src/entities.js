@@ -151,6 +151,10 @@ export class Mercenary extends Entity {
         this.stuckCounter = 0;
         this.maxStuckCount = 5;
         this.lastPosition = { x: this.x, y: this.y };
+
+        // 플레이어 주변을 배회하기 위한 프로퍼티
+        this.wanderCooldown = 0;
+        this.wanderTarget = null;
     }
 
     render(ctx) {
