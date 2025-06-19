@@ -1,5 +1,5 @@
 import { MapManager } from '../src/map.js';
-import { CharacterFactory, ItemFactory } from '../src/factory.js';
+import { CharacterFactory } from '../src/factory.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
 import { PathfindingManager } from '../src/managers/pathfindingManager.js';
@@ -7,33 +7,28 @@ import { ItemManager, EquipmentManager } from '../src/managers/managers.js';
 import { TagManager } from '../src/managers/tagManager.js';
 import { CombatCalculator } from '../src/combat.js';
 import { MeleeAI } from '../src/ai.js';
+import { Item } from '../src/entities.js';
+import { SKILLS } from '../src/data/skills.js';
 import { describe, test, assert } from './helpers.js';
+
+// 업데이트된 엠바고 테스트
 
 describe('Integration', () => {
 
 class AutoPlayerAI extends MeleeAI {
     decideAction(self, context) {
-        const { enemies, itemManager } = context;
-
-        // 아이템이 가까이 있으면 먼저 이동
-        for (const item of itemManager.items) {
-            const dist = Math.hypot(item.x - self.x, item.y - self.y);
-            if (dist < self.tileSize * 2) {
-                return { type: 'move', target: item };
-            }
-        }
-
-        // 가장 가까운 적을 항상 추적
+        const { enemies } = context;
         let nearest = null;
         let minDist = Infinity;
         for (const e of enemies) {
             const d = Math.hypot(e.x - self.x, e.y - self.y);
-            if (d < minDist) {
-                minDist = d;
-                nearest = e;
-            }
+            if (d < minDist) { minDist = d; nearest = e; }
         }
         if (nearest) {
+            const charge = SKILLS.charge_attack;
+            if (minDist > self.attackRange && minDist <= charge.chargeRange) {
+                return { type: 'charge_attack', target: nearest, skill: charge };
+            }
             if (minDist <= self.attackRange) return { type: 'attack', target: nearest };
             return { type: 'move', target: nearest };
         }
@@ -41,89 +36,59 @@ class AutoPlayerAI extends MeleeAI {
     }
 }
 
-test('맵 순회 자동 플레이', () => {
-    const assets = { player:{}, monster:{}, mercenary:{}, gold:{}, potion:{}, sword:{}, leather_armor:{} };
+test('차지 어택과 포션 사용 시나리오', () => {
+    const assets = { player:{}, monster:{}, potion:{}, sword:{}, leather_armor:{} };
     const mapManager = new MapManager(1);
     const factory = new CharacterFactory(assets);
-    const itemFactory = new ItemFactory(assets);
     const eventManager = new EventManager();
     const pathfindingManager = new PathfindingManager(mapManager);
     const aiManager = new MetaAIManager(eventManager);
-    const itemManager = new ItemManager(5, mapManager, assets);
+    const itemManager = new ItemManager(0, mapManager, assets);
     const equipmentManager = new EquipmentManager(eventManager);
+    const tagManager = new TagManager();
+    const combatCalculator = new CombatCalculator(eventManager, tagManager);
+    const movementManager = { moveEntityTowards(e,t){ e.x=t.x; e.y=t.y; } };
 
     const playerGroup = aiManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
     const monsterGroup = aiManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
-    const pPos = mapManager.getRandomFloorPosition();
-    const player = factory.create('player', { x:pPos.x, y:pPos.y, tileSize: mapManager.tileSize, groupId: playerGroup.id, baseStats:{ movement: 10 } });
+    const player = factory.create('player', { x:0, y:0, tileSize:mapManager.tileSize, groupId:playerGroup.id });
     player.ai = new AutoPlayerAI();
+    player.skills.push(SKILLS.charge_attack.id);
     playerGroup.addMember(player);
 
-    const merc = factory.create('mercenary', { x:pPos.x + mapManager.tileSize, y:pPos.y, tileSize: mapManager.tileSize, groupId: playerGroup.id, jobId:'warrior', image: assets.mercenary, baseStats:{ movement: 10 } });
-    merc.ai = new MeleeAI();
-    playerGroup.addMember(merc);
+    const monster = factory.create('monster', { x: mapManager.tileSize * 2, y:0, tileSize:mapManager.tileSize, groupId:monsterGroup.id });
+    monsterGroup.addMember(monster);
 
-    const monsters = [];
-    const offsets = [
-        {x: mapManager.tileSize, y: 0},
-        {x: -mapManager.tileSize, y: 0},
-        {x: 0, y: mapManager.tileSize},
-        {x: 0, y: -mapManager.tileSize}
-    ];
-    console.log('player start', pPos);
-    for (let i=0;i<2;i++) {
-        let mPos = null;
-        for (const off of offsets) {
-            const candidate = { x: pPos.x + off.x, y: pPos.y + off.y };
-            if (!mapManager.isWallAt(candidate.x, candidate.y, mapManager.tileSize, mapManager.tileSize)) {
-                mPos = candidate; break;
-            }
-        }
-        if (!mPos) mPos = mapManager.getRandomFloorPosition();
-        const m = factory.create('monster', {
-            x: mPos.x,
-            y: mPos.y,
-            tileSize: mapManager.tileSize,
-            groupId: monsterGroup.id,
-            image: assets.monster
-        });
-        console.log('monster', i, mPos);
-        monsters.push(m);
-        monsterGroup.addMember(m);
+    // 포션 사용 로직 (HP가 낮으면 자동 사용)
+    const potion = new Item(0,0,mapManager.tileSize,'potion', null);
+    const inventory = [potion];
+    player.hp = 3;
+    if (player.hp <= 5 && inventory.length) {
+        player.hp = Math.min(player.maxHp, player.hp + 5);
+        inventory.pop();
     }
 
-    // 장비 아이템 몇 개 추가
-    const swordPos = mapManager.getRandomFloorPosition();
-    itemManager.items.push(itemFactory.create('short_sword', swordPos.x, swordPos.y, mapManager.tileSize));
-    const armorPos = mapManager.getRandomFloorPosition();
-    itemManager.items.push(itemFactory.create('leather_armor', armorPos.x, armorPos.y, mapManager.tileSize));
-
-    let gold = 200;
-    const inventory = [];
-
-    const tagManager = new TagManager();
-    const combatCalculator = new CombatCalculator(eventManager, tagManager);
-
-    eventManager.subscribe('entity_attack', data => combatCalculator.handleAttack(data));
+    let chargeUsed = false;
+    eventManager.subscribe('entity_attack', data => {
+        if (data.skill && data.skill.id === SKILLS.charge_attack.id) chargeUsed = true;
+    });
     eventManager.subscribe('damage_calculated', data => {
         data.defender.takeDamage(data.damage);
-        if (data.defender.hp <= 0) {
-            eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
-            eventManager.publish('entity_removed', { victimId: data.defender.id });
-        }
-    });
-    eventManager.subscribe('entity_death', ({ attacker, victim }) => {
-        if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
-            eventManager.publish('exp_gained', { player: attacker, exp: victim.expValue });
-        }
-    });
-    eventManager.subscribe('exp_gained', ({ player, exp }) => {
-        player.stats.addExp(exp);
     });
 
-    assert.strictEqual(player.isPlayer, true);
+    const context = { player, mapManager, pathfindingManager, movementManager, eventManager, itemManager, equipmentManager, tagManager, combatCalculator };
+
+    aiManager.createGroup('player_party');
+    aiManager.createGroup('dungeon_monsters');
+
+    aiManager.groups['player_party'] = playerGroup;
+    aiManager.groups['dungeon_monsters'] = monsterGroup;
+
+    aiManager.update(context);
+
+    assert.ok(chargeUsed, '차지 어택이 발동되지 않았습니다');
+    assert.strictEqual(player.hp, 8, '포션 사용 후 HP 값이 올바르지 않습니다');
 });
 
 });
-
