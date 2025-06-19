@@ -1,9 +1,9 @@
 import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
 import { MeleeAI } from '../src/ai.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running AI Group Strategy Tests ---");
+describe('AI', () => {
 
 test('setGroupStrategy updates strategy', () => {
     const em = new EventManager();
@@ -29,4 +29,6 @@ test('IDLE strategy prevents movement', () => {
     aiManager.update(context);
     assert.strictEqual(self.x, 0);
     assert.strictEqual(self.y, 0);
+});
+
 });

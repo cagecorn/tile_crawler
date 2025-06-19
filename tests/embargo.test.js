@@ -7,9 +7,9 @@ import { ItemManager, EquipmentManager } from '../src/managers/managers.js';
 import { TagManager } from '../src/managers/tagManager.js';
 import { CombatCalculator } from '../src/combat.js';
 import { MeleeAI } from '../src/ai.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running Embargo Test ---");
+describe('Integration', () => {
 
 class AutoPlayerAI extends MeleeAI {
     decideAction(self, context) {
@@ -123,5 +123,7 @@ test('맵 순회 자동 플레이', () => {
     });
 
     assert.strictEqual(player.isPlayer, true);
+});
+
 });
 

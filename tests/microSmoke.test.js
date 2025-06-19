@@ -3,9 +3,9 @@ import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { MercenaryManager } from '../src/managers/managers.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { monsterDeathWorkflow } from '../src/workflows.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running Micro Smoke Test ---");
+describe('Integration', () => {
 
 test('간단한 게임 흐름', () => {
     const assets = { player:{}, mercenary:{}, monster:{}, sword:{}, leather_armor:{} };
@@ -41,4 +41,6 @@ test('간단한 게임 흐름', () => {
     merc.stats.updateEquipmentStats();
     merc.updateAI();
     assert.ok(merc.stats.get('attackPower') > beforeAtk, '장비 장착 후 스탯 증가');
+});
+
 });

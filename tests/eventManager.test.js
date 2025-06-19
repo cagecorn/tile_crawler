@@ -1,7 +1,7 @@
 import { EventManager } from '../src/managers/eventManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running EventManager Tests ---");
+describe('Managers', () => {
 
 test('publish가 구독자 호출', () => {
     const em = new EventManager();
@@ -9,4 +9,6 @@ test('publish가 구독자 호출', () => {
     em.subscribe('test', () => { called = true; });
     em.publish('test', {});
     assert.ok(called);
+});
+
 });

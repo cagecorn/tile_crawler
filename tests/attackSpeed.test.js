@@ -1,9 +1,9 @@
 import { MetaAIManager } from '../src/managers/ai-managers.js';
 import { MeleeAI } from '../src/ai.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running Attack Speed Tests ---");
+describe('AI', () => {
 
 test('공격 속도가 빠른 유닛이 먼저 공격', () => {
     const em = new EventManager();
@@ -38,4 +38,6 @@ test('공격 속도가 빠른 유닛이 먼저 공격', () => {
     aiManager.update(context);
 
     assert.strictEqual(order[0], 'fast');
+});
+
 });

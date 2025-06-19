@@ -1,8 +1,8 @@
 import { PathfindingManager } from '../src/managers/pathfindingManager.js';
 import { MotionManager } from '../src/managers/motionManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running MotionManager Tests ---");
+describe('Managers', () => {
 
 test('dashTowards 이동 거리 제한', () => {
     const mapManager = {
@@ -20,4 +20,6 @@ test('dashTowards 이동 거리 제한', () => {
     motion.dashTowards(entity, target, 3);
     assert.strictEqual(entity.x, 3);
     assert.strictEqual(entity.y, 0);
+});
+
 });

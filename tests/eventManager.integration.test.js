@@ -1,7 +1,7 @@
 import { EventManager } from '../src/managers/eventManager.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running EventManager Integration Tests ---");
+describe('Integration', () => {
 
 test('이벤트 매니저 통합 동작', () => {
     // 1. 테스트 환경 설정
@@ -39,4 +39,6 @@ test('이벤트 매니저 통합 동작', () => {
     assert.ok(combatLogReceived, "CombatLogManager가 'log' 이벤트를 수신하지 못했습니다.");
     assert.ok(systemLogReceived, "SystemLogManager가 'debug' 이벤트를 수신하지 못했습니다.");
     assert.ok(statsChangeReceived, '스탯 변경 이벤트가 정상적으로 수신되지 않았습니다.');
+});
+
 });

@@ -1,8 +1,8 @@
 import { CharacterFactory } from '../src/factory.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 import { SKILLS } from '../src/data/skills.js';
 
-console.log("--- Running Mercenary Skill Tests ---");
+describe('Managers', () => {
 
 const assets = { mercenary:{} };
 
@@ -33,4 +33,6 @@ test('궁수 스킬 부여 - double_thrust', () => {
 test('궁수 스킬 부여 - hawk_eye', () => {
     const merc = createMercWithRandom(0.9, 'archer');
     assert.strictEqual(merc.skills[0], SKILLS.hawk_eye.id);
+});
+
 });

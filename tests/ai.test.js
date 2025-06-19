@@ -1,7 +1,7 @@
 import { MeleeAI, RangedAI } from '../src/ai.js';
-import { test, assert } from './helpers.js';
+import { describe, test, assert } from './helpers.js';
 
-console.log("--- Running AI Tests ---");
+describe('AI', () => {
 
 const mapStub = { tileSize: 1, isWallAt: () => false };
 
@@ -56,4 +56,6 @@ test('RangedAI - 사정거리 밖 적에게 접근', () => {
     const action = ai.decideAction(self, context);
     assert.strictEqual(action.type, 'move');
     assert.strictEqual(action.target, enemy);
+});
+
 });
