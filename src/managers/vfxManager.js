@@ -1,11 +1,12 @@
 import { Particle } from '../particle.js';
 
 export class VFXManager {
-    constructor(eventManager = null) {
+    constructor(eventManager = null, itemManager = null) {
         this.effects = [];
         this.particles = [];
         this.emitters = [];
         this.eventManager = eventManager;
+        this.itemManager = itemManager;
         console.log("[VFXManager] Initialized");
     }
 
@@ -127,6 +128,26 @@ export class VFXManager {
             particle.gravity = 0;
             this.particles.push(particle);
         }
+    }
+
+    /**
+     * 아이템이 시체 위치에서 포물선을 그리며 튀어나오는 애니메이션을 추가합니다.
+     * 애니메이션이 종료되면 ItemManager에 아이템을 정식으로 추가합니다.
+     * @param {object} item - 드롭될 아이템 객체
+     * @param {{x:number,y:number}} startPos - 시작 위치
+     * @param {{x:number,y:number}} endPos - 최종 위치
+     */
+    addItemPopAnimation(item, startPos, endPos) {
+        const effect = {
+            type: 'item_pop',
+            item,
+            startPos,
+            endPos,
+            duration: 20,
+            life: 20,
+            popHeight: 48,
+        };
+        this.effects.push(effect);
     }
 
     /**
@@ -269,6 +290,19 @@ export class VFXManager {
                 continue;
             }
 
+            if (effect.type === 'item_pop') {
+                effect.life--;
+                if (effect.life <= 0) {
+                    if (this.itemManager && effect.item) {
+                        effect.item.x = effect.endPos.x;
+                        effect.item.y = effect.endPos.y;
+                        this.itemManager.addItem(effect.item);
+                    }
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
 
             if (effect.type === 'glow') {
                 effect.alpha -= effect.decay;
@@ -323,6 +357,13 @@ export class VFXManager {
                     ctx.drawImage(entity.image, entity.x, entity.y, entity.width, entity.height);
                 }
                 ctx.restore();
+            } else if (effect.type === 'item_pop') {
+                const { item, startPos, endPos, life, duration, popHeight } = effect;
+                const progress = 1 - (life / duration);
+                const currentX = startPos.x + (endPos.x - startPos.x) * progress;
+                const currentY = startPos.y + (endPos.y - startPos.y) * progress;
+                const arc = Math.sin(progress * Math.PI) * popHeight;
+                ctx.drawImage(item.image, currentX, currentY - arc, item.width, item.height);
             } else if (effect.type === 'glow') {
                 const { x, y, radius } = effect;
                 const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
