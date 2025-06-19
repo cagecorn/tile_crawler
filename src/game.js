@@ -357,6 +357,12 @@ export class Game {
             }
         });
 
+        eventManager.subscribe('vfx_request', (data) => {
+            if (data.type === 'dash_trail') {
+                this.vfxManager.createDashTrail(data.from.x, data.from.y, data.to.x, data.to.y);
+            }
+        });
+
         // 스탯 변경 이벤트 구독 (효과 적용/해제 시 스탯 재계산)
         eventManager.subscribe('stats_changed', (data) => {
             data.entity.stats.recalculate();

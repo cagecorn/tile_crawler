@@ -6,7 +6,7 @@ describe('Managers', () => {
 
 const assets = { mercenary:{} };
 
-function createMercWithRandom(randomValue, jobId = 'warrior') {
+function createMerc(jobId = undefined, randomValue = 0.5) {
     const original = Math.random;
     Math.random = () => randomValue;
     const factory = new CharacterFactory(assets);
@@ -15,23 +15,28 @@ function createMercWithRandom(randomValue, jobId = 'warrior') {
     return merc;
 }
 
-test('무작위 스킬 부여 - double_strike', () => {
-    const merc = createMercWithRandom(0.1);
+test('전사 기본 스킬 - charge_attack', () => {
+    const merc = createMerc('warrior');
+    assert.strictEqual(merc.skills[0], SKILLS.charge_attack.id);
+});
+
+test('기본 용병 무작위 스킬 - double_strike', () => {
+    const merc = createMerc(undefined, 0.1);
     assert.strictEqual(merc.skills[0], SKILLS.double_strike.id);
 });
 
-test('무작위 스킬 부여 - charge_attack', () => {
-    const merc = createMercWithRandom(0.9);
+test('기본 용병 무작위 스킬 - charge_attack', () => {
+    const merc = createMerc(undefined, 0.9);
     assert.strictEqual(merc.skills[0], SKILLS.charge_attack.id);
 });
 
 test('궁수 스킬 부여 - double_thrust', () => {
-    const merc = createMercWithRandom(0.1, 'archer');
+    const merc = createMerc('archer', 0.1);
     assert.strictEqual(merc.skills[0], SKILLS.double_thrust.id);
 });
 
 test('궁수 스킬 부여 - hawk_eye', () => {
-    const merc = createMercWithRandom(0.9, 'archer');
+    const merc = createMerc('archer', 0.9);
     assert.strictEqual(merc.skills[0], SKILLS.hawk_eye.id);
 });
 
