@@ -175,6 +175,7 @@ export class Game {
         this.aquariumInspector.run();
 
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
+        this.metaAIManager.setGroupStrategy('player_party', STRATEGY.IDLE); // prevent player AI actions
         this.monsterGroup = this.metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
         // === 2. 플레이어 생성 ===
@@ -187,6 +188,7 @@ export class Game {
             image: assets.player,
             baseStats: { strength: 5, agility: 5, endurance: 15, movement: 10 }
         });
+        player.ai = null; // disable any automatic skills for the player
         player.equipmentRenderManager = this.equipmentRenderManager;
         this.gameState = {
             player,
@@ -265,6 +267,15 @@ export class Game {
                     } else {
                         monster.addConsumable(item);
                     }
+                }
+                if (Math.random() < 0.3) {
+                    const bow = this.itemFactory.create(
+                        'long_bow',
+                        monster.x,
+                        monster.y,
+                        this.mapManager.tileSize
+                    );
+                    if (bow) this.equipmentManager.equip(monster, bow, null);
                 }
                 monsters.push(monster);
             }
