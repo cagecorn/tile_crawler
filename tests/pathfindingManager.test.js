@@ -29,6 +29,27 @@ test('단순 경로 탐색', () => {
     assert.deepStrictEqual(path, [{x:1,y:0},{x:2,y:0}]);
 });
 
+test('같은 지점은 경로 없음', () => {
+    const mapManager = {
+        map: [
+            [0,0,0],
+            [0,0,0],
+            [0,0,0]
+        ],
+        width:3,
+        height:3,
+        tileSize:1,
+        tileTypes:{FLOOR:0,WALL:1},
+        isWallAt(x,y){
+            const tx=Math.floor(x/1); const ty=Math.floor(y/1);
+            return this.map[ty][tx]===this.tileTypes.WALL;
+        }
+    };
+    const pfManager = new PathfindingManager(mapManager);
+    const path = pfManager.findPath(1,1,1,1);
+    assert.deepStrictEqual(path, []);
+});
+
 test('동적 장애물 회피', () => {
     const mapManager = {
         map: [
