@@ -7,7 +7,7 @@ export class TurnManager {
         this.currentFrame = 0;
     }
 
-    update(entities, { eventManager = null, player = null } = {}) {
+    update(entities, { eventManager = null, player = null, parasiteManager = null } = {}) {
         this.currentFrame++;
         if (this.currentFrame >= this.framesPerTurn) {
             this.currentFrame = 0;
@@ -15,10 +15,19 @@ export class TurnManager {
 
             for (const e of entities) {
                 if (e.fullness !== undefined) {
+                    let loss = 0;
                     if ((e.isFriendly || e.isPlayer) && e.prevTurnPos) {
                         if (e.x !== e.prevTurnPos.x || e.y !== e.prevTurnPos.y) {
-                            e.fullness = Math.max(0, +(e.fullness - 0.1).toFixed(2));
+                            loss = 0.1;
                         }
+                    } else if (parasiteManager?.hasParasite(e)) {
+                        loss = 0.1; // 몬스터는 이동 여부와 상관없이 기본 소모
+                    }
+                    if (parasiteManager?.hasParasite(e)) {
+                        loss = +(loss * 2).toFixed(2);
+                    }
+                    if (loss > 0) {
+                        e.fullness = Math.max(0, +(e.fullness - loss).toFixed(2));
                     }
                     e.prevTurnPos = { x: e.x, y: e.y };
                     if (e.fullness <= 0) {
@@ -35,7 +44,9 @@ export class TurnManager {
                 }
 
                 if (e.affinity !== undefined && e !== player && e.isFriendly) {
-                    e.affinity = Math.min(e.maxAffinity, +(e.affinity + 0.1).toFixed(2));
+                    let gain = 0.1;
+                    if (parasiteManager?.hasParasite(e)) gain *= 0.5;
+                    e.affinity = Math.min(e.maxAffinity, +(e.affinity + gain).toFixed(2));
                     if (e.affinity <= 0) {
                         eventManager?.publish('log', { message: `${e.constructor.name}의 호감도가 바닥나 파티를 떠났습니다.` });
                     } else if (e.affinity < 20) {
