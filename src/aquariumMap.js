@@ -6,16 +6,14 @@ export class AquariumMapManager extends MapManager {
     constructor(seed) {
         super(seed);
         this.name = 'aquarium';
+        // wider passages help observe pathfinding for mercenaries and monsters
+        this.corridorWidth = 8;
+        // regenerate with the new corridor width
+        this.map = this._generateMaze();
     }
 
     _generateMaze() {
-        // Aquarium map is a large open area for testing new features
-        const map = Array.from({ length: this.height }, () => Array(this.width).fill(this.tileTypes.WALL));
-        for (let y = 1; y < this.height - 1; y++) {
-            for (let x = 1; x < this.width - 1; x++) {
-                map[y][x] = this.tileTypes.FLOOR;
-            }
-        }
-        return map;
+        // use the base maze generation but with a larger corridor width
+        return super._generateMaze();
     }
 }

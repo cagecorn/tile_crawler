@@ -8,9 +8,11 @@ import { describe, test, assert } from './helpers.js';
 const assets = { monster:{} };
 
 describe('Aquarium', () => {
-    test('Aquarium map has open floor', () => {
+    test('Aquarium map uses a wide maze layout', () => {
         const m = new AquariumMapManager(1);
-        assert.strictEqual(m.map[1][1], m.tileTypes.FLOOR);
+        assert.ok(m.corridorWidth >= 8, 'corridor width should be wide');
+        const wallCount = m.countTiles(m.tileTypes.WALL);
+        assert.ok(wallCount > 0 && wallCount < m.width * m.height, 'maze should contain walls and floors');
     });
 
     test('Manager adds feature and inspector passes', () => {
