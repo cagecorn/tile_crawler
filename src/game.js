@@ -50,6 +50,7 @@ export class Game {
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
         this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
+        this.loader.loadImage('healing-effect', 'assets/images/healing-effect.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -414,7 +415,28 @@ export class Game {
             this.vfxManager.castEffect(caster, skill);
 
             if (skill.tags && (skill.tags.includes('healing') || skill.tags.includes('회복'))) {
-                this.particleDecoratorManager.playHealingEffect(target || caster);
+                const healTarget = target || caster;
+                const amount = skill.healAmount || 10;
+                const prevHp = healTarget.hp;
+                healTarget.hp = Math.min(healTarget.maxHp, healTarget.hp + amount);
+                const healed = healTarget.hp - prevHp;
+                if (healed > 0) {
+                    eventManager.publish('log', { message: `${healTarget.constructor.name}의 체력이 ${healed} 회복되었습니다.`, color: 'lime' });
+                }
+                this.particleDecoratorManager.playHealingEffect(healTarget);
+                const img = assets['healing-effect'];
+                if (img) {
+                    this.vfxManager.addSpriteEffect(
+                        img,
+                        healTarget.x + healTarget.width / 2,
+                        healTarget.y + healTarget.height / 2,
+                        {
+                            width: healTarget.width,
+                            height: healTarget.height,
+                            blendMode: 'screen'
+                        }
+                    );
+                }
             }
 
             if (skill.teleport) {
