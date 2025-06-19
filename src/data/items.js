@@ -42,4 +42,28 @@ export const ITEMS = {
         imageKey: 'leather_armor',
         stats: { maxHp: 5 },
     },
+
+    // 기본 소모품 및 화폐
+    potion: {
+        name: 'potion',
+        type: 'consumable',
+        tags: ['consumable'],
+        imageKey: 'potion',
+    },
+    gold: {
+        name: 'gold',
+        type: 'currency',
+        tags: ['currency'],
+        imageKey: 'gold',
+    },
+
+    // 일반적인 검 아이템 (드랍 테이블용)
+    sword: {
+        name: '검',
+        type: 'weapon',
+        damageDice: '1d6',
+        tags: ['melee', 'sword'],
+        imageKey: 'sword',
+        stats: { attackPower: 2 },
+    },
 };
