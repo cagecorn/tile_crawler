@@ -48,6 +48,8 @@ export class Game {
         this.loader.loadImage('bow', 'assets/images/bow.png');
         this.loader.loadImage('arrow', 'assets/images/arrow.png');
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
+        this.loader.loadImage('plate-armor', 'assets/images/plate-armor.png');
+        this.loader.loadImage('violin-bow', 'assets/images/violin-bow.png');
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
         this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
@@ -183,9 +185,19 @@ export class Game {
                                 player.x,
                                 player.y + this.mapManager.tileSize,
                                 this.mapManager.tileSize);
+        const violinBow = this.itemFactory.create('violin_bow',
+                                player.x + this.mapManager.tileSize,
+                                player.y - this.mapManager.tileSize,
+                                this.mapManager.tileSize);
+        const plateArmor = this.itemFactory.create('plate_armor',
+                                player.x + this.mapManager.tileSize * 2,
+                                player.y - this.mapManager.tileSize,
+                                this.mapManager.tileSize);
         this.itemManager.addItem(potion);
         if (dagger) this.itemManager.addItem(dagger);
         if (bow) this.itemManager.addItem(bow);
+        if (violinBow) this.itemManager.addItem(violinBow);
+        if (plateArmor) this.itemManager.addItem(plateArmor);
 
         // === 3. 몬스터 생성 ===
         const monsters = [];

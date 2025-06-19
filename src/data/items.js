@@ -12,9 +12,26 @@ export const ITEMS = {
         name: '장궁',
         type: 'weapon',
         damageDice: '1d6',
-        tags: ['ranged', 'bow'],
+        tags: ['ranged', 'bow', 'finesse_weapon'],
         imageKey: 'bow',
         stats: { attackPower: 2, attackRange: 384 },
+    },
+
+    violin_bow: {
+        name: '바이올린 보우',
+        type: 'weapon',
+        damageDice: '1d6',
+        tags: ['ranged', 'bow', 'finesse_weapon', 'song'],
+        imageKey: 'violin-bow',
+        stats: { attackPower: 2, attackRange: 384 },
+    },
+
+    plate_armor: {
+        name: '강철 갑옷',
+        type: 'armor',
+        tags: ['armor', 'heavy_armor'],
+        imageKey: 'plate-armor',
+        stats: { maxHp: 10 },
     },
 
     // 방어구
