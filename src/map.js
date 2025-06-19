@@ -3,6 +3,7 @@
 const TILE_TYPES = {
     FLOOR: 0,
     WALL: 1,
+    LAVA: 2,
 };
 
 export class MapManager {
@@ -39,6 +40,9 @@ export class MapManager {
 
         // 4. 막다른 길 일부 제거 (선택사항)
         this._removeDeadEnds(map, 0.2);
+
+        // 5. 특수 지형 배치 (용암 등)
+        this._addLavaPools(map, 0.02);
 
         return map;
     }
@@ -286,6 +290,32 @@ export class MapManager {
         }
     }
 
+    _addLavaPools(map, chance = 0.02, size = 3) {
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                if (map[y][x] === this.tileTypes.FLOOR && this._random() < chance) {
+                    for (let py = y; py < y + size && py < this.height - 1; py++) {
+                        for (let px = x; px < x + size && px < this.width - 1; px++) {
+                            if (map[py][px] === this.tileTypes.FLOOR) {
+                                map[py][px] = this.tileTypes.LAVA;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    countTiles(type) {
+        let count = 0;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.map[y][x] === type) count++;
+            }
+        }
+        return count;
+    }
+
     // 나머지 메서드들은 기존과 동일
     getRandomFloorPosition(sizeInTiles = {w: 1, h: 1}) {
         let attempts = 0;
@@ -330,10 +360,16 @@ export class MapManager {
     render(ctxBase, ctxDecor, assets) {
         const wallImage = assets.wall;
         const floorImage = assets.floor;
+        const lavaImage = assets.lava || floorImage;
 
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                const imageToDraw = (this.map[y][x] === this.tileTypes.WALL) ? wallImage : floorImage;
+                let imageToDraw = floorImage;
+                if (this.map[y][x] === this.tileTypes.WALL) {
+                    imageToDraw = wallImage;
+                } else if (this.map[y][x] === this.tileTypes.LAVA) {
+                    imageToDraw = lavaImage;
+                }
                 if (imageToDraw) {
                     ctxBase.drawImage(imageToDraw, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize);
                 }
