@@ -82,8 +82,10 @@ export class StatManager {
         final.attackPower = (final.attackPower || 0) + 1 + final.strength * 2;
         final.maxMp = 10 + final.focus * 10;
         final.movementSpeed = final.movement;
-        final.hpRegen = (final.hpRegen || 0) + final.endurance * 0.05;
-        final.mpRegen = (final.mpRegen || 0) + final.focus * 0.05;
+        // 체력/마나 재생률이 지나치게 높아 전투 테스트가 어려웠다.
+        // 기본 회복 공식을 완화하여 초당 회복량을 대폭 줄인다.
+        final.hpRegen = (final.hpRegen || 0) + final.endurance * 0.01;
+        final.mpRegen = (final.mpRegen || 0) + final.focus * 0.01;
 
         this.derivedStats = final;
     }
