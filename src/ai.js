@@ -40,6 +40,13 @@ export class MeleeAI extends AIArchetype {
                 Math.floor(nearestTarget.y / mapManager.tileSize),
                 mapManager
             );
+
+            if (!hasLOS && self.isFriendly && !self.isPlayer) {
+                const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
+                if (playerDistance > self.tileSize) {
+                    return { type: 'move', target: player };
+                }
+            }
             const chargeSkill = Array.isArray(self.skills)
                 ? self.skills.map(id => SKILLS[id]).find(s => s && s.tags && s.tags.includes('charge'))
                 : null;
@@ -180,6 +187,12 @@ export class RangedAI extends AIArchetype {
                 Math.floor(nearestTarget.y / mapManager.tileSize),
                 mapManager
             );
+            if (!hasLOS && self.isFriendly && !self.isPlayer) {
+                const playerDistance = Math.sqrt(Math.pow(player.x - self.x, 2) + Math.pow(player.y - self.y, 2));
+                if (playerDistance > self.tileSize) {
+                    return { type: "move", target: player };
+                }
+            }
 
             if (hasLOS) {
                 if (minDistance <= self.attackRange && minDistance > self.attackRange * 0.5) {

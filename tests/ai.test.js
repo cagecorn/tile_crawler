@@ -116,4 +116,16 @@ test('HealerAI - intuitive types still follow player when no healing needed', ()
     assert.strictEqual(action.target, player);
 });
 
+test('RangedAI - follows player when no line of sight to enemy', () => {
+    const ai = new RangedAI();
+    const mapWithWall = { tileSize: 1, isWallAt: (x, y) => x === 1 && y === 0 };
+    const player = { x: 0, y: 2 };
+    const self = { x: 0, y: 0, visionRange: 100, attackRange: 20, speed: 5, tileSize: 1, isFriendly: true, isPlayer: false };
+    const enemy = { x: 2, y: 0 };
+    const context = { player, allies: [self], enemies: [enemy], mapManager: mapWithWall };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'move');
+    assert.strictEqual(action.target, player);
+});
+
 });
