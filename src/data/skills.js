@@ -160,6 +160,7 @@ export const SKILLS = {
         manaCost: 14,
         cooldown: 180,
         tags: ['skill', 'buff', 'attack_up', 'self', '버프'],
+        effects: { self: ['strength_buff'] },
     },
     fortress: {
         id: 'fortress',
@@ -168,6 +169,7 @@ export const SKILLS = {
         manaCost: 14,
         cooldown: 180,
         tags: ['skill', 'buff', 'defense_up', 'self', '버프'],
+        effects: { self: ['defense_buff'] },
     },
     arcane_burst: {
         id: 'arcane_burst',
@@ -176,6 +178,7 @@ export const SKILLS = {
         manaCost: 14,
         cooldown: 180,
         tags: ['skill', 'buff', 'magic_up', 'self', '버프'],
+        effects: { self: ['magic_buff'] },
     },
     barrier: {
         id: 'barrier',
@@ -184,6 +187,7 @@ export const SKILLS = {
         manaCost: 14,
         cooldown: 180,
         tags: ['skill', 'buff', 'magic_resist_up', 'self', '버프'],
+        effects: { self: ['magic_resist_buff'] },
     },
     divinity: {
         id: 'divinity',
@@ -192,6 +196,7 @@ export const SKILLS = {
         manaCost: 20,
         cooldown: 240,
         tags: ['skill', 'buff', 'stat_up', 'self', '버프'],
+        effects: { self: ['all_stat_buff'] },
     },
     weaken: {
         id: 'weaken',
@@ -200,6 +205,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 120,
         tags: ['skill', 'debuff', 'attack_down', 'enemy', '디버프'],
+        effects: { target: ['attack_down'] },
     },
     sunder: {
         id: 'sunder',
@@ -208,6 +214,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 120,
         tags: ['skill', 'debuff', 'defense_down', 'enemy', '디버프'],
+        effects: { target: ['armor_break'] },
     },
     regression: {
         id: 'regression',
@@ -216,6 +223,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 120,
         tags: ['skill', 'debuff', 'magic_down', 'enemy', '디버프'],
+        effects: { target: ['magic_down'] },
     },
     spell_weakness: {
         id: 'spell_weakness',
@@ -224,6 +232,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 120,
         tags: ['skill', 'debuff', 'magic_resist_down', 'enemy', '디버프'],
+        effects: { target: ['magic_resist_down'] },
     },
     elemental_weakness: {
         id: 'elemental_weakness',
@@ -232,5 +241,6 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 120,
         tags: ['skill', 'debuff', 'resist_down', 'enemy', '디버프'],
+        effects: { target: ['resist_down'] },
     },
 };
