@@ -95,6 +95,9 @@ export class Game {
         this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);
         this.movementManager = new MovementManager(this.mapManager);
         this.fogManager = new FogManager(this.mapManager.width, this.mapManager.height);
+        this.particleDecoratorManager = new Managers.ParticleDecoratorManager();
+        this.particleDecoratorManager.setManagers(this.vfxManager, this.mapManager);
+        this.particleDecoratorManager.init();
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
