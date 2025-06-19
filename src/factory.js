@@ -8,7 +8,7 @@ import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { RangedAI } from './ai.js';
+import { RangedAI, HealerAI } from './ai.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -65,6 +65,9 @@ export class CharacterFactory {
                     merc.ai = new RangedAI();
                 } else if (config.jobId === 'warrior') {
                     merc.skills.push(SKILLS.charge_attack.id);
+                } else if (config.jobId === 'healer') {
+                    merc.skills.push(SKILLS.heal.id);
+                    merc.ai = new HealerAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);

@@ -91,8 +91,55 @@ export class MeleeAI extends AIArchetype {
     }
 }
 
-// --- 앞으로 만들 AI 유형들을 위한 [여백 구멍] ---
-export class HealerAI extends AIArchetype { /* 나중에 구현 */ }
+// --- 힐러형 AI ---
+export class HealerAI extends AIArchetype {
+    decideAction(self, context) {
+        const { allies, mapManager } = context;
+        const healId = SKILLS.heal?.id;
+        const healSkill = SKILLS[healId];
+
+        const skillReady =
+            healId &&
+            Array.isArray(self.skills) &&
+            self.skills.includes(healId) &&
+            self.mp >= healSkill.manaCost &&
+            (self.skillCooldowns[healId] || 0) <= 0;
+
+        // 체력이 부족한 아군 목록
+        const candidates = allies.filter(a => a.hp < a.maxHp);
+        if (candidates.length === 0) {
+            return { type: 'idle' };
+        }
+
+        // MBTI 성향에 따른 대상 선택
+        const mbti = self.properties?.mbti || '';
+        let target = null;
+        if (mbti.includes('I')) {
+            target = candidates.find(c => c === self) || candidates[0];
+        } else if (mbti.includes('E')) {
+            target = candidates.reduce((lowest, cur) =>
+                cur.hp / cur.maxHp < lowest.hp / lowest.maxHp ? cur : lowest,
+            candidates[0]);
+        } else {
+            target = candidates[0];
+        }
+
+        const distance = Math.hypot(target.x - self.x, target.y - self.y);
+        const hasLOS = hasLineOfSight(
+            Math.floor(self.x / mapManager.tileSize),
+            Math.floor(self.y / mapManager.tileSize),
+            Math.floor(target.x / mapManager.tileSize),
+            Math.floor(target.y / mapManager.tileSize),
+            mapManager,
+        );
+
+        if (distance <= self.attackRange && hasLOS && skillReady) {
+            return { type: 'skill', target, skillId: healId };
+        }
+
+        return { type: 'move', target };
+    }
+}
 
 // --- 원거리형 AI ---
 export class RangedAI extends AIArchetype {
