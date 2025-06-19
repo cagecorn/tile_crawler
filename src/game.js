@@ -343,7 +343,7 @@ export class Game {
                     this.vfxManager.addParticleBurst(
                         defender.x + defender.width / 2,
                         defender.y + defender.height / 2,
-                        { color: 'orange', count: 12 }
+                        { color: 'rgba(200,0,0,0.9)', count: 12 }
                     );
                 }
             }
