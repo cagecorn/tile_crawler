@@ -10,7 +10,7 @@ describe('Managers', () => {
     let floorCount = 0;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (map[y][x] === tileTypes.FLOOR) {
+        if (map[y][x] !== tileTypes.WALL) {
           if (!startNode) startNode = { x, y };
           floorCount++;
         }
@@ -36,7 +36,7 @@ describe('Managers', () => {
       ];
       for (const n of neighbors) {
         const key = `${n.x},${n.y}`;
-        if (map[n.y] && map[n.y][n.x] === tileTypes.FLOOR && !visited.has(key)) {
+        if (map[n.y] && map[n.y][n.x] !== tileTypes.WALL && !visited.has(key)) {
           visited.add(key);
           queue.push(n);
         }
@@ -44,5 +44,12 @@ describe('Managers', () => {
     }
 
     assert.strictEqual(connectedCount, floorCount, '맵이 고립된 공간을 포함합니다.');
+  });
+
+  test('용암 타일 생성 확인', () => {
+    const mapManager = new MapManager(12345);
+    const { tileTypes } = mapManager;
+    const lavaCount = mapManager.countTiles(tileTypes.LAVA);
+    assert.ok(lavaCount > 0, '용암 타일이 생성되지 않았습니다.');
   });
 });
