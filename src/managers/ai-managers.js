@@ -71,7 +71,7 @@ export class MetaAIManager {
                 ) {
                     entity.mp -= skill.manaCost;
                     entity.skillCooldowns[action.skillId] = skill.cooldown;
-                    eventManager.publish('skill_used', { caster: entity, skill });
+                    eventManager.publish('skill_used', { caster: entity, skill, target: action.target });
                     const baseCd = 60;
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }

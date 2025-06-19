@@ -35,4 +35,19 @@ export class ParticleDecoratorManager {
         this.emitters = [];
         this.initialized = false;
     }
+
+    /**
+     * 회복 계열 행동 시 사용할 초록빛 파티클 효과를 생성한다.
+     * @param {object} entity 파티클을 표시할 대상 엔티티
+     */
+    playHealingEffect(entity) {
+        if (!this.vfxManager || !entity) return;
+        const x = entity.x + (entity.width || 0) / 2;
+        const y = entity.y + (entity.height || 0) / 2;
+        this.vfxManager.addParticleBurst(x, y, {
+            count: 10,
+            color: 'lime',
+            gravity: -0.05,
+        });
+    }
 }

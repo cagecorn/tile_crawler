@@ -106,6 +106,7 @@ export class Game {
         this.particleDecoratorManager.init();
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
+        this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
         this.aquariumManager = new AquariumManager(
             this.eventManager,
@@ -408,9 +409,13 @@ export class Game {
         });
 
         eventManager.subscribe('skill_used', (data) => {
-            const { caster, skill } = data;
+            const { caster, skill, target } = data;
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
             this.vfxManager.castEffect(caster, skill);
+
+            if (skill.tags && (skill.tags.includes('healing') || skill.tags.includes('회복'))) {
+                this.particleDecoratorManager.playHealingEffect(target || caster);
+            }
 
             if (skill.teleport) {
                 this.handleTeleportSkill(caster);
@@ -464,7 +469,7 @@ export class Game {
                     if (player.mp >= skillData.manaCost) {
                         player.mp -= skillData.manaCost;
                         player.skillCooldowns[skillId] = skillData.cooldown;
-                        eventManager.publish('skill_used', { caster: player, skill: skillData });
+                        eventManager.publish('skill_used', { caster: player, skill: skillData, target: null });
                     } else {
                         eventManager.publish('log', { message: '마나가 부족합니다.' });
                     }
@@ -484,6 +489,7 @@ export class Game {
                 } else if (item.name === 'potion') {
                     const playerChar = gameState.player;
                     playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
+                    this.particleDecoratorManager.playHealingEffect(playerChar);
                     gameState.inventory.splice(itemIndex, 1);
                 }
                 this.uiManager.renderInventory(gameState);
