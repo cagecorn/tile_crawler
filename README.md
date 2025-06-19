@@ -50,3 +50,9 @@
 
 For detailed gameplay instructions, see [GAMEPLAY_GUIDE.md](GAMEPLAY_GUIDE.md).
 
+
+## 결함 주입 테스트
+MBTI AI와 힐러 AI의 오류 처리 능력을 확인하는 시나리오가 `tests/faultInjection.test.js`에 있습니다. 버퍼/디버퍼 AI가 추가되면 동일한 파일에서 함께 관리합니다.
+이 테스트들은 매 패치마다 돌릴 필요는 없으며, 엠바고 테스트를 실행할 때 같이 수행하는 것을 권장합니다.
+자세한 지침은 [FAULT_INJECTION_GUIDE.md](FAULT_INJECTION_GUIDE.md)를 참고하세요.
+
