@@ -6,9 +6,9 @@ export class EquipmentRenderManager {
     getWeaponDrawParams(entity) {
         return {
             x: entity.x + entity.width * 0.3,
-            y: entity.y + entity.height * 0.3,
-            width: entity.width * 0.8,
-            height: entity.height * 0.8,
+            y: entity.y + entity.height * 0,
+            width: entity.width * 1,
+            height: entity.height * 1,
         };
     }
 
