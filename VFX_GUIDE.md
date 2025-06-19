@@ -38,3 +38,7 @@
 4. **유도형** : `addHomingBurst`는 `target`을 지정하여 파티클들이 해당 지점을 향해 서서히 모입니다.
 
 위 기능들은 모두 `vfxManager` 인스턴스를 통해 호출할 수 있습니다.
+
+## 신규 효과: Bubble Emitter
+- `AquariumManager`의 `bubble` 피처가 호출되면 맵의 임의 위치에 거품 파티클 이미터가 생성됩니다.
+- 해당 이미터는 `spawnRate`를 조절해 지속적으로 파티클을 분출하며, `gravity` 값을 음수로 주어 위로 떠오르는 움직임을 연출합니다.
