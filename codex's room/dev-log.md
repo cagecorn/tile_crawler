@@ -9,3 +9,7 @@
 - 힐러 직업과 `HealerAI` 구현.
 - 고유 스킬 `heal`을 사용해 아군을 회복하도록 테스트 추가.
 - `CharacterFactory`가 `jobId: 'healer'`를 처리하도록 수정.
+
+## 세션 3
+- 파일 전투 로그 매니저(`FileLogManager`)를 추가하여 'log' 이벤트를 파일로 남기도록 구현.
+- 해당 기능을 검증하는 `fileLogManager.test.js` 테스트 작성.
