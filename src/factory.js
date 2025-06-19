@@ -9,6 +9,7 @@ import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
 import { RangedAI, HealerAI } from './ai.js';
+import { MBTI_TYPES } from './data/mbti.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -80,7 +81,10 @@ export class CharacterFactory {
     }
     
     // === 아래는 다이스를 굴리는 내부 함수들 (구멍만 파기) ===
-    _rollMBTI() { return 'ISTJ'; }
+    _rollMBTI() {
+        const index = Math.floor(Math.random() * MBTI_TYPES.length);
+        return MBTI_TYPES[index];
+    }
     _rollRandomKey(obj) { const keys = Object.keys(obj); return keys[Math.floor(Math.random() * keys.length)]; }
     _rollStars() {
         // ... (별 갯수 랜덤 배분 로직) ...

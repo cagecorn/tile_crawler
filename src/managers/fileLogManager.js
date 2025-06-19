@@ -1,23 +1,26 @@
-import fs from 'fs';
+import { appendFileSync, writeFileSync } from 'fs';
 
 export class FileLogManager {
     constructor(eventManager, filePath = 'combat.log') {
         this.filePath = filePath;
-        if (eventManager) {
-            eventManager.subscribe('log', data => {
-                if (data && data.message) {
-                    this.log(data.message);
-                }
-            });
+        // initialize file
+        try {
+            writeFileSync(this.filePath, '', { flag: 'w' });
+        } catch (e) {
+            console.error('Failed to initialize log file', e);
         }
+        eventManager.subscribe('log', (data) => {
+            if (data && data.message) {
+                this.write(data.message);
+            }
+        });
     }
 
-    log(message) {
-        const timestamp = new Date().toISOString();
-        fs.appendFileSync(this.filePath, `[${timestamp}] ${message}\n`);
-    }
-
-    clear() {
-        fs.writeFileSync(this.filePath, '');
+    write(message) {
+        try {
+            appendFileSync(this.filePath, message + '\n');
+        } catch (e) {
+            console.error('Failed to write log', e);
+        }
     }
 }
