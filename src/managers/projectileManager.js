@@ -59,6 +59,12 @@ export class ProjectileManager {
 
     update() {
         this.projectiles.forEach((proj, index) => {
+            if (!proj.target || proj.target.hp <= 0 || proj.target.isDying) {
+                proj.isDead = true;
+                this.projectiles.splice(index, 1);
+                return;
+            }
+
             const result = proj.update();
             if (result.collided) {
                 this.eventManager.publish('entity_attack', {
