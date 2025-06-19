@@ -41,6 +41,8 @@ class Entity {
     get attackPower() { return this.stats.get('attackPower'); }
     get maxHp() { return this.stats.get('maxHp'); }
     get maxMp() { return this.stats.get('maxMp'); }
+    get hpRegen() { return this.stats.get('hpRegen'); }
+    get mpRegen() { return this.stats.get('mpRegen'); }
     get expValue() { return this.stats.get('expValue'); }
     get visionRange() { return this.stats.get('visionRange'); }
     get attackRange() { return this.stats.get('attackRange'); }
@@ -78,6 +80,7 @@ class Entity {
     }
 
     update(context) {
+        this.applyRegen();
         if (this.ai) {
             const action = this.ai.decideAction(this, context);
             context.metaAIManager.executeAction(this, action, context);
@@ -88,6 +91,17 @@ class Entity {
             if (this.skillCooldowns[skillId] > 0) {
                 this.skillCooldowns[skillId]--;
             }
+        }
+    }
+
+    applyRegen() {
+        const hpRegen = this.stats.get('hpRegen');
+        if (hpRegen) {
+            this.hp = Math.min(this.maxHp, this.hp + hpRegen);
+        }
+        const mpRegen = this.stats.get('mpRegen');
+        if (mpRegen) {
+            this.mp = Math.min(this.maxMp, this.mp + mpRegen);
         }
     }
 

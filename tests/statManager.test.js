@@ -42,4 +42,11 @@ test('레벨 업', () => {
     assert.strictEqual(stats.get('endurance'), 2);
 });
 
+// 체력/마나 재생 계산 확인
+test('재생 스탯 계산', () => {
+    const stats = new StatManager({}, { endurance: 10, focus: 8 });
+    assert.ok(stats.get('hpRegen') > 0);
+    assert.ok(stats.get('mpRegen') > 0);
+});
+
 });

@@ -116,6 +116,7 @@ export class MetaAIManager {
             for (const member of membersSorted) {
                 if (member.hp <= 0) continue;
                 if (member.attackCooldown > 0) member.attackCooldown--;
+                if (typeof member.applyRegen === 'function') member.applyRegen();
 
                 let action = { type: 'idle' };
                 if (group.strategy !== STRATEGY.IDLE && member.ai) {

@@ -102,7 +102,7 @@ export class UIManager {
 
         this.mercDetailName.textContent = `${mercenary.constructor.name} (Lv.${mercenary.stats.get('level')})`;
 
-        const statsToShow = ['attackPower', 'strength', 'agility', 'endurance', 'movementSpeed'];
+        const statsToShow = ['attackPower', 'strength', 'agility', 'endurance', 'movementSpeed', 'hpRegen', 'mpRegen'];
         this.mercStatsContainer.innerHTML = '';
 
         // 레벨 및 경험치 표시
@@ -234,7 +234,7 @@ export class UIManager {
         const page1 = this.characterSheetPanel.querySelector('#stat-page-1');
         if (page1) {
             page1.innerHTML = '';
-            const statsToShow = ['strength','agility','endurance','focus','intelligence','movement','maxHp','maxMp','attackPower','movementSpeed'];
+            const statsToShow = ['strength','agility','endurance','focus','intelligence','movement','maxHp','maxMp','attackPower','movementSpeed','hpRegen','mpRegen'];
             statsToShow.forEach(stat => {
                 const line = document.createElement('div');
                 line.className = 'stat-line';
