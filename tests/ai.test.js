@@ -62,7 +62,8 @@ test('HealerAI - injured ally gets healed', () => {
     const ai = new HealerAI();
     const self = {
         x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
-        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ENFP' }
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ENFP' },
+        isFriendly: true, isPlayer: false
     };
     const ally = { x: 5, y: 0, hp: 5, maxHp: 10 };
     const context = { player: {}, allies: [self, ally], enemies: [], mapManager: mapStub };
@@ -72,16 +73,19 @@ test('HealerAI - injured ally gets healed', () => {
     assert.strictEqual(action.skillId, 'heal');
 });
 
-test('HealerAI - idle when everyone healthy', () => {
+test('HealerAI - follows player when everyone healthy', () => {
     const ai = new HealerAI();
+    const player = { x: 10, y: 0 };
     const self = {
         x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
-        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ENFP' }
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ENFP' },
+        isFriendly: true, isPlayer: false
     };
     const ally = { x: 5, y: 0, hp: 10, maxHp: 10 };
-    const context = { player: {}, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const context = { player, allies: [self, ally], enemies: [], mapManager: mapStub };
     const action = ai.decideAction(self, context);
-    assert.strictEqual(action.type, 'idle');
+    assert.strictEqual(action.type, 'move');
+    assert.strictEqual(action.target, player);
 });
 
 test('HealerAI - sensing types heal earlier', () => {
@@ -97,16 +101,19 @@ test('HealerAI - sensing types heal earlier', () => {
     assert.strictEqual(action.target, ally);
 });
 
-test('HealerAI - intuitive types wait for lower hp', () => {
+test('HealerAI - intuitive types still follow player when no healing needed', () => {
     const ai = new HealerAI();
+    const player = { x: 8, y: 0 };
     const self = {
         x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
-        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'INFP' }
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'INFP' },
+        isFriendly: true, isPlayer: false
     };
     const ally = { x: 5, y: 0, hp: 7, maxHp: 10 };
-    const context = { player: {}, allies: [self, ally], enemies: [], mapManager: mapStub };
+    const context = { player, allies: [self, ally], enemies: [], mapManager: mapStub };
     const action = ai.decideAction(self, context);
-    assert.strictEqual(action.type, 'idle');
+    assert.strictEqual(action.type, 'move');
+    assert.strictEqual(action.target, player);
 });
 
 });

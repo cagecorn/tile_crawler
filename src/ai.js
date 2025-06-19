@@ -94,7 +94,7 @@ export class MeleeAI extends AIArchetype {
 // --- 힐러형 AI ---
 export class HealerAI extends AIArchetype {
     decideAction(self, context) {
-        const { allies, mapManager } = context;
+        const { player, allies, mapManager } = context;
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
 
@@ -116,6 +116,12 @@ export class HealerAI extends AIArchetype {
             a => a.hp < a.maxHp && a.hp / a.maxHp <= healThreshold
         );
         if (candidates.length === 0) {
+            if (self.isFriendly && !self.isPlayer && player) {
+                const dist = Math.hypot(player.x - self.x, player.y - self.y);
+                if (dist > self.tileSize) {
+                    return { type: 'move', target: player };
+                }
+            }
             return { type: 'idle' };
         }
 
