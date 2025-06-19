@@ -611,7 +611,11 @@ export class Game {
                     const playerChar = gameState.player;
                     playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
                     this.particleDecoratorManager.playHealingEffect(playerChar);
-                    gameState.inventory.splice(itemIndex, 1);
+                    if (item.quantity > 1) {
+                        item.quantity -= 1;
+                    } else {
+                        gameState.inventory.splice(itemIndex, 1);
+                    }
                 }
                 this.uiManager.renderInventory(gameState);
             },
@@ -735,7 +739,12 @@ export class Game {
                 gameState.gold += 10;
                 this.combatLogManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
             } else {
-                gameState.inventory.push(itemToPick);
+                const existing = gameState.inventory.find(i => i.name === itemToPick.name);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    gameState.inventory.push(itemToPick);
+                }
                 this.combatLogManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
             }
             this.itemManager.removeItem(itemToPick);

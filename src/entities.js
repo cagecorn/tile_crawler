@@ -244,6 +244,7 @@ export class Item {
     constructor(x, y, tileSize, name, image) {
         this.x = x; this.y = y; this.width = tileSize; this.height = tileSize;
         this.name = name; this.image = image;
+        this.quantity = 1;
         this.baseId = '';
         this.tags = [];
         const statsMap = new Map();
@@ -279,6 +280,7 @@ export class Item {
     getSaveState() {
         return {
             name: this.name,
+            quantity: this.quantity,
             x: this.x,
             y: this.y,
         };

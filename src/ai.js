@@ -89,6 +89,7 @@ export class MeleeAI extends AIArchetype {
                 : null;
 
             if (
+                !self.isPlayer &&
                 chargeSkill &&
                 minDistance > self.attackRange &&
                 minDistance <= chargeSkill.chargeRange &&
