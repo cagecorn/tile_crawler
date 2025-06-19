@@ -11,6 +11,7 @@ import { SkillManager } from './skillManager.js';
 import { SoundManager } from './soundManager.js';
 import { EffectManager } from './effectManager.js';
 import { ProjectileManager } from './projectileManager.js';
+import { ItemAIManager } from './item-ai-manager.js';
 import { MotionManager } from './motionManager.js';
 import { MovementManager } from './movementManager.js';
 import { EquipmentRenderManager } from './equipmentRenderManager.js';
@@ -30,6 +31,7 @@ export {
     SoundManager,
     EffectManager,
     ProjectileManager,
+    ItemAIManager,
     MotionManager,
     MovementManager,
     EquipmentRenderManager,

@@ -104,6 +104,11 @@ export class Game {
         this.effectManager = this.managers.EffectManager;
         this.projectileManager = this.managers.ProjectileManager;
         this.projectileManager.vfxManager = this.vfxManager;
+        this.itemAIManager = new Managers.ItemAIManager(
+            this.eventManager,
+            this.projectileManager,
+            this.vfxManager
+        );
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
 
@@ -140,7 +145,8 @@ export class Game {
             if (pos) {
                 const isGold = Math.random() < 0.6;
                 const itemName = isGold ? 'gold' : 'potion';
-                this.itemManager.addItem(new Item(pos.x, pos.y, this.mapManager.tileSize, itemName, assets[itemName]));
+                const item = this.itemFactory.create(itemName, pos.x, pos.y, this.mapManager.tileSize);
+                if (item) this.itemManager.addItem(item);
             }
         }
 
@@ -181,10 +187,11 @@ export class Game {
         this.playerGroup.addMember(player);
 
         // 초기 아이템 배치
-        const potion = new Item(player.x + this.mapManager.tileSize,
+        const potion = this.itemFactory.create(
+                                'potion',
+                                player.x + this.mapManager.tileSize,
                                 player.y,
-                                this.mapManager.tileSize,
-                                'potion', assets.potion);
+                                this.mapManager.tileSize);
         const dagger = this.itemFactory.create('short_sword',
                                 player.x - this.mapManager.tileSize,
                                 player.y,
@@ -609,7 +616,7 @@ export class Game {
                 if (item.tags.includes('weapon') || item.tags.includes('armor') ||
                     item.type === 'weapon' || item.type === 'armor') {
                     this.uiManager._showEquipTargetPanel(item, gameState);
-                } else if (item.name === 'potion') {
+                } else if (item.baseId === 'potion' || item.name === 'potion') {
                     const playerChar = gameState.player;
                     playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
                     this.particleDecoratorManager.playHealingEffect(playerChar);
@@ -737,11 +744,11 @@ export class Game {
             player.y + player.height > item.y
         );
         if (itemToPick) {
-            if (itemToPick.name === 'gold') {
+            if (itemToPick.baseId === 'gold' || itemToPick.name === 'gold') {
                 gameState.gold += 10;
                 this.combatLogManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
             } else {
-                const existing = gameState.inventory.find(i => i.name === itemToPick.name);
+                const existing = gameState.inventory.find(i => i.baseId === itemToPick.baseId);
                 if (existing) {
                     existing.quantity += 1;
                 } else {
@@ -754,6 +761,7 @@ export class Game {
         this.fogManager.update(player, mapManager);
         const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager, movementManager: this.movementManager, projectileManager: this.projectileManager };
         metaAIManager.update(context);
+        this.itemAIManager.update(context);
         this.projectileManager.update();
         this.vfxManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });

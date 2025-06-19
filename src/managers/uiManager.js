@@ -412,7 +412,7 @@ export class UIManager {
         if (item.tags.includes('weapon') || item.tags.includes('armor') ||
             item.type === 'weapon' || item.type === 'armor') {
             this._showEquipTargetPanel(item, gameState);
-        } else if (item.name === 'potion') {
+        } else if (item.baseId === 'potion' || item.name === 'potion') {
             const player = gameState.player;
             player.hp = Math.min(player.maxHp, player.hp + 5);
             console.log(`포션을 사용했습니다! HP +5`);
