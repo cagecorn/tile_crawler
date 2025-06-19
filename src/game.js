@@ -9,6 +9,8 @@ import { CombatLogManager, SystemLogManager } from './managers/logManager.js';
 import { CombatCalculator } from './combat.js';
 import { TagManager } from './managers/tagManager.js';
 import { MapManager } from './map.js';
+import { AquariumMapManager } from './aquariumMap.js';
+import { AquariumManager, AquariumInspector } from './managers/aquariumManager.js';
 import * as Managers from './managers/index.js'; // managers/index.js에서 모든 매니저를 한 번에 불러옴
 import { AssetLoader } from './assetLoader.js';
 import { MetaAIManager, STRATEGY } from './managers/ai-managers.js';
@@ -57,7 +59,8 @@ export class Game {
         this.systemLogManager = new SystemLogManager(this.eventManager);
         this.tagManager = new TagManager();
         this.combatCalculator = new CombatCalculator(this.eventManager, this.tagManager);
-        this.mapManager = new MapManager();
+        // Player begins in the Aquarium map for feature testing
+        this.mapManager = new AquariumMapManager();
         this.saveLoadManager = new SaveLoadManager();
         this.turnManager = new TurnManager();
         this.narrativeManager = new NarrativeManager();
@@ -95,6 +98,15 @@ export class Game {
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
+        this.aquariumManager = new AquariumManager(
+            this.eventManager,
+            this.monsterManager,
+            this.itemManager,
+            this.mapManager,
+            this.factory,
+            this.itemFactory
+        );
+        this.aquariumInspector = new AquariumInspector(this.aquariumManager);
 
         for (let i = 0; i < 20; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
@@ -104,6 +116,14 @@ export class Game {
                 this.itemManager.addItem(new Item(pos.x, pos.y, this.mapManager.tileSize, itemName, assets[itemName]));
             }
         }
+
+        // example feature: spawn a monster for poison debuff testing
+        this.aquariumManager.addTestingFeature({
+            type: 'monster',
+            image: assets.monster,
+            baseStats: { }
+        });
+        this.aquariumInspector.run();
 
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
         this.monsterGroup = this.metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
