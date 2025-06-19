@@ -9,6 +9,7 @@
     <div id="top-menu-bar" class="ui-frame">
         <button class="menu-btn" data-panel-id="inventory">인벤토리</button>
         <button class="menu-btn" data-panel-id="mercenary-panel">용병 부대</button>
+        <button class="menu-btn" data-panel-id="character-sheet-panel">플레이어 정보</button>
     </div>
     <div id="canvas-container">
         <canvas id="map-base-canvas" class="game-layer"></canvas>
@@ -181,6 +182,22 @@
         <button class="close-btn" data-panel-id="mercenary-panel">X</button>
         <h2>🗡️ 용병 부대</h2>
         <div id="mercenary-list"></div>
+    </div>
+
+    <!-- 캐릭터 스탯을 표시하는 패널 -->
+    <div id="character-sheet-panel" class="modal-panel ui-frame hidden">
+        <button class="close-btn" data-panel-id="character-sheet-panel">X</button>
+        <h2 id="sheet-character-name">캐릭터</h2>
+        <div class="stats-content-box">
+            <div id="sheet-equipment" class="equipment-slots">
+                <div class="equip-slot" data-slot="weapon"><span>무기</span></div>
+                <div class="equip-slot" data-slot="armor"><span>방어구</span></div>
+                <div class="equip-slot" data-slot="accessory1"><span>악세서리1</span></div>
+                <div class="equip-slot" data-slot="accessory2"><span>악세서리2</span></div>
+            </div>
+            <div id="sheet-inventory"></div>
+            <div id="stat-page-1" class="stat-page"></div>
+        </div>
     </div>
 
 
