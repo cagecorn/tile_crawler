@@ -128,6 +128,10 @@ export class Mercenary extends Entity {
         this.unitType = 'human'; // 용병의 타입도 '인간'
         this.ai = new MeleeAI();
         this.inventory = [];
+
+        this.stuckCounter = 0;
+        this.maxStuckCount = 5;
+        this.lastPosition = { x: this.x, y: this.y };
     }
 
     render(ctx) {
@@ -145,6 +149,43 @@ export class Mercenary extends Entity {
                 const drawH = this.height * 0.8;
                 ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
             }
+        }
+    }
+
+    update(context) {
+        const prevX = this.x;
+        const prevY = this.y;
+        super.update(context);
+
+        if (this.x === prevX && this.y === prevY) {
+            this.stuckCounter++;
+            if (this.stuckCounter >= this.maxStuckCount) {
+                const tileSize = context.mapManager.tileSize;
+                const startX = Math.floor(this.x / tileSize);
+                const startY = Math.floor(this.y / tileSize);
+                const allEntities = [
+                    context.player,
+                    ...context.monsterManager.monsters,
+                    ...context.mercenaryManager.mercenaries
+                ];
+                const isBlocked = (x, y) => {
+                    for (const e of allEntities) {
+                        if (e === this) continue;
+                        const ex = Math.floor(e.x / tileSize);
+                        const ey = Math.floor(e.y / tileSize);
+                        if (ex === x && ey === y) return true;
+                    }
+                    return false;
+                };
+                const escape = context.pathfindingManager.findEscapeRoute(startX, startY, isBlocked);
+                if (escape) {
+                    this.x = escape.x * tileSize;
+                    this.y = escape.y * tileSize;
+                }
+                this.stuckCounter = 0;
+            }
+        } else {
+            this.stuckCounter = 0;
         }
     }
 }
