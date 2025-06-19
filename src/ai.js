@@ -267,3 +267,24 @@ export class RangedAI extends AIArchetype {
 export class WizardAI extends RangedAI {
     // 추가적인 마법사 전용 로직이 들어갈 수 있습니다
 }
+
+// --- 소환사형 AI ---
+export class SummonerAI extends RangedAI {
+    decideAction(self, context) {
+        const summonId = SKILLS.summon_skeleton?.id;
+        const skill = SKILLS[summonId];
+        if (
+            summonId &&
+            skill &&
+            Array.isArray(self.skills) &&
+            self.skills.includes(summonId) &&
+            self.mp >= skill.manaCost &&
+            (self.skillCooldowns[summonId] || 0) <= 0 &&
+            !context.allies.some(a => a.properties?.summonedBy !== undefined && a.properties.summonedBy === self.id)
+        ) {
+            return { type: 'skill', target: self, skillId: summonId };
+        }
+
+        return super.decideAction(self, context);
+    }
+}

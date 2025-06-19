@@ -42,3 +42,8 @@
 - ParasiteManager에 중복 기생체 결합 기능 구현.
 - Item 클래스에 rank 속성 추가 및 저장 상태 갱신.
 - 기생체 결합 로직 테스트 추가.
+
+## 세션 10
+- SummonerAI 클래스 추가로 소환사 행동 로직 구현.
+- `summon_skeleton` 스킬 데이터를 정의하여 소환 행동이 가능하도록 함.
+- 기본 테스트 `summonerAI.test.js`로 스킬 사용 여부 검증.

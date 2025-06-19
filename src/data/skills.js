@@ -244,6 +244,14 @@ export const SKILLS = {
         tags: ['skill', 'debuff', 'resist_down', 'enemy', '디버프'],
         effects: { target: ['resist_down'] },
     },
+    summon_skeleton: {
+        id: 'summon_skeleton',
+        name: '해골 소환',
+        description: '해골 하수인을 소환합니다.',
+        manaCost: 18,
+        cooldown: 150,
+        tags: ['skill', 'summon', 'magic', 'minion'],
+    },
     teleport: {
         id: 'teleport',
         name: '텔레포트',
