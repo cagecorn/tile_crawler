@@ -719,7 +719,7 @@ export class Game {
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
-        turnManager.update(allEntities); // 턴 매니저 업데이트
+        turnManager.update(allEntities, { eventManager, player: gameState.player }); // 턴 매니저 업데이트
         itemManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
         const player = gameState.player;

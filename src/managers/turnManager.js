@@ -7,18 +7,42 @@ export class TurnManager {
         this.currentFrame = 0;
     }
 
-    update(entities) {
+    update(entities, { eventManager = null, player = null } = {}) {
         this.currentFrame++;
         if (this.currentFrame >= this.framesPerTurn) {
             this.currentFrame = 0;
             this.turnCount++;
-            
-            // 여기에 턴마다 발생하는 로직 추가
-            // 예: 모든 유닛의 배부름 0.1 감소, 호감도 0.1 증가 등
-            // entities.forEach(e => {
-            //     e.hunger -= 0.1;
-            //     e.affinity += 0.1;
-            // });
+
+            for (const e of entities) {
+                if (e.fullness !== undefined) {
+                    if ((e.isFriendly || e.isPlayer) && e.prevTurnPos) {
+                        if (e.x !== e.prevTurnPos.x || e.y !== e.prevTurnPos.y) {
+                            e.fullness = Math.max(0, +(e.fullness - 0.1).toFixed(2));
+                        }
+                    }
+                    e.prevTurnPos = { x: e.x, y: e.y };
+                    if (e.fullness <= 0) {
+                        eventManager?.publish('log', { message: `${e.constructor.name}이(가) 굶주림으로 쓰러졌습니다.` });
+                        if (e.isPlayer) {
+                            eventManager?.publish('game_over', {});
+                        } else {
+                            eventManager?.publish('entity_death', { attacker: null, victim: e });
+                        }
+                        continue;
+                    } else if (e.fullness < 20) {
+                        eventManager?.publish('log', { message: `${e.constructor.name}의 배부름이 위험합니다!`, color: 'orange' });
+                    }
+                }
+
+                if (e.affinity !== undefined && e !== player && e.isFriendly) {
+                    e.affinity = Math.min(e.maxAffinity, +(e.affinity + 0.1).toFixed(2));
+                    if (e.affinity <= 0) {
+                        eventManager?.publish('log', { message: `${e.constructor.name}의 호감도가 바닥나 파티를 떠났습니다.` });
+                    } else if (e.affinity < 20) {
+                        eventManager?.publish('log', { message: `${e.constructor.name}의 호감도가 위험합니다!`, color: 'orange' });
+                    }
+                }
+            }
         }
     }
 }
