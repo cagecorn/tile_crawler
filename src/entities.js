@@ -272,6 +272,8 @@ export class Projectile {
         // 밝게 그려야 하는 마법 투사체의 경우 blendMode를 'lighter'로 설정할 수 있다
         this.blendMode = config.blendMode || null;
 
+        this.rotation = 0;
+
         this.vfxManager = config.vfxManager || null;
         this.enableGlow = config.enableGlow || false;
         this.isDead = false;
@@ -293,6 +295,8 @@ export class Projectile {
         const dy = this.target.y - this.y;
         const distance = Math.hypot(dx, dy);
 
+        this.rotation = Math.atan2(dy, dx);
+
         if (distance < this.speed) {
             this.isDead = true;
             return { collided: true, target: this.target };
@@ -313,6 +317,9 @@ export class Projectile {
 
         if (this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.rotate(this.rotation);
+            ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
         }
 
         ctx.restore();
