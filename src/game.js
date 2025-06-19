@@ -107,7 +107,8 @@ export class Game {
             this.itemManager,
             this.mapManager,
             this.factory,
-            this.itemFactory
+            this.itemFactory,
+            this.vfxManager
         );
         this.aquariumInspector = new AquariumInspector(this.aquariumManager);
 

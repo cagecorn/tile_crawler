@@ -1,13 +1,14 @@
 // src/managers/aquariumManager.js
 // Manages patches and features placed on the Aquarium map
 export class AquariumManager {
-    constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory) {
+    constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null) {
         this.eventManager = eventManager;
         this.monsterManager = monsterManager;
         this.itemManager = itemManager;
         this.mapManager = mapManager;
         this.charFactory = charFactory;
         this.itemFactory = itemFactory;
+        this.vfxManager = vfxManager;
         this.features = [];
     }
 
@@ -31,6 +32,24 @@ export class AquariumManager {
             if (pos) {
                 const item = this.itemFactory.create(feature.itemId, pos.x, pos.y, this.mapManager.tileSize);
                 if (item) this.itemManager.addItem(item);
+            }
+        } else if (feature.type === 'bubble' && this.vfxManager) {
+            const pos = this.mapManager.getRandomFloorPosition();
+            if (pos) {
+                const emitter = this.vfxManager.addEmitter(
+                    pos.x + this.mapManager.tileSize / 2,
+                    pos.y + this.mapManager.tileSize / 2,
+                    {
+                        spawnRate: feature.spawnRate || 2,
+                        duration: -1,
+                        particleOptions: {
+                            color: feature.color || 'rgba(200,200,255,0.7)',
+                            gravity: feature.gravity !== undefined ? feature.gravity : -0.05,
+                            speed: feature.speed || 0.5,
+                        },
+                    }
+                );
+                feature.emitter = emitter;
             }
         }
     }

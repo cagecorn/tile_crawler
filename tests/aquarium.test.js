@@ -3,6 +3,7 @@ import { AquariumManager, AquariumInspector } from '../src/managers/aquariumMana
 import { CharacterFactory } from '../src/factory.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { MonsterManager, ItemManager } from '../src/managers/managers.js';
+import { VFXManager } from '../src/managers/vfxManager.js';
 import { describe, test, assert } from './helpers.js';
 
 const assets = { monster:{} };
@@ -18,12 +19,24 @@ describe('Aquarium', () => {
     test('Manager adds feature and inspector passes', () => {
         const eventManager = new EventManager();
         const monsterManager = new MonsterManager(0, new AquariumMapManager(), assets, eventManager, new CharacterFactory(assets));
-        const itemManager = new ItemManager();
+        const itemManager = new ItemManager(0, monsterManager.mapManager, assets);
         const factory = new CharacterFactory(assets);
-        const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} });
+        const vfx = new VFXManager();
+        const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx);
         aquariumManager.addTestingFeature({ type:'monster', image:{} });
         const inspector = new AquariumInspector(aquariumManager);
         assert.ok(inspector.run(), 'inspection fails');
         assert.strictEqual(monsterManager.monsters.length, 1);
+    });
+
+    test('Bubble feature spawns emitter', () => {
+        const eventManager = new EventManager();
+        const monsterManager = new MonsterManager(0, new AquariumMapManager(), assets, eventManager, new CharacterFactory(assets));
+        const itemManager = new ItemManager(0, monsterManager.mapManager, assets);
+        const factory = new CharacterFactory(assets);
+        const vfx = new VFXManager();
+        const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx);
+        aquariumManager.addTestingFeature({ type: 'bubble' });
+        assert.strictEqual(vfx.emitters.length, 1);
     });
 });
