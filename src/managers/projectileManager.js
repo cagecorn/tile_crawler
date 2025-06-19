@@ -12,25 +12,31 @@ export class ProjectileManager {
     create(caster, target, skill) {
         const keyMap = {
             fireball: 'fire-ball',
-            iceball: 'ice-ball'
+            iceball: 'ice-ball',
+            arrow: 'arrow'
         };
         const imageKey = keyMap[skill.projectile] || skill.projectile;
 
+        const isArrow = skill.projectile === 'arrow';
+
         const config = {
-            x: caster.x,
-            y: caster.y,
+            x: caster.x + caster.width / 2,
+            y: caster.y + caster.height / 2,
             target: target,
             caster: caster,
             damage: skill.damage,
             image: this.assets[imageKey],
-            width: 64,
-            height: 64,
-            // 파이어볼 및 아이스볼 투사체는 스크린 블렌드 모드로 표현
-            blendMode: 'screen',
-            enableGlow: true,
+            width: isArrow ? 32 : 64,
+            height: isArrow ? 32 : 64,
+            blendMode: isArrow ? null : 'screen',
+            enableGlow: !isArrow,
             vfxManager: this.vfxManager,
         };
-        this.projectiles.push(new Projectile(config));
+        const projectile = new Projectile(config);
+        this.projectiles.push(projectile);
+        if (isArrow && this.vfxManager) {
+            this.vfxManager.addArrowTrail(projectile);
+        }
     }
 
     update() {

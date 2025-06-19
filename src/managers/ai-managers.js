@@ -58,6 +58,14 @@ export class MetaAIManager {
                 if (entity.attackCooldown === 0) {
                     // 공격 이벤트를 발행
                     eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
+                    const weaponTags = entity.equipment?.weapon?.tags || [];
+                    const isRanged = weaponTags.includes('ranged') || weaponTags.includes('bow');
+                    if (isRanged && context.projectileManager) {
+                        const projSkill = { projectile: 'arrow', damage: entity.attackPower };
+                        context.projectileManager.create(entity, action.target, projSkill);
+                    } else {
+                        eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
+                    }
                     const baseCd = 60;
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
