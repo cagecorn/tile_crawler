@@ -121,12 +121,14 @@ export class Game {
             }
         }
 
-        // example feature: spawn a monster for poison debuff testing
-        this.aquariumManager.addTestingFeature({
-            type: 'monster',
-            image: assets.monster,
-            baseStats: { }
-        });
+        // example feature: spawn several monsters for poison debuff testing
+        for (let i = 0; i < 10; i++) {
+            this.aquariumManager.addTestingFeature({
+                type: 'monster',
+                image: assets.monster,
+                baseStats: { }
+            });
+        }
         this.aquariumInspector.run();
 
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
@@ -174,7 +176,7 @@ export class Game {
 
         // === 3. 몬스터 생성 ===
         const monsters = [];
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 80; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
                 const monster = this.factory.create('monster', {
