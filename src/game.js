@@ -122,6 +122,7 @@ export class Game {
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
+        this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
         this.aquariumManager = new AquariumManager(
             this.eventManager,
