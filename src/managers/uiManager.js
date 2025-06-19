@@ -1,4 +1,5 @@
 import { SKILLS } from '../data/skills.js';
+import { MBTI_INFO } from '../data/mbti.js';
 
 export class UIManager {
     constructor() {
@@ -138,6 +139,15 @@ export class UIManager {
         affinityDiv.textContent = `💕 호감도: ${mercenary.affinity.toFixed(1)} / ${mercenary.maxAffinity}`;
         this.mercStatsContainer.appendChild(affinityDiv);
 
+        const mbtiDiv = document.createElement('div');
+        mbtiDiv.className = 'stat-line';
+        const mbtiSpan = document.createElement('span');
+        mbtiSpan.textContent = mercenary.properties.mbti;
+        this._attachTooltip(mbtiSpan, this._getMBTITooltip(mercenary.properties.mbti));
+        mbtiDiv.innerHTML = 'MBTI: ';
+        mbtiDiv.appendChild(mbtiSpan);
+        this.mercStatsContainer.appendChild(mbtiDiv);
+
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
@@ -265,6 +275,17 @@ export class UIManager {
                 aLine.className = 'stat-line';
                 aLine.innerHTML = `<span>affinity:</span> <span>${entity.affinity.toFixed(1)} / ${entity.maxAffinity}</span>`;
                 page1.appendChild(aLine);
+            }
+
+            if (entity.properties && entity.properties.mbti) {
+                const mLine = document.createElement('div');
+                mLine.className = 'stat-line';
+                const span = document.createElement('span');
+                span.textContent = entity.properties.mbti;
+                this._attachTooltip(span, this._getMBTITooltip(entity.properties.mbti));
+                mLine.innerHTML = 'MBTI: ';
+                mLine.appendChild(span);
+                page1.appendChild(mLine);
             }
         }
     }
@@ -534,6 +555,11 @@ export class UIManager {
             }
         }
         return html;
+    }
+
+    _getMBTITooltip(mbti) {
+        const info = MBTI_INFO[mbti] || '';
+        return `<strong>${mbti}</strong><br>${info}`;
     }
 
     _attachTooltip(element, html) {
