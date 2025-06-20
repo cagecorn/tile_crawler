@@ -125,7 +125,7 @@ export class Game {
         );
         this.itemAIManager.setEffectManager(this.effectManager);
         this.microItemAIManager = new Managers.MicroItemAIManager();
-        this.microEngine = new MicroEngine([], this.itemManager.items);
+        this.microEngine = new MicroEngine(this.eventManager, this.itemManager);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
@@ -866,7 +866,6 @@ export class Game {
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...(this.petManager?.pets || [])];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
-        microEngine.update();
         turnManager.update(allEntities, { eventManager, player: gameState.player, parasiteManager: this.parasiteManager }); // 턴 매니저 업데이트
         itemManager.update();
         this.petManager.update();
@@ -956,6 +955,8 @@ export class Game {
         this.itemAIManager.update(context);
         this.projectileManager.update();
         this.vfxManager.update();
+        // micro-world engine runs after visuals and item logic
+        this.microEngine.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });
     }
 
