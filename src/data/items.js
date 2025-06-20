@@ -49,6 +49,7 @@ export const ITEMS = {
         type: 'consumable',
         tags: ['consumable', 'healing_item', '체력 회복 아이템'],
         imageKey: 'potion',
+        healAmount: 5,
         range: 192,
     },
     gold: {

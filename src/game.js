@@ -769,6 +769,27 @@ export class Game {
                 }
                 this.uiManager.renderInventory(gameState);
             },
+            onConsumableUse: (itemIndex) => {
+                const item = gameState.player.consumables[itemIndex];
+                if (!item) return;
+
+                if (item.baseId === 'potion' || item.tags?.includes('healing_item')) {
+                    const playerChar = gameState.player;
+                    playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
+                    this.particleDecoratorManager.playHealingEffect(playerChar);
+                } else if (item.tags.includes('buff_item')) {
+                    this.effectManager.addEffect(gameState.player, item.effectId);
+                } else if (item.tags.includes('pet') || item.type === 'pet') {
+                    const pet = this.petManager.equip(gameState.player, item, 'fox');
+                    if (pet) {
+                        gameState.player.consumables.splice(itemIndex, 1);
+                        this.uiManager.updateUI(gameState);
+                        return;
+                    }
+                }
+                gameState.player.consumables.splice(itemIndex, 1);
+                this.uiManager.updateUI(gameState);
+            },
             onEquipItem: (entity, item) => {
                 const targetInventory = entity.isPlayer ? gameState.inventory : (entity.consumables || entity.inventory || gameState.inventory);
                 this.equipmentManager.equip(entity, item, targetInventory);
@@ -889,6 +910,16 @@ export class Game {
             if (itemToPick.baseId === 'gold' || itemToPick.name === 'gold') {
                 gameState.gold += 10;
                 this.combatLogManager.add(`골드를 주웠습니다! 현재 골드: ${gameState.gold}`);
+            } else if (itemToPick.tags?.includes('consumable')) {
+                if (!player.addConsumable(itemToPick)) {
+                    const existing = gameState.inventory.find(i => i.baseId === itemToPick.baseId);
+                    if (existing) {
+                        existing.quantity += 1;
+                    } else {
+                        gameState.inventory.push(itemToPick);
+                    }
+                }
+                this.combatLogManager.add(`${itemToPick.name}을(를) 획득했습니다.`);
             } else {
                 const existing = gameState.inventory.find(i => i.baseId === itemToPick.baseId);
                 if (existing) {
@@ -897,6 +928,12 @@ export class Game {
                     gameState.inventory.push(itemToPick);
                 }
                 this.combatLogManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
+                if (itemToPick.tags.includes('pet') || itemToPick.type === 'pet') {
+                    const pet = this.petManager.equip(player, itemToPick, 'fox');
+                    if (pet) {
+                        gameState.inventory = gameState.inventory.filter(i => i !== itemToPick);
+                    }
+                }
             }
             this.itemManager.removeItem(itemToPick);
         }

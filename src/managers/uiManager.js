@@ -44,6 +44,7 @@ export class UIManager {
         this.sheetInventory = document.getElementById('sheet-inventory');
         this.callbacks = {};
         this._lastInventory = [];
+        this._lastConsumables = [];
         this._statUpCallback = null;
         this._isInitialized = false;
         this.particleDecoratorManager = null;
@@ -55,6 +56,7 @@ export class UIManager {
         this.callbacks = callbacks || {};
         this._statUpCallback = this.callbacks.onStatUp;
         this.onEquipItem = this.callbacks.onEquipItem;
+        this.onConsumableUse = this.callbacks.onConsumableUse;
         if (this.statUpButtonsContainer) {
             this.statUpButtonsContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('stat-up-btn') || event.target.classList.contains('stat-plus')) {
@@ -447,9 +449,9 @@ export class UIManager {
         const expRatio = stats.get('exp') / stats.get('expNeeded');
         if (this.expBarFillElement) this.expBarFillElement.style.width = `${expRatio * 100}%`;
         if (this.expTextElement) this.expTextElement.textContent = `${stats.get('exp')} / ${stats.get('expNeeded')}`;
-        if (this.inventorySlotsElement && this._hasInventoryChanged(gameState.inventory)) {
+        if (this.inventorySlotsElement && this._hasConsumablesChanged(player.consumables)) {
             this.inventorySlotsElement.innerHTML = '';
-            gameState.inventory.forEach((item, index) => {
+            (player.consumables || []).forEach((item, index) => {
                 const slot = document.createElement('div');
                 slot.className = 'inventory-slot';
                 if (item.image) {
@@ -468,11 +470,11 @@ export class UIManager {
                 }
                 this._attachTooltip(slot, this._getItemTooltip(item));
                 slot.onclick = () => {
-                    if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
+                    if (this.onConsumableUse) this.onConsumableUse(index);
                 };
                 this.inventorySlotsElement.appendChild(slot);
             });
-            this._lastInventory = [...gameState.inventory];
+            this._lastConsumables = [...(player.consumables || [])];
         }
 
         if (this.skillSlots) {
@@ -512,6 +514,15 @@ export class UIManager {
         for (let i = 0; i < current.length; i++) {
             if (current[i] !== this._lastInventory[i]) return true;
             if (current[i].quantity !== this._lastInventory[i].quantity) return true;
+        }
+        return false;
+    }
+
+    _hasConsumablesChanged(current) {
+        if (current.length !== this._lastConsumables.length) return true;
+        for (let i = 0; i < current.length; i++) {
+            if (current[i] !== this._lastConsumables[i]) return true;
+            if (current[i].quantity !== this._lastConsumables[i].quantity) return true;
         }
         return false;
     }
