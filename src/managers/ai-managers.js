@@ -80,17 +80,6 @@ export class MetaAIManager {
                     entity.mp -= skill.manaCost;
                     entity.skillCooldowns[action.skillId] = skill.cooldown;
                     eventManager.publish('skill_used', { caster: entity, skill, target: action.target });
-                    if (skill.id === SKILLS.heal.id && entity.properties?.mbti) {
-                        const letter = entity.properties.mbti.includes('I') ? 'I'
-                            : entity.properties.mbti.includes('E') ? 'E' : '';
-                        if (letter) {
-                            eventManager.publish('vfx_request', {
-                                type: 'text_popup',
-                                text: letter,
-                                target: entity
-                            });
-                        }
-                    }
                     const baseCd = 60;
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
@@ -112,13 +101,6 @@ export class MetaAIManager {
                 entity.mp -= skill.manaCost;
                 entity.skillCooldowns[skill.id] = skill.cooldown;
                 entity.attackCooldown = Math.max(1, Math.round(60 / (entity.attackSpeed || 1)));
-                if (entity.properties?.mbti && entity.properties.mbti.includes('P')) {
-                    ev.publish('vfx_request', {
-                        type: 'text_popup',
-                        text: 'P',
-                        target: entity
-                    });
-                }
                 break; }
             case 'move':
                 const { movementManager } = context;
