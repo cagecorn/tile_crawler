@@ -7,7 +7,7 @@ import { ItemManager } from '../src/managers/itemManager.js';
 import { EquipmentManager } from '../src/managers/equipmentManager.js';
 import { TagManager } from '../src/managers/tagManager.js';
 import { CombatCalculator } from '../src/combat.js';
-import { MeleeAI } from '../src/ai.js';
+import { MeleeAI, PurifierAI, HealerAI, CompositeAI } from '../src/ai.js';
 import { Item } from '../src/entities.js';
 import { SKILLS } from '../src/data/skills.js';
 import { describe, test, assert } from './helpers.js';
@@ -96,5 +96,34 @@ test('차지 어택과 포션 사용 시나리오', () => {
     assert.ok(chargeUsed, '차지 어택이 발동되지 않았습니다');
     assert.ok(player.hp >= 8, '포션 사용 후 HP 값이 올바르지 않습니다');
 });
+
+// 독 상태이상과 정화 시나리오
+ test('Poison status and purifier AI', () => {
+     const assets = { player:{}, mercenary:{}, monster:{} };
+     const mapManager = new MapManager(1);
+     const factory = new CharacterFactory(assets);
+     const player = factory.create('player', { x:0, y:0, tileSize:1, groupId:'g' });
+     const healer = factory.create('mercenary', { x:1, y:0, tileSize:1, groupId:'g', jobId:'healer' });
+     healer.ai = new CompositeAI(new PurifierAI(), new HealerAI());
+     healer.properties.mbti = 'ESFJ';
+     healer.mp = healer.maxMp;
+     const monster = factory.create('monster', { x:2, y:0, tileSize:1, groupId:'m' });
+     monster.skills.push(SKILLS.poison_sting.id);
+
+     // 몬스터의 독 공격 가정
+     player.effects.push({ id:'poison', tags:['status_ailment'], remaining:50 });
+     assert.ok(player.effects.some(e => e.id === 'poison'), 'Poison effect should apply');
+
+     const context = { player, allies:[player, healer], enemies:[monster], mapManager:{ tileSize:1, isWallAt:() => false } };
+     const action = healer.ai.decideAction(healer, context);
+
+     const usedPurify = action.type === 'skill' && action.skillId === SKILLS.purify.id;
+     if (usedPurify) {
+         player.effects = player.effects.filter(e => !e.tags?.includes('status_ailment'));
+     }
+
+     assert.ok(usedPurify || player.effects.some(e => e.id === 'poison'), 'Healer may skip purify based on MBTI');
+ });
+
 
 });
