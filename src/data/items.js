@@ -5,6 +5,7 @@ export const ITEMS = {
         type: 'weapon',
         damageDice: '1d6',
         tags: ['melee', 'sword'],
+        knockbackChance: 0.1,
         imageKey: 'sword',
         stats: { attackPower: 2 },
         tier: 'normal',
@@ -85,6 +86,7 @@ export const ITEMS = {
         type: 'weapon',
         damageDice: '1d6',
         tags: ['melee', 'sword'],
+        knockbackChance: 0.15,
         imageKey: 'sword',
         stats: { attackPower: 2 },
         tier: 'normal',
@@ -98,6 +100,7 @@ export const ITEMS = {
         type: 'weapon',
         damageDice: '1d8',
         tags: ['melee', 'sword', 'finesse_weapon'],
+        knockbackChance: 0.2,
         imageKey: 'sword',
         stats: {
             attackPower: 3,

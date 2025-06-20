@@ -8,6 +8,7 @@ export class CombatCalculator {
 
     handleAttack(data) {
         const { attacker, defender, skill } = data;
+        const attackingWeapon = attacker.equipment?.weapon;
 
         // --- 패링 로직 시작 ---
         const defendingWeapon = defender.equipment?.weapon;
@@ -83,5 +84,15 @@ export class CombatCalculator {
         this.eventManager.publish('attack_landed', { attacker, defender, skill });
 
         this.eventManager.publish('damage_calculated', { ...data, damage: finalDamage, details });
+
+        if (attackingWeapon && attackingWeapon.tags?.includes('sword')) {
+            const chance = attackingWeapon.knockbackChance || 0;
+            if (chance > 0 && Math.random() < chance) {
+                this.eventManager.publish('knockback_success', {
+                    attacker,
+                    weapon: attackingWeapon
+                });
+            }
+        }
     }
 }
