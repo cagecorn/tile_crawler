@@ -61,6 +61,8 @@ export class CharacterFactory {
         switch (type) {
             case 'player':
                 const player = new Player(finalConfig);
+                player.consumables = [];
+                player.consumableCapacity = 4;
                 player.skills.push(SKILLS.fireball.id);
                 player.skills.push(SKILLS.iceball.id);
                 player.skills.push(SKILLS.teleport.id);

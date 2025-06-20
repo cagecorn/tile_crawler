@@ -143,6 +143,8 @@ export class Player extends Entity {
         this.isFriendly = true;
         this.unitType = 'human'; // 플레이어의 타입은 '인간'
         this.fullness = this.maxFullness;
+        this.consumables = [];
+        this.consumableCapacity = 4;
     }
 
     render(ctx) {
@@ -163,6 +165,13 @@ export class Player extends Entity {
         }
 
         // 플레이어는 머리 위 MBTI 표기를 숨긴다
+    }
+
+    addConsumable(item) {
+        if (this.consumables.length >= this.consumableCapacity) return false;
+        item.quantity = 1;
+        this.consumables.push(item);
+        return true;
     }
 
 }
