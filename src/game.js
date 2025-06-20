@@ -1022,12 +1022,26 @@ export class Game {
             { x: -1, y: 1 }, { x: 0, y: 1 }, { x: 1, y: 1 }
         ];
         dirs.sort(() => Math.random() - 0.5);
+
+        const entities = [
+            this.gameState.player,
+            ...this.mercenaryManager.mercenaries,
+            ...this.monsterManager.monsters,
+        ];
+
         for (const d of dirs) {
             const tileX = baseX + d.x;
             const tileY = baseY + d.y;
             const worldX = tileX * tileSize;
             const worldY = tileY * tileSize;
-            if (!this.mapManager.isWallAt(worldX, worldY)) {
+            if (this.mapManager.isWallAt(worldX, worldY)) continue;
+
+            const occupied = entities.some(e => {
+                const ex = Math.floor(e.x / tileSize);
+                const ey = Math.floor(e.y / tileSize);
+                return ex === tileX && ey === tileY;
+            });
+            if (!occupied) {
                 return { x: worldX, y: worldY };
             }
         }
