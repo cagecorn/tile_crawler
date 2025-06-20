@@ -47,3 +47,7 @@
 - SummonerAI 클래스 추가로 소환사 행동 로직 구현.
 - `summon_skeleton` 스킬 데이터를 정의하여 소환 행동이 가능하도록 함.
 - 기본 테스트 `summonerAI.test.js`로 스킬 사용 여부 검증.
+
+## 세션 11
+- SummonerAI가 `maxMinions` 값을 고려하여 소환수를 제한하도록 수정.
+- 테스트에 최대 소환수 로직을 검증하는 케이스 추가.
