@@ -107,6 +107,10 @@ export class MetaAIManager {
                     context.motionManager.dashTowards(entity, action.target, 3);
                 }
 
+                if (action.skillId === 'pull' && context.motionManager && action.target) {
+                    context.motionManager.pullTargetTo(action.target, entity);
+                }
+
                 if (action.skillId === 'charge_shot' && context.effectManager) {
                     context.effectManager.addEffect(action.target, 'charging_shot_effect');
                 }
