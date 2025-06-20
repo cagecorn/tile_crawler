@@ -122,6 +122,11 @@ export class StatManager {
             if (this.entity.eventManager) {
                 this.entity.eventManager.publish('level_up', { player: this.entity, level: this.get('level') });
             }
+            
+            // --- BUG FIX ---
+            // 루프가 끝난 후에 호출되던 것을 루프 안으로 이동시켜
+            // 매 레벨업마다 스탯을 다시 계산하도록 수정합니다.
+            this.recalculate();
         }
 
         this.recalculate();
