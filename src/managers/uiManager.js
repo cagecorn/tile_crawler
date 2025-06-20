@@ -1,6 +1,7 @@
 import { SKILLS } from '../data/skills.js';
 import { MBTI_INFO } from '../data/mbti.js';
 import { FAITHS } from '../data/faiths.js';
+import { TRAITS } from '../data/traits.js';
 
 export class UIManager {
     constructor() {
@@ -88,10 +89,16 @@ export class UIManager {
             this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(btn => {
                 btn.onclick = () => {
                     this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(b => b.classList.remove('active'));
-                    this.characterSheetPanel.querySelectorAll('.stat-page').forEach(p => p.classList.remove('active'));
+                    this.characterSheetPanel.querySelectorAll('.stat-page').forEach(p => {
+                        p.classList.remove('active');
+                        p.classList.add('hidden');
+                    });
                     btn.classList.add('active');
                     const page = this.characterSheetPanel.querySelector(`#stat-page-${btn.dataset.tab}`);
-                    if (page) page.classList.add('active');
+                    if (page) {
+                        page.classList.add('active');
+                        page.classList.remove('hidden');
+                    }
                 };
             });
         }
@@ -161,6 +168,20 @@ export class UIManager {
         faithDiv.innerHTML = '신앙: ';
         faithDiv.appendChild(faithSpan);
         this.mercStatsContainer.appendChild(faithDiv);
+
+        if (mercenary.properties.traits && mercenary.properties.traits.length) {
+            const traitDiv = document.createElement('div');
+            traitDiv.className = 'stat-line';
+            traitDiv.innerHTML = '특성: ';
+            mercenary.properties.traits.forEach(id => {
+                const span = document.createElement('span');
+                span.textContent = TRAITS[id]?.name || id;
+                this._attachTooltip(span, this._getTraitTooltip(id));
+                traitDiv.appendChild(span);
+                traitDiv.appendChild(document.createTextNode(' '));
+            });
+            this.mercStatsContainer.appendChild(traitDiv);
+        }
 
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
@@ -341,6 +362,20 @@ export class UIManager {
                 fLine2.innerHTML = 'faith: ';
                 fLine2.appendChild(span2);
                 page1.appendChild(fLine2);
+            }
+
+            if (entity.properties && Array.isArray(entity.properties.traits)) {
+                const tLine = document.createElement('div');
+                tLine.className = 'stat-line';
+                tLine.innerHTML = 'traits: ';
+                entity.properties.traits.forEach(id => {
+                    const span = document.createElement('span');
+                    span.textContent = TRAITS[id]?.name || id;
+                    this._attachTooltip(span, this._getTraitTooltip(id));
+                    tLine.appendChild(span);
+                    tLine.appendChild(document.createTextNode(' '));
+                });
+                page1.appendChild(tLine);
             }
         }
 
@@ -689,6 +724,20 @@ export class UIManager {
                 .map(([k, v]) => `${k} ${v > 0 ? '+' : ''}${v}`)
                 .join(', ');
             if (bonusText) html += `<br><em>보너스: ${bonusText}</em>`;
+        }
+        return html;
+    }
+
+    _getTraitTooltip(traitId) {
+        const data = TRAITS[traitId];
+        if (!data) return traitId;
+        let html = `<strong>${data.name}</strong>`;
+        if (data.description) html += `<br>${data.description}`;
+        if (data.stats) {
+            const stats = Object.entries(data.stats)
+                .map(([k, v]) => `${k} ${v > 0 ? '+' : ''}${v}`)
+                .join(', ');
+            if (stats) html += `<br><em>${stats}</em>`;
         }
         return html;
     }
