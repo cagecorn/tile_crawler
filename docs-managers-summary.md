@@ -55,6 +55,7 @@
 | `saveLoadManager.js` | 게임 상태 저장과 불러오기를 처리합니다. |
 | `skillManager.js` | 스킬 사용 쿨다운과 적용 로직을 관리합니다. |
 | `soundManager.js` | 효과음 및 배경 음악 재생을 초기화합니다. |
+| `speechBubbleManager.js` | 엔티티 머리 위에 대사나 스킬명을 표시하는 말풍선을 관리합니다. |
 | `tagManager.js` | 아이템과 스킬에 부여된 태그를 조회해 AI나 다른 시스템에 전달합니다. |
 | `traitManager.js` | 유닛의 특성 부여와 스탯 변화를 관리합니다. |
 | `turnManager.js` | 턴 기반 전투 모드에서 행동 순서를 결정하도록 설계되었습니다. |

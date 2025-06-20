@@ -88,6 +88,9 @@ export class MetaAIManager {
                     entity.mp -= skill.manaCost;
                     entity.skillCooldowns[action.skillId] = skill.cooldown;
                     eventManager.publish('skill_used', { caster: entity, skill, target: action.target });
+                    if (context.speechBubbleManager) {
+                        context.speechBubbleManager.addBubble(entity, skill.name);
+                    }
                     const baseCd = 60;
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
@@ -117,6 +120,10 @@ export class MetaAIManager {
 
                 if (action.skillId === 'parry_stance' && context.effectManager) {
                     context.effectManager.addEffect(entity, 'parry_ready');
+                }
+
+                if (context.speechBubbleManager) {
+                    context.speechBubbleManager.addBubble(entity, skillData.name);
                 }
 
                 weapon.weaponStats.setCooldown(skillData.cooldown);

@@ -133,6 +133,7 @@ export class Game {
         this.microEngine = new MicroEngine(this.eventManager);
         this.microCombatManager = new MicroCombatManager(this.eventManager);
         this.synergyManager = new Managers.SynergyManager(this.eventManager);
+        this.speechBubbleManager = this.managers.SpeechBubbleManager;
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
@@ -980,11 +981,13 @@ export class Game {
             equipmentManager: this.equipmentManager,
             metaAIManager,
             microItemAIManager,
+            speechBubbleManager: this.speechBubbleManager,
         };
         metaAIManager.update(context);
         this.itemAIManager.update(context);
         this.projectileManager.update();
         this.vfxManager.update();
+        this.speechBubbleManager.update();
         // micro-world engine runs after visuals and item logic
         const allItems = [
             ...this.gameState.inventory,
@@ -1038,6 +1041,7 @@ export class Game {
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
         this.projectileManager.render(contexts.vfx);
         this.vfxManager.render(contexts.vfx);
+        this.speechBubbleManager.render(contexts.vfx);
         this.effectIconManager.render(contexts.vfx, [gameState.player, ...monsterManager.monsters, ...mercenaryManager.mercenaries, ...this.petManager.pets], EFFECTS);
 
         // weatherManager.render(contexts.weather); // (미래 구멍)
