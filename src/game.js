@@ -644,6 +644,8 @@ export class Game {
         eventManager.subscribe('vfx_request', (data) => {
             if (data.type === 'dash_trail') {
                 this.vfxManager.createDashTrail(data.from.x, data.from.y, data.to.x, data.to.y);
+            } else if (data.type === 'text_popup') {
+                this.vfxManager.addTextPopup(data.text, data.target, data.options || {});
             }
         });
 
