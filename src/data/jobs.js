@@ -64,5 +64,18 @@ export const JOBS = {
             attackPower: 11,
         }
     },
+    bard: {
+        name: '음유시인',
+        description: '연주로 아군을 지원하는 전문가입니다.',
+        stats: {
+            strength: 3,
+            agility: 6,
+            endurance: 4,
+            focus: 8,
+            movement: 10,
+            hp: 26,
+            attackPower: 10,
+        }
+    },
 };
 

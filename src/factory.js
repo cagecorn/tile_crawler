@@ -8,7 +8,7 @@ import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { RangedAI, HealerAI, WizardAI, SummonerAI } from './ai.js';
+import { RangedAI, HealerAI, WizardAI, SummonerAI, BardAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 
 export class CharacterFactory {
@@ -87,6 +87,11 @@ export class CharacterFactory {
                     merc.skills.push(SKILLS.summon_skeleton.id);
                     merc.properties.maxMinions = 2;
                     merc.ai = new SummonerAI();
+                } else if (config.jobId === 'bard') {
+                    merc.skills.push(SKILLS.guardian_hymn.id);
+                    merc.skills.push(SKILLS.courage_hymn.id);
+                    merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow', 'song'] };
+                    merc.ai = new BardAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);

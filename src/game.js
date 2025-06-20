@@ -22,6 +22,7 @@ import { FogManager } from './managers/fogManager.js';
 import { NarrativeManager } from './managers/narrativeManager.js';
 import { TurnManager } from './managers/turnManager.js';
 import { SKILLS } from './data/skills.js';
+import { EFFECTS } from './data/effects.js';
 import { Item } from './entities.js';
 import { rollOnTable } from './utils/random.js';
 import { getMonsterLootTable } from './data/tables.js';
@@ -41,6 +42,7 @@ export class Game {
         this.loader.loadImage('healer', 'assets/images/healer.png');
         this.loader.loadImage('wizard', 'assets/images/wizard.png');
         this.loader.loadImage('summoner', 'assets/images/summoner.png');
+        this.loader.loadImage('bard', 'assets/images/bard.png');
         // 기존 호환성을 위해 기본 mercenary 키도 전사 이미지로 유지
         this.loader.loadImage('mercenary', 'assets/images/warrior.png');
         this.loader.loadImage('floor', 'assets/floor.png');
@@ -53,6 +55,8 @@ export class Game {
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
         this.loader.loadImage('plate-armor', 'assets/images/plate-armor.png');
         this.loader.loadImage('violin-bow', 'assets/images/violin-bow.png');
+        this.loader.loadImage('guardian-hymn-effect', 'assets/images/Guardian Hymn-effect.png');
+        this.loader.loadImage('courage-hymn-effect', 'assets/images/Courage Hymn-effect.png');
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
         this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
@@ -132,6 +136,7 @@ export class Game {
         this.particleDecoratorManager = new Managers.ParticleDecoratorManager();
         this.particleDecoratorManager.setManagers(this.vfxManager, this.mapManager);
         this.particleDecoratorManager.init();
+        this.effectIconManager = new Managers.EffectIconManager(this.eventManager, assets);
         // UIManager가 mercenaryManager에 접근할 수 있도록 설정
         this.uiManager.mercenaryManager = this.mercenaryManager;
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
@@ -388,6 +393,29 @@ export class Game {
                     if (newMerc) {
                         this.playerGroup.addMember(newMerc);
                         this.eventManager.publish('log', { message: `마법사 용병을 고용했습니다.` });
+                    }
+                } else {
+                    this.eventManager.publish('log', { message: `골드가 부족합니다.` });
+                }
+            };
+        }
+
+        const bardBtn = document.getElementById('hire-bard');
+        if (bardBtn) {
+            bardBtn.onclick = () => {
+                if (this.gameState.gold >= 50) {
+                    this.gameState.gold -= 50;
+                    const newMerc = this.mercenaryManager.hireMercenary(
+                        'bard',
+                        this.gameState.player.x + this.mapManager.tileSize,
+                        this.gameState.player.y,
+                        this.mapManager.tileSize,
+                        'player_party'
+                    );
+
+                    if (newMerc) {
+                        this.playerGroup.addMember(newMerc);
+                        this.eventManager.publish('log', { message: `음유시인 용병을 고용했습니다.` });
                     }
                 } else {
                     this.eventManager.publish('log', { message: `골드가 부족합니다.` });
@@ -877,6 +905,7 @@ export class Game {
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
         this.projectileManager.render(contexts.vfx);
         this.vfxManager.render(contexts.vfx);
+        this.effectIconManager.render(contexts.vfx, [gameState.player, ...monsterManager.monsters, ...mercenaryManager.mercenaries], EFFECTS);
 
         // weatherManager.render(contexts.weather); // (미래 구멍)
 

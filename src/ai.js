@@ -292,3 +292,35 @@ export class SummonerAI extends RangedAI {
         return super.decideAction(self, context);
     }
 }
+
+export class BardAI extends AIArchetype {
+    decideAction(self, context) {
+        const { player, allies, mapManager } = context;
+        const songs = [SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id];
+        for (const skillId of songs) {
+            const skill = SKILLS[skillId];
+            if (
+                self.skills.includes(skillId) &&
+                self.mp >= skill.manaCost &&
+                (self.skillCooldowns[skillId] || 0) <= 0 &&
+                self.equipment.weapon && self.equipment.weapon.tags.includes('song')
+            ) {
+                const target = player; // 간단히 플레이어 중심으로 시전
+                const distance = Math.hypot(target.x - self.x, target.y - self.y);
+                if (distance <= self.attackRange) {
+                    return { type: 'skill', target, skillId };
+                }
+                return { type: 'move', target };
+            }
+        }
+
+        if (self.isFriendly && !self.isPlayer) {
+            const target = this._getWanderPosition(self, player, allies, mapManager);
+            if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                return { type: 'move', target };
+            }
+        }
+
+        return { type: 'idle' };
+    }
+}

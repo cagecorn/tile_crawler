@@ -72,7 +72,7 @@ export const SKILLS = {
         description: '아군에게 보호막을 부여합니다.',
         manaCost: 12,
         cooldown: 180,
-        tags: ['skill', 'buff', 'shield', 'song', 'support', '버프'],
+        tags: ['skill', 'buff', 'shield', 'song', 'support', '버프', '연주'],
     },
     courage_hymn: {
         id: 'courage_hymn',
@@ -80,7 +80,7 @@ export const SKILLS = {
         description: '아군의 공격력을 증가시킵니다.',
         manaCost: 12,
         cooldown: 180,
-        tags: ['skill', 'buff', 'attack_up', 'song', 'support', '버프'],
+        tags: ['skill', 'buff', 'attack_up', 'song', 'support', '버프', '연주'],
     },
     hawk_eye: {
         id: 'hawk_eye',
