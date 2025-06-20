@@ -161,6 +161,16 @@ export class Player extends Entity {
                 ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
             }
         }
+
+        // 머리 위에 MBTI 글자를 항상 표시하여 직관적인 개성을 드러낸다
+        if (this.properties && this.properties.mbti) {
+            ctx.save();
+            ctx.fillStyle = 'yellow';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.properties.mbti, this.x + this.width / 2, this.y - 4);
+            ctx.restore();
+        }
     }
 
 }

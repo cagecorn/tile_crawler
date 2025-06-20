@@ -73,6 +73,7 @@ export class Game {
     }
 
     init(assets) {
+        this.assets = assets;
         this.layerManager = new LayerManager();
         const canvas = this.layerManager.layers.mapBase;
 
