@@ -273,6 +273,10 @@ export class SummonerAI extends RangedAI {
     decideAction(self, context) {
         const summonId = SKILLS.summon_skeleton?.id;
         const skill = SKILLS[summonId];
+        const maxMinions = self.properties?.maxMinions ?? 1;
+        const activeMinions = context.allies.filter(
+            a => a !== self && a.properties?.summonedBy === self.id
+        );
         if (
             summonId &&
             skill &&
@@ -280,7 +284,7 @@ export class SummonerAI extends RangedAI {
             self.skills.includes(summonId) &&
             self.mp >= skill.manaCost &&
             (self.skillCooldowns[summonId] || 0) <= 0 &&
-            !context.allies.some(a => a.properties?.summonedBy !== undefined && a.properties.summonedBy === self.id)
+            activeMinions.length < maxMinions
         ) {
             return { type: 'skill', target: self, skillId: summonId };
         }
