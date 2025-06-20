@@ -421,3 +421,11 @@ body, html {
     padding: 5px 0;
 }
 
+/* 무기 숙련도 UI */
+.proficiency-list { display: flex; flex-direction: column; gap: 8px; }
+.proficiency-line { display: grid; grid-template-columns: 80px 50px 1fr; align-items: center; font-size: 12px; }
+.prof-name { font-weight: bold; }
+.prof-exp-bar-container { position: relative; width: 100%; height: 14px; background-color: #555; border-radius: 3px; }
+.prof-exp-bar-fill { height: 100%; background-color: #a2d2ff; border-radius: 3px; }
+.prof-exp-text { position: absolute; width: 100%; text-align: center; color: black; font-size: 10px; line-height: 14px; }
+

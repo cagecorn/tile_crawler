@@ -1,4 +1,4 @@
-import { SwordAI, DaggerAI, BowAI, SpearAI, ViolinBowAI, EstocAI } from './WeaponAI.js';
+import { SwordAI, DaggerAI, BowAI, SpearAI, ViolinBowAI, EstocAI, AxeAI, MaceAI, StaffAI, ScytheAI, WhipAI } from './WeaponAI.js';
 import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 
 export class WeaponStatManager {
@@ -59,6 +59,13 @@ export class WeaponStatManager {
         }
         if (itemId.includes('spear')) return new SpearAI();
         if (itemId.includes('estoc')) return new EstocAI();
+        // --- 신규 무기 AI 연결 ---
+        if (itemId.includes('axe')) return new AxeAI();
+        if (itemId.includes('mace')) return new MaceAI();
+        if (itemId.includes('staff')) return new StaffAI();
+        if (itemId.includes('scythe')) return new ScytheAI();
+        if (itemId.includes('whip')) return new WhipAI();
+        // -----------------------
         return new SwordAI(); // 기본값은 검 AI
     }
 }

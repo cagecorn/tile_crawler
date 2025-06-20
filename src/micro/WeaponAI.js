@@ -163,4 +163,18 @@ export class EstocAI extends BaseWeaponAI {
 
 export class SaberAI extends EstocAI {}
 
+// --- 신규 무기 AI 클래스 ---
+export class AxeAI extends SwordAI {}
+export class MaceAI extends SwordAI {}
+
+// 지팡이 AI: 원거리 마법 공격
+export class StaffAI extends BowAI {
+    // TODO: 지능 기반 데미지 계산 로직과 연계 필요
+}
+
+// 낫, 채찍 AI: 창과 같은 중거리 유지 AI
+export class ScytheAI extends SpearAI {}
+export class WhipAI extends SpearAI {}
+// --- 여기까지 ---
+
 export { BaseWeaponAI };
