@@ -9,9 +9,10 @@ import { ARTIFACTS } from './data/artifacts.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, CompositeAI } from './ai.js';
+import { MeleeAI, RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, CompositeAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 import { PETS } from './data/pets.js';
+import { WeaponStatManager } from './micro/WeaponStatManager.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -72,31 +73,32 @@ export class CharacterFactory {
                     finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
                 }
                 const merc = new Mercenary(finalConfig);
+                merc.fallbackAI = new MeleeAI();
 
                 if (config.jobId === 'archer') {
                     const rangedSkill = Math.random() < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id;
                     merc.skills.push(rangedSkill);
                     merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow'] };
-                    merc.ai = new RangedAI();
+                    merc.fallbackAI = new RangedAI();
                 } else if (config.jobId === 'warrior') {
                     merc.skills.push(SKILLS.charge_attack.id);
                 } else if (config.jobId === 'healer') {
                     merc.skills.push(SKILLS.heal.id);
                     merc.skills.push(SKILLS.purify.id);
-                    merc.ai = new CompositeAI(new PurifierAI(), new HealerAI());
+                    merc.roleAI = new CompositeAI(new PurifierAI(), new HealerAI());
                 } else if (config.jobId === 'wizard') {
                     const mageSkill = Math.random() < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id;
                     merc.skills.push(mageSkill);
-                    merc.ai = new WizardAI();
+                    merc.fallbackAI = new WizardAI();
                 } else if (config.jobId === 'summoner') {
                     merc.skills.push(SKILLS.summon_skeleton.id);
                     merc.properties.maxMinions = 2;
-                    merc.ai = new SummonerAI();
+                    merc.roleAI = new SummonerAI();
                 } else if (config.jobId === 'bard') {
                     merc.skills.push(SKILLS.guardian_hymn.id);
                     merc.skills.push(SKILLS.courage_hymn.id);
                     merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow', 'song'] };
-                    merc.ai = new BardAI();
+                    merc.roleAI = new BardAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);
@@ -159,6 +161,9 @@ export class ItemFactory {
         item.baseId = itemId;
         item.type = baseItem.type;
         item.tags = [...baseItem.tags];
+        if (item.type === 'weapon' || item.tags.includes('weapon')) {
+            item.weaponStats = new WeaponStatManager(itemId);
+        }
         if (baseItem.range) {
             item.range = baseItem.range;
         }

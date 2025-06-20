@@ -18,6 +18,7 @@ import { EquipmentRenderManager } from './equipmentRenderManager.js';
 import { ParticleDecoratorManager } from './particleDecoratorManager.js';
 import { TraitManager } from './traitManager.js';
 import { ParasiteManager } from './parasiteManager.js';
+import { MicroItemAIManager } from './microItemAIManager.js';
 import { EffectIconManager } from './effectIconManager.js';
 import { PetManager } from './petManager.js';
 import { MetaAIManager } from './metaAIManager.js';
@@ -43,6 +44,7 @@ export {
     ParticleDecoratorManager,
     TraitManager,
     ParasiteManager,
+    MicroItemAIManager,
     PetManager,
     EffectIconManager,
     MetaAIManager,

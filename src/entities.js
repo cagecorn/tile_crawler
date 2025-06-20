@@ -51,6 +51,16 @@ class Entity {
         // --- 상태이상 및 버프 관련 수치 ---
         this.shield = 0;       // 보호막
         this.damageBonus = 0;  // 추가 공격력
+
+        this.proficiency = {
+            sword: { level: 1, exp: 0, expNeeded: 10 },
+            dagger: { level: 1, exp: 0, expNeeded: 10 },
+            spear: { level: 1, exp: 0, expNeeded: 10 },
+            bow: { level: 1, exp: 0, expNeeded: 10 },
+        };
+
+        this.roleAI = null;
+        this.fallbackAI = null;
     }
 
     get speed() { return this.stats.get('movementSpeed'); }
@@ -298,6 +308,7 @@ export class Item {
         };
         this.stats = statsMap;
         this.sockets = [];
+        this.weaponStats = null;
 
         // Animation properties
         this.baseY = y;
