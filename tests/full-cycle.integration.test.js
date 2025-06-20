@@ -19,6 +19,11 @@ describe('Full Cycle Integration Test', () => {
       id: 'player',
       isPlayer: true,
       isFriendly: true,
+      x: 0,
+      y: 0,
+      width: 32,
+      height: 32,
+      tileSize: 32,
       hp: 50,
       maxHp: 50,
       gold: 100,
@@ -32,6 +37,11 @@ describe('Full Cycle Integration Test', () => {
 
     const monster = {
       id: 'monster1',
+      x: 32,
+      y: 0,
+      width: 32,
+      height: 32,
+      tileSize: 32,
       hp: 30,
       maxHp: 30,
       expValue: 20,
@@ -41,6 +51,11 @@ describe('Full Cycle Integration Test', () => {
     const healer = {
       id: 'healer1',
       isFriendly: true,
+      x: 0,
+      y: 32,
+      width: 32,
+      height: 32,
+      tileSize: 32,
       hp: 40,
       maxHp: 40,
       mp: 30,
@@ -50,6 +65,7 @@ describe('Full Cycle Integration Test', () => {
       ai: new HealerAI(),
       properties: { mbti: 'ESFJ' },
       stats: { get: () => 0 },
+      attackRange: 192,
     };
 
     // 전투 시작 - 플레이어가 몬스터를 공격
@@ -82,6 +98,7 @@ describe('Full Cycle Integration Test', () => {
 
     // 플레이어가 몬스터를 처치
     monster.takeDamage(20);
+    assert.strictEqual(monster.hp, 0);
     const wfContext = { eventManager, victim: monster, attacker: player };
     monsterDeathWorkflow(wfContext);
 
