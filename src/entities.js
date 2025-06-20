@@ -186,9 +186,6 @@ export class Mercenary extends Entity {
         this.consumables = [];
         this.consumableCapacity = 4;
 
-        this.stuckCounter = 0;
-        this.maxStuckCount = 5;
-        this.lastPosition = { x: this.x, y: this.y };
 
         // 플레이어 주변을 배회하기 위한 프로퍼티
         this.wanderCooldown = 0;
@@ -213,42 +210,7 @@ export class Mercenary extends Entity {
         }
     }
 
-    update(context) {
-        const prevX = this.x;
-        const prevY = this.y;
-        super.update();
 
-        if (this.x === prevX && this.y === prevY) {
-            this.stuckCounter++;
-            if (this.stuckCounter >= this.maxStuckCount) {
-                const tileSize = context.mapManager.tileSize;
-                const startX = Math.floor(this.x / tileSize);
-                const startY = Math.floor(this.y / tileSize);
-                const allEntities = [
-                    context.player,
-                    ...context.monsterManager.monsters,
-                    ...context.mercenaryManager.mercenaries
-                ];
-                const isBlocked = (x, y) => {
-                    for (const e of allEntities) {
-                        if (e === this) continue;
-                        const ex = Math.floor(e.x / tileSize);
-                        const ey = Math.floor(e.y / tileSize);
-                        if (ex === x && ey === y) return true;
-                    }
-                    return false;
-                };
-                const escape = context.pathfindingManager.findEscapeRoute(startX, startY, isBlocked);
-                if (escape) {
-                    this.x = escape.x * tileSize;
-                    this.y = escape.y * tileSize;
-                }
-                this.stuckCounter = 0;
-            }
-        } else {
-            this.stuckCounter = 0;
-        }
-    }
 
     addConsumable(item) {
         if (this.consumables.length >= this.consumableCapacity) return false;
