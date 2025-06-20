@@ -139,11 +139,29 @@ export class MetaAIManager {
                     if (typeof member.applyRegen === 'function') member.applyRegen();
                 }
 
-                // 2단계: 업데이트 이후 행동 결정 및 실행
+                // 2단계: 행동 결정
                 let action = { type: 'idle' };
-                if (group.strategy !== STRATEGY.IDLE && member.ai) {
+
+                if (member.roleAI) {
+                    action = member.roleAI.decideAction(member, currentContext);
+                } else if (member.ai && !member.fallbackAI) {
+                    // backward compatibility: original ai property acts as role AI
                     action = member.ai.decideAction(member, currentContext);
                 }
+
+                if (action.type === 'idle') {
+                    const weapon = member.equipment?.weapon;
+                    const combatAI = context.microItemAIManager?.getWeaponAI(weapon);
+                    if (combatAI) {
+                        action = combatAI.decideAction(member, weapon, currentContext);
+                    } else if (member.fallbackAI) {
+                        action = member.fallbackAI.decideAction(member, currentContext);
+                    } else if (member.ai) {
+                        // use legacy ai as fallback if present
+                        action = member.ai.decideAction(member, currentContext);
+                    }
+                }
+
                 this.executeAction(member, action, currentContext);
             }
         }

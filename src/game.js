@@ -26,6 +26,8 @@ import { EFFECTS } from './data/effects.js';
 import { Item } from './entities.js';
 import { rollOnTable } from './utils/random.js';
 import { getMonsterLootTable } from './data/tables.js';
+import { MicroEngine } from './micro/MicroEngine.js';
+import { MicroItemAIManager } from './managers/microItemAIManager.js';
 
 export class Game {
     constructor() {
@@ -122,6 +124,8 @@ export class Game {
             this.vfxManager
         );
         this.itemAIManager.setEffectManager(this.effectManager);
+        this.microItemAIManager = new Managers.MicroItemAIManager();
+        this.microEngine = new MicroEngine([], this.itemManager.items);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
@@ -856,12 +860,13 @@ export class Game {
     }
 
     update = (deltaTime) => {
-        const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager, equipmentManager } = this;
+        const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, metaAIManager, eventManager, equipmentManager, pathfindingManager, microEngine, microItemAIManager } = this;
         if (gameState.isPaused || gameState.isGameOver) return;
 
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...(this.petManager?.pets || [])];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
+        microEngine.update();
         turnManager.update(allEntities, { eventManager, player: gameState.player, parasiteManager: this.parasiteManager }); // 턴 매니저 업데이트
         itemManager.update();
         this.petManager.update();
@@ -945,6 +950,7 @@ export class Game {
             itemManager: this.itemManager,
             equipmentManager: this.equipmentManager,
             metaAIManager,
+            microItemAIManager,
         };
         metaAIManager.update(context);
         this.itemAIManager.update(context);
