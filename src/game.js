@@ -148,7 +148,7 @@ export class Game {
         this.metaAIManager = new MetaAIManager(this.eventManager);
         this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager);
         this.managers.PetManager = this.petManager;
-        this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager);
+        this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager, this.monsterManager);
         this.aquariumManager = new AquariumManager(
             this.eventManager,
             this.monsterManager,
@@ -762,10 +762,7 @@ export class Game {
                         gameState.inventory.splice(itemIndex, 1);
                     }
                 } else if (item.tags.includes('pet') || item.type === 'pet') {
-                    const pet = this.petManager.equip(gameState.player, item, 'fox');
-                    if (pet) {
-                        gameState.inventory.splice(itemIndex, 1);
-                    }
+                    this.petManager.equip(gameState.player, item, 'fox');
                 }
                 this.uiManager.renderInventory(gameState);
             },
@@ -777,17 +774,15 @@ export class Game {
                     const playerChar = gameState.player;
                     playerChar.hp = Math.min(playerChar.maxHp, playerChar.hp + 5);
                     this.particleDecoratorManager.playHealingEffect(playerChar);
+                    gameState.player.consumables.splice(itemIndex, 1);
                 } else if (item.tags.includes('buff_item')) {
                     this.effectManager.addEffect(gameState.player, item.effectId);
+                    gameState.player.consumables.splice(itemIndex, 1);
                 } else if (item.tags.includes('pet') || item.type === 'pet') {
-                    const pet = this.petManager.equip(gameState.player, item, 'fox');
-                    if (pet) {
-                        gameState.player.consumables.splice(itemIndex, 1);
-                        this.uiManager.updateUI(gameState);
-                        return;
-                    }
+                    this.petManager.equip(gameState.player, item, 'fox');
+                } else {
+                    gameState.player.consumables.splice(itemIndex, 1);
                 }
-                gameState.player.consumables.splice(itemIndex, 1);
                 this.uiManager.updateUI(gameState);
             },
             onEquipItem: (entity, item) => {
@@ -922,6 +917,7 @@ export class Game {
                 this.combatLogManager.add(`${itemToPick.name}을(를) 획득했습니다.`);
             } else {
                 const existing = gameState.inventory.find(i => i.baseId === itemToPick.baseId);
+                const invItem = existing || itemToPick;
                 if (existing) {
                     existing.quantity += 1;
                 } else {
@@ -929,10 +925,9 @@ export class Game {
                 }
                 this.combatLogManager.add(`${itemToPick.name}을(를) 인벤토리에 추가했습니다.`);
                 if (itemToPick.tags.includes('pet') || itemToPick.type === 'pet') {
-                    const pet = this.petManager.equip(player, itemToPick, 'fox');
-                    if (pet) {
-                        gameState.inventory = gameState.inventory.filter(i => i !== itemToPick);
-                    }
+                    player.addConsumable(invItem);
+                    this.petManager.equip(player, invItem, 'fox');
+                    // 아이템은 그대로 보유하도록 남겨둔다
                 }
             }
             this.itemManager.removeItem(itemToPick);
