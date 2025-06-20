@@ -73,6 +73,8 @@ export class Game {
         this.loader.loadImage('parasite', 'assets/images/parasite.png');
         this.loader.loadImage('leech', 'assets/images/parasite.png');
         this.loader.loadImage('worm', 'assets/images/parasite.png');
+        this.loader.loadImage('talisman1', 'assets/images/talisman-1.png');
+        this.loader.loadImage('talisman2', 'assets/images/talisman-2.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -183,7 +185,7 @@ export class Game {
         }
 
         // example feature: spawn several monsters for poison debuff testing
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 20; i++) {
             this.aquariumManager.addTestingFeature({
                 type: 'monster',
                 image: assets.monster,
@@ -275,7 +277,7 @@ export class Game {
 
         // === 3. 몬스터 생성 ===
         const monsters = [];
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 40; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
                 const monster = this.factory.create('monster', {

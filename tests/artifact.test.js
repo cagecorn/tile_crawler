@@ -2,7 +2,7 @@ import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { ItemAIManager } from '../src/managers/item-ai-manager.js';
 import { describe, test, assert } from './helpers.js';
 
-const assets = { talisman:{} };
+const assets = { talisman1:{} };
 
 describe('Artifact Item', () => {
     test('healing talisman heals without consumption and has cooldown', () => {

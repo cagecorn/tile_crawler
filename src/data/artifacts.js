@@ -7,7 +7,7 @@ export const ARTIFACTS = {
         cooldown: 60,
         healAmount: 5,
         tags: ['artifact', 'healing_item'],
-        imageKey: 'talisman',
+        imageKey: 'talisman1',
     },
     fox_charm: {
         id: 'fox_charm',
@@ -17,6 +17,6 @@ export const ARTIFACTS = {
         cooldown: 120,
         effectId: 'all_stat_buff',
         tags: ['artifact', 'buff'],
-        imageKey: 'talisman',
+        imageKey: 'talisman2',
     },
 };
