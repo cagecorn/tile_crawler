@@ -127,7 +127,7 @@ export class Game {
         );
         this.itemAIManager.setEffectManager(this.effectManager);
         this.microItemAIManager = new Managers.MicroItemAIManager();
-        this.microEngine = new MicroEngine(this.eventManager, this.itemManager);
+        this.microEngine = new MicroEngine(this.eventManager);
         this.microCombatManager = new MicroCombatManager(this.eventManager);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
@@ -982,7 +982,13 @@ export class Game {
         this.projectileManager.update();
         this.vfxManager.update();
         // micro-world engine runs after visuals and item logic
-        this.microEngine.update();
+        const allItems = [
+            ...this.gameState.inventory,
+            ...this.itemManager.items,
+            ...this.mercenaryManager.mercenaries.flatMap(m => m.consumables || []),
+            ...this.monsterManager.monsters.flatMap(m => m.consumables || []),
+        ];
+        this.microEngine.update(allItems);
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update End ---' });
     }
 

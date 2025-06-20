@@ -117,12 +117,7 @@ class Entity {
                 this.skillCooldowns[skillId]--;
             }
         }
-        const inv = this.consumables || this.inventory;
-        if (Array.isArray(inv)) {
-            for (const it of inv) {
-                if (it.cooldownRemaining > 0) it.cooldownRemaining--;
-            }
-        }
+        // 아이템 쿨다운 감소는 MicroTurnManager가 전담한다
     }
 
     applyRegen() {
@@ -330,7 +325,7 @@ export class Item {
             this.bobbingAngle -= Math.PI * 2;
         }
         this.y = this.baseY + Math.sin(this.bobbingAngle) * this.bobbingAmount;
-        if (this.cooldownRemaining > 0) this.cooldownRemaining--;
+        // 아이템 쿨다운 감소는 MicroTurnManager가 관리한다
     }
 
     render(ctx) {
