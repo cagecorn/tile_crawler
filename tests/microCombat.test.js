@@ -2,6 +2,8 @@ import { describe, test, assert } from './helpers.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { MicroCombatManager } from '../src/micro/MicroCombatManager.js';
+import { CombatCalculator } from '../src/combat.js';
+import { TagManager } from '../src/managers/tagManager.js';
 import { EquipmentManager } from '../src/managers/equipmentManager.js';
 import { ItemManager } from '../src/managers/itemManager.js';
 import { disarmWorkflow, armorBreakWorkflow } from '../src/workflows.js';
@@ -15,6 +17,8 @@ describe('Micro-World Combat Scenarios', () => {
       const microCombatManager = new MicroCombatManager(eventManager);
       const equipmentManager = new EquipmentManager(eventManager);
       const itemManager = new ItemManager();
+      const tagManager = new TagManager();
+      const combatCalculator = new CombatCalculator(eventManager, tagManager);
 
       const attacker = factory.create('player', { x:0, y:0, tileSize:1, groupId:'g' });
       const defender = factory.create('monster', { x:1, y:0, tileSize:1, groupId:'m' });
@@ -26,7 +30,7 @@ describe('Micro-World Combat Scenarios', () => {
           vfxManager: { addEjectAnimation: () => {}, addArmorBreakAnimation: () => {} }
       };
 
-      return { eventManager, factory, itemFactory, microCombatManager, attacker, defender, context };
+      return { eventManager, factory, itemFactory, microCombatManager, attacker, defender, context, combatCalculator, itemManager, tagManager };
   }
 
   test('방어구 파괴: 무게가 높은 무기가 강인함이 낮은 방어구를 파괴한다', () => {
@@ -103,5 +107,57 @@ describe('Micro-World Combat Scenarios', () => {
 
       assert.strictEqual(armorBroken, false, '하위 등급 장비는 상위 등급 장비를 파괴할 수 없습니다.');
       assert.strictEqual(rareArmor.durability, 1, '하위 등급의 공격은 상위 등급 장비에 피해를 주지 않아야 합니다.');
+  });
+
+  test('패링 성공: 패링 스킬을 가진 무기는 확률적으로 공격을 무효화한다', () => {
+      const { eventManager, itemFactory, combatCalculator, attacker, defender } = setupTestEnvironment();
+
+      const parryingSword = itemFactory.create('short_sword', 0, 0, 1);
+      defender.equipment.weapon = parryingSword;
+      parryingSword.weaponStats.skills.push('parry');
+
+      const initialDefenderHP = defender.hp;
+      let parrySuccessLog = false;
+      let parryEvent = false;
+      eventManager.subscribe('log', (data) => {
+          if (data.message.includes('[패링]')) parrySuccessLog = true;
+      });
+      eventManager.subscribe('parry_success', () => { parryEvent = true; });
+
+      const originalRandom = Math.random;
+      Math.random = () => 0;
+
+      combatCalculator.handleAttack({ attacker, defender, skill: null });
+
+      Math.random = originalRandom;
+
+      assert.ok(parrySuccessLog, '패링 성공 로그가 출력되어야 합니다.');
+      assert.ok(parryEvent, 'parry_success 이벤트가 발생해야 합니다.');
+      assert.strictEqual(defender.hp, initialDefenderHP, '패링 성공 시 수비자의 HP는 변하지 않아야 합니다.');
+      assert.ok(parryingSword.weaponStats.cooldown > 0, '패링 성공 시 무기에 쿨타임이 적용되어야 합니다.');
+  });
+
+  test('패링 실패: 확률적으로 패링에 실패하면 정상적으로 피해를 입는다', () => {
+      const { eventManager, itemFactory, combatCalculator, attacker, defender } = setupTestEnvironment();
+
+      const parryingSword = itemFactory.create('short_sword', 0, 0, 1);
+      defender.equipment.weapon = parryingSword;
+      parryingSword.weaponStats.skills.push('parry');
+
+      const initialDefenderHP = defender.hp;
+      let parryEvent = false;
+
+      const originalRandom = Math.random;
+      Math.random = () => 0.99;
+      eventManager.subscribe('parry_success', () => { parryEvent = true; });
+
+      combatCalculator.handleAttack({ attacker, defender, skill: null });
+
+      Math.random = originalRandom;
+
+      defender.takeDamage(5);
+
+      assert.ok(defender.hp < initialDefenderHP, '패링 실패 시 수비자는 피해를 입어야 합니다.');
+      assert.strictEqual(parryEvent, false, '패링 실패 시 parry_success 이벤트가 발생하지 않아야 합니다.');
   });
 });
