@@ -8,7 +8,7 @@ import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { RangedAI, HealerAI, WizardAI } from './ai.js';
+import { RangedAI, HealerAI, WizardAI, SummonerAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 
 export class CharacterFactory {
@@ -83,6 +83,10 @@ export class CharacterFactory {
                     const mageSkill = Math.random() < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id;
                     merc.skills.push(mageSkill);
                     merc.ai = new WizardAI();
+                } else if (config.jobId === 'summoner') {
+                    merc.skills.push(SKILLS.summon_skeleton.id);
+                    merc.properties.maxMinions = 2;
+                    merc.ai = new SummonerAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);

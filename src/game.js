@@ -40,6 +40,7 @@ export class Game {
         this.loader.loadImage('archer', 'assets/images/archer.png');
         this.loader.loadImage('healer', 'assets/images/healer.png');
         this.loader.loadImage('wizard', 'assets/images/wizard.png');
+        this.loader.loadImage('summoner', 'assets/images/dark_mage.png');
         // 기존 호환성을 위해 기본 mercenary 키도 전사 이미지로 유지
         this.loader.loadImage('mercenary', 'assets/images/warrior.png');
         this.loader.loadImage('floor', 'assets/floor.png');
@@ -384,6 +385,29 @@ export class Game {
                     if (newMerc) {
                         this.playerGroup.addMember(newMerc);
                         this.eventManager.publish('log', { message: `마법사 용병을 고용했습니다.` });
+                    }
+                } else {
+                    this.eventManager.publish('log', { message: `골드가 부족합니다.` });
+                }
+            };
+        }
+
+        const summonerBtn = document.getElementById('hire-summoner');
+        if (summonerBtn) {
+            summonerBtn.onclick = () => {
+                if (this.gameState.gold >= 50) {
+                    this.gameState.gold -= 50;
+                    const newMerc = this.mercenaryManager.hireMercenary(
+                        'summoner',
+                        this.gameState.player.x + this.mapManager.tileSize,
+                        this.gameState.player.y,
+                        this.mapManager.tileSize,
+                        'player_party'
+                    );
+
+                    if (newMerc) {
+                        this.playerGroup.addMember(newMerc);
+                        this.eventManager.publish('log', { message: `소환사 용병을 고용했습니다.` });
                     }
                 } else {
                     this.eventManager.publish('log', { message: `골드가 부족합니다.` });
