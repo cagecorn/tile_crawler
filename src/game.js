@@ -146,6 +146,8 @@ export class Game {
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
         this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
+        this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager);
+        this.managers.PetManager = this.petManager;
         this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager);
         this.aquariumManager = new AquariumManager(
             this.eventManager,
@@ -162,8 +164,10 @@ export class Game {
         for (let i = 0; i < 20; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
-                const isGold = Math.random() < 0.6;
-                const itemName = isGold ? 'gold' : 'potion';
+                const rand = Math.random();
+                let itemName = 'potion';
+                if (rand < 0.6) itemName = 'gold';
+                else if (rand < 0.7) itemName = 'fox_charm';
                 const item = this.itemFactory.create(itemName, pos.x, pos.y, this.mapManager.tileSize);
                 if (item) this.itemManager.addItem(item);
             }
@@ -757,6 +761,11 @@ export class Game {
                     } else {
                         gameState.inventory.splice(itemIndex, 1);
                     }
+                } else if (item.tags.includes('pet') || item.type === 'pet') {
+                    const pet = this.petManager.equip(gameState.player, item, 'fox');
+                    if (pet) {
+                        gameState.inventory.splice(itemIndex, 1);
+                    }
                 }
                 this.uiManager.renderInventory(gameState);
             },
@@ -834,11 +843,12 @@ export class Game {
         const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager, equipmentManager } = this;
         if (gameState.isPaused || gameState.isGameOver) return;
 
-        const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
+        const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...(this.petManager?.pets || [])];
         gameState.player.applyRegen();
         effectManager.update(allEntities); // EffectManager 업데이트 호출
         turnManager.update(allEntities, { eventManager, player: gameState.player, parasiteManager: this.parasiteManager }); // 턴 매니저 업데이트
         itemManager.update();
+        this.petManager.update();
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
         const player = gameState.player;
         if (player.attackCooldown > 0) player.attackCooldown--;
@@ -945,13 +955,14 @@ export class Game {
 
         monsterManager.render(contexts.entity);
         mercenaryManager.render(contexts.entity);
+        this.petManager.render(contexts.entity);
         gameState.player.render(contexts.entity);
 
         fogManager.render(contexts.vfx, mapManager.tileSize);
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);
         this.projectileManager.render(contexts.vfx);
         this.vfxManager.render(contexts.vfx);
-        this.effectIconManager.render(contexts.vfx, [gameState.player, ...monsterManager.monsters, ...mercenaryManager.mercenaries], EFFECTS);
+        this.effectIconManager.render(contexts.vfx, [gameState.player, ...monsterManager.monsters, ...mercenaryManager.mercenaries, ...this.petManager.pets], EFFECTS);
 
         // weatherManager.render(contexts.weather); // (미래 구멍)
 

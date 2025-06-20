@@ -61,4 +61,16 @@ export class PetManager {
         }
         return true;
     }
+
+    update() {
+        for (const pet of this.pets) {
+            if (typeof pet.update === 'function') pet.update();
+        }
+    }
+
+    render(ctx) {
+        for (const pet of this.pets) {
+            if (typeof pet.render === 'function') pet.render(ctx);
+        }
+    }
 }
