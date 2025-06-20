@@ -1,7 +1,6 @@
 // src/entities.js
 
 import { MeleeAI, RangedAI } from './ai.js';
-import { EmptyHandedAI } from './empty-handed-ai.js';
 import { StatManager } from './stats.js';
 
 class Entity {
@@ -74,9 +73,7 @@ class Entity {
 
         const weapon = this.equipment.weapon;
         const tags = Array.isArray(weapon?.tags) ? weapon.tags : [];
-        if (!weapon) {
-            if (!(this.ai instanceof EmptyHandedAI)) this.ai = new EmptyHandedAI();
-        } else if (tags.includes('ranged')) {
+        if (tags.includes('ranged')) {
             if (!(this.ai instanceof RangedAI)) this.ai = new RangedAI();
         } else {
             if (!(this.ai instanceof MeleeAI)) this.ai = new MeleeAI();
