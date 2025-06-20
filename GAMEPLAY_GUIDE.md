@@ -91,6 +91,11 @@ comes with one of two skill sets:
 These hymns play `auraActivateMinor` or `auraActivateMajor` sound cues when
 activated, letting you know their protective or offensive effects are in play.
 
+### Summoner Mercenaries
+
+Summoners command undead minions to fight for you. They know the **Summon Skeleton** skill
+and can control up to two minions at a time.
+
 ### Mercenary Traits
 
 *This system has been removed.* Mercenaries no longer receive random traits or related bonuses.

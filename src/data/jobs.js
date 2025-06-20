@@ -50,5 +50,19 @@ export const JOBS = {
             attackPower: 12,
         }
     },
+    summoner: {
+        name: '소환사',
+        description: '하수인을 소환해 전투를 지원하는 전문가입니다.',
+        stats: {
+            strength: 2,
+            agility: 3,
+            endurance: 3,
+            focus: 10,
+            intelligence: 9,
+            movement: 10,
+            hp: 22,
+            attackPower: 11,
+        }
+    },
 };
 

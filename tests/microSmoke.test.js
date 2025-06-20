@@ -8,7 +8,7 @@ import { describe, test, assert } from './helpers.js';
 describe('Integration', () => {
 
 test('간단한 게임 흐름', () => {
-    const assets = { player:{}, mercenary:{}, monster:{}, sword:{}, leather_armor:{} };
+    const assets = { player:{}, mercenary:{}, monster:{}, sword:{}, leather_armor:{}, summoner:{} };
     const mapManager = new MapManager(42);
     assert.ok(mapManager.map && mapManager.map.length > 0, '맵 생성');
 
@@ -25,6 +25,9 @@ test('간단한 게임 흐름', () => {
 
     const archer = mercManager.hireMercenary('archer', 2, 0, 1, 'player_party');
     assert.ok(archer && archer.ai, '궁수 용병 고용');
+
+    const summoner = mercManager.hireMercenary('summoner', 3, 0, 1, 'player_party');
+    assert.ok(summoner && summoner.ai, '소환사 용병 고용');
 
     const monster = factory.create('monster', { x:2, y:0, tileSize:1, groupId:'dungeon_monsters', baseStats:{ expValue:5 } });
     let expEvent = false;
