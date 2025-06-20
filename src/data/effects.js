@@ -105,5 +105,14 @@ export const EFFECTS = {
         duration: 300,
         stats: { movementSpeed: -1 },
         tags: ['debuff', 'slow'],
+    },
+
+    charging_shot_effect: {
+        name: '충전된 사격',
+        type: 'buff',
+        duration: 120,
+        stats: {},
+        tags: ['buff', 'attack_up', 'charge_shot'],
+        iconKey: 'courage-hymn-effect',
     }
 };

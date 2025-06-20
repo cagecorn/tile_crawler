@@ -1,5 +1,6 @@
 // src/ai-managers.js
 import { SKILLS } from '../data/skills.js';
+import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 
 export const STRATEGY = {
     IDLE: 'idle',
@@ -91,6 +92,27 @@ export class MetaAIManager {
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
+            case 'weapon_skill': {
+                const skillData = WEAPON_SKILLS[action.skillId];
+                if (!skillData) break;
+                const weapon = entity.equipment?.weapon;
+                if (!weapon || !weapon.weaponStats?.canUseSkill(action.skillId)) break;
+
+                eventManager.publish('log', {
+                    message: `${entity.constructor.name}의 ${weapon.name}(이)가 [${skillData.name}] 스킬을 사용합니다!`,
+                    color: 'yellow'
+                });
+
+                if (action.skillId === 'charge' && context.motionManager && action.target) {
+                    context.motionManager.dashTowards(entity, action.target, 3);
+                }
+
+                if (action.skillId === 'charge_shot' && context.effectManager) {
+                    context.effectManager.addEffect(action.target, 'charging_shot_effect');
+                }
+
+                weapon.weaponStats.setCooldown(skillData.cooldown);
+                break; }
             case 'charge_attack': {
                 const { eventManager: ev } = context;
                 const { target, skill } = action;

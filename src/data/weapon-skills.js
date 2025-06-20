@@ -36,6 +36,7 @@ export const WEAPON_SKILLS = {
         description: '적을 향해 최대 3칸 돌진합니다.',
         type: 'active',
         cooldown: 25,
+        range: 192 * 3,
         tags: ['weapon_skill', 'movement', 'spear'],
     },
     // 바이올린 활 레벨 1

@@ -1,4 +1,5 @@
 // src/micro/WeaponAI.js
+import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 
 // 모든 무기 AI의 기반이 될 부모 클래스입니다.
 class BaseWeaponAI {
@@ -33,15 +34,61 @@ export class DaggerAI extends BaseWeaponAI {
 // 활 AI: 거리를 유지하며 충전 사격 기회 탐색
 export class BowAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        // TODO: RangedAI와 유사한 카이팅 로직 + 충전 후 발사 스킬 사용
-        return { type: 'idle' };
+        const { enemies } = context;
+        if (!enemies || enemies.length === 0) return { type: 'idle' };
+
+        const nearestTarget = enemies.sort((a,b)=>Math.hypot(a.x-wielder.x,a.y-wielder.y)-Math.hypot(b.x-wielder.x,b.y-wielder.y))[0];
+        const distance = Math.hypot(nearestTarget.x-wielder.x, nearestTarget.y-wielder.y);
+
+        const isCharging = wielder.effects?.some(e=>e.id==='charging_shot_effect');
+        if (isCharging) {
+            return { type: 'attack', target: nearestTarget };
+        }
+
+        const chargeSkillId = 'charge_shot';
+        if (weapon.weaponStats?.canUseSkill(chargeSkillId) && distance <= wielder.attackRange && distance > wielder.attackRange*0.5) {
+            return { type: 'weapon_skill', skillId: chargeSkillId, target: wielder };
+        }
+
+        if (distance <= wielder.attackRange*0.5) {
+            return { type: 'move', target: { x: wielder.x - (nearestTarget.x - wielder.x), y: wielder.y - (nearestTarget.y - wielder.y) } };
+        } else if (distance > wielder.attackRange) {
+            return { type: 'move', target: nearestTarget };
+        }
+
+        return { type: 'attack', target: nearestTarget };
     }
 }
 
 // 창 AI: 긴 사거리를 이용한 카이팅 및 돌진
 export class SpearAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        // TODO: 적과 일정 거리를 유지하며 공격하고, 돌진 스킬 기회 탐색
+        const { enemies, mapManager } = context;
+        if (!enemies || enemies.length === 0) return { type: 'idle' };
+
+        let nearestTarget = null;
+        let minDistance = Infinity;
+        for (const target of enemies) {
+            const d = Math.hypot(target.x-wielder.x, target.y-wielder.y);
+            if (d < minDistance) { minDistance = d; nearestTarget = target; }
+        }
+
+        if (nearestTarget) {
+            const chargeSkillId = 'charge';
+            const chargeData = WEAPON_SKILLS[chargeSkillId];
+            const chargeRange = chargeData.range || 200;
+
+            if (weapon.weaponStats?.canUseSkill(chargeSkillId) && minDistance > wielder.attackRange && minDistance <= chargeRange) {
+                return { type: 'weapon_skill', skillId: chargeSkillId, target: nearestTarget };
+            }
+
+            if (minDistance <= wielder.attackRange) {
+                return { type: 'attack', target: nearestTarget };
+            }
+
+            return { type: 'move', target: nearestTarget };
+        }
+
         return { type: 'idle' };
     }
 }
