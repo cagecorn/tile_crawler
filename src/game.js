@@ -54,6 +54,7 @@ export class Game {
         this.loader.loadImage('gold', 'assets/gold.png');
         this.loader.loadImage('potion', 'assets/potion.png');
         this.loader.loadImage('sword', 'assets/images/shortsword.png');
+        this.loader.loadWeaponImages();
         this.loader.loadImage('bow', 'assets/images/bow.png');
         this.loader.loadImage('arrow', 'assets/images/arrow.png');
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');

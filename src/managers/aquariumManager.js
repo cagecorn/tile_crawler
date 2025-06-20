@@ -1,6 +1,7 @@
 // src/managers/aquariumManager.js
 // Manages patches and features placed on the Aquarium map
 import { TRAITS } from '../data/traits.js';
+import { EquipmentManager } from './equipmentManager.js';
 export class AquariumManager {
     constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null, traitManager = null) {
         this.eventManager = eventManager;
@@ -12,6 +13,8 @@ export class AquariumManager {
         this.vfxManager = vfxManager;
         this.traitManager = traitManager;
         this.features = [];
+        this.equipmentManager = new EquipmentManager(eventManager);
+        this.allWeaponIds = ['short_sword', 'long_bow', 'estoc', 'axe', 'mace', 'staff', 'spear', 'scythe', 'whip', 'dagger', 'violin_bow'];
     }
 
     addTestingFeature(feature) {
@@ -31,6 +34,16 @@ export class AquariumManager {
                     this.traitManager.applyTraits(monster, TRAITS);
                 }
                 this.monsterManager.monsters.push(monster);
+
+                // --- 몬스터에게 무작위 무기 장착 ---
+                if (Math.random() < 0.8) {
+                    const randomWeaponId = this.allWeaponIds[Math.floor(Math.random() * this.allWeaponIds.length)];
+                    const weapon = this.itemFactory.create(randomWeaponId, 0, 0, 1);
+                    if (weapon) {
+                        this.equipmentManager.equip(monster, weapon, null);
+                    }
+                }
+                // --- 여기까지 ---
             }
         } else if (feature.type === 'item') {
             const pos = this.mapManager.getRandomFloorPosition();

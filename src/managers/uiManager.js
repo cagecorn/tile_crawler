@@ -331,17 +331,42 @@ export class UIManager {
             page1.appendChild(mLine);
         }
 
-        if (entity.properties && entity.properties.faith) {
-            const fLine2 = document.createElement('div');
-            fLine2.className = 'stat-line';
-            const span2 = document.createElement('span');
-            const fId2 = entity.properties.faith;
-            span2.textContent = FAITHS[fId2].name;
-            this._attachTooltip(span2, this._getFaithTooltip(fId2));
-            fLine2.innerHTML = 'faith: ';
-            fLine2.appendChild(span2);
-            page1.appendChild(fLine2);
+            if (entity.properties && entity.properties.faith) {
+                const fLine2 = document.createElement('div');
+                fLine2.className = 'stat-line';
+                const span2 = document.createElement('span');
+                const fId2 = entity.properties.faith;
+                span2.textContent = FAITHS[fId2].name;
+                this._attachTooltip(span2, this._getFaithTooltip(fId2));
+                fLine2.innerHTML = 'faith: ';
+                fLine2.appendChild(span2);
+                page1.appendChild(fLine2);
+            }
         }
+
+        // --- 숙련도 페이지 렌더링 ---
+        const page2 = this.characterSheetPanel.querySelector('#stat-page-2');
+        if (page2) {
+            page2.innerHTML = '<h3>무기 숙련도</h3>';
+            const proficiencyList = document.createElement('div');
+            proficiencyList.className = 'proficiency-list';
+
+            for (const weaponType in entity.proficiency) {
+                const prof = entity.proficiency[weaponType];
+                const line = document.createElement('div');
+                line.className = 'proficiency-line';
+                const expRatio = (prof.exp / prof.expNeeded) * 100;
+                line.innerHTML = `
+                    <span class="prof-name">${weaponType}</span>
+                    <span class="prof-level">Lv.${prof.level}</span>
+                    <div class="prof-exp-bar-container">
+                        <div class="prof-exp-bar-fill" style="width: ${expRatio}%"></div>
+                        <span class="prof-exp-text">${prof.exp}/${prof.expNeeded}</span>
+                    </div>
+                `;
+                proficiencyList.appendChild(line);
+            }
+            page2.appendChild(proficiencyList);
         }
     }
 

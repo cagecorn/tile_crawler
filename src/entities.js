@@ -70,11 +70,16 @@ class Entity {
 
         this.proficiency = {
             sword: { level: 1, exp: 0, expNeeded: 10 },
+            axe: { level: 1, exp: 0, expNeeded: 10 },
+            mace: { level: 1, exp: 0, expNeeded: 10 },
             dagger: { level: 1, exp: 0, expNeeded: 10 },
-            estoc: { level: 1, exp: 0, expNeeded: 10 },
-            spear: { level: 1, exp: 0, expNeeded: 10 },
             bow: { level: 1, exp: 0, expNeeded: 10 },
             violin_bow: { level: 1, exp: 0, expNeeded: 10 },
+            staff: { level: 1, exp: 0, expNeeded: 10 },
+            spear: { level: 1, exp: 0, expNeeded: 10 },
+            estoc: { level: 1, exp: 0, expNeeded: 10 },
+            scythe: { level: 1, exp: 0, expNeeded: 10 },
+            whip: { level: 1, exp: 0, expNeeded: 10 },
         };
     }
 

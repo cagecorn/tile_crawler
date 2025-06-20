@@ -28,4 +28,19 @@ export class AssetLoader {
             .then(() => callback(this.assets))
             .catch(error => console.error(error));
     }
+
+    // 신규 무기 이미지들을 한 번에 로드하는 헬퍼 메서드
+    loadWeaponImages() {
+        const weapons = [
+            ['axe', 'assets/images/axe.png'],
+            ['mace', 'assets/images/mace.png'],
+            ['staff', 'assets/images/staff.png'],
+            ['spear', 'assets/images/spear.png'],
+            ['estoc', 'assets/images/Estoc.png'],
+            ['scythe', 'assets/images/scythe.png'],
+            ['whip', 'assets/images/whip.png'],
+            ['dagger', 'assets/images/dagger.png'],
+        ];
+        weapons.forEach(([key, src]) => this.loadImage(key, src));
+    }
 }
