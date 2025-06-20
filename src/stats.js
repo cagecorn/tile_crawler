@@ -107,6 +107,7 @@ export class StatManager {
             finalAmount = Math.floor(amount * 0.8);
         }
         this._baseStats.exp += finalAmount;
+        this.recalculate();
 
         while (this.get('exp') >= this.get('expNeeded')) {
             this.levelUp();
