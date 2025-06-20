@@ -6,6 +6,7 @@ export class SkillManager {
         this.effectManager = null;
         this.factory = null;
         this.metaAIManager = null;
+        this.monsterManager = null;
         console.log("[SkillManager] Initialized");
 
         if (this.eventManager) {
@@ -19,10 +20,11 @@ export class SkillManager {
         this.effectManager = effectManager;
     }
 
-    setManagers(effectManager, factory, metaAIManager) {
+    setManagers(effectManager, factory, metaAIManager, monsterManager = null) {
         this.effectManager = effectManager;
         this.factory = factory;
         this.metaAIManager = metaAIManager;
+        this.monsterManager = monsterManager;
     }
 
     applySkillEffects(caster, skill, target = null) {
@@ -85,6 +87,9 @@ export class SkillManager {
         });
         monster.isFriendly = caster.isFriendly;
         monster.properties.summonedBy = caster.id;
+        if (this.monsterManager) {
+            this.monsterManager.monsters.push(monster);
+        }
         if (this.metaAIManager) {
             const group = this.metaAIManager.groups[caster.groupId];
             if (group) group.addMember(monster);
