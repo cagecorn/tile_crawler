@@ -122,7 +122,8 @@ export class UIManager {
 
         const hpDiv = document.createElement('div');
         hpDiv.className = 'stat-line';
-        hpDiv.textContent = `HP: ${mercenary.hp.toFixed(1)} / ${mercenary.maxHp}`;
+        const shieldText = mercenary.shield > 0 ? ` <span style="color: blue">+${mercenary.shield.toFixed(1)}</span>` : '';
+        hpDiv.innerHTML = `HP: ${mercenary.hp.toFixed(1)} / ${mercenary.maxHp}${shieldText}`;
         this.mercStatsContainer.appendChild(hpDiv);
 
         const mpDiv = document.createElement('div');
@@ -162,10 +163,24 @@ export class UIManager {
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
-            const statValue = mercenary.stats.get(stat);
-            statDiv.textContent = `${stat}: ${statValue}`;
+            let statValue = mercenary.stats.get(stat);
+            if (stat === 'attackPower') {
+                const bonus = mercenary.damageBonus || 0;
+                const bonusText = bonus > 0 ? ` <span style="color:red">+${bonus}</span>` : '';
+                statDiv.innerHTML = `${stat}: ${statValue}${bonusText}`;
+            } else {
+                statDiv.textContent = `${stat}: ${statValue}`;
+            }
             this.mercStatsContainer.appendChild(statDiv);
         });
+
+        if (mercenary.effects && mercenary.effects.length > 0) {
+            const effDiv = document.createElement('div');
+            effDiv.className = 'stat-line';
+            const list = mercenary.effects.map(e => `${e.name}(${Math.ceil(e.remaining / 100)}턴)`);
+            effDiv.textContent = `효과: ${list.join(', ')}`;
+            this.mercStatsContainer.appendChild(effDiv);
+        }
 
         if (this.mercEquipment) {
             this.mercEquipment.innerHTML = '';
@@ -271,9 +286,24 @@ export class UIManager {
             statsToShow.forEach(stat => {
                 const line = document.createElement('div');
                 line.className = 'stat-line';
-                line.innerHTML = `<span>${stat}:</span> <span>${entity.stats.get(stat)}</span>`;
+                if (stat === 'attackPower') {
+                    const base = entity.stats.get(stat);
+                    const bonus = entity.damageBonus || 0;
+                    const bonusText = bonus > 0 ? ` <span style="color:red">+${bonus}</span>` : '';
+                    line.innerHTML = `<span>${stat}:</span> <span>${base}${bonusText}</span>`;
+                } else {
+                    line.innerHTML = `<span>${stat}:</span> <span>${entity.stats.get(stat)}</span>`;
+                }
                 page1.appendChild(line);
             });
+
+            if (entity.effects && entity.effects.length > 0) {
+                const effLine = document.createElement('div');
+                effLine.className = 'stat-line';
+                const list = entity.effects.map(e => `${e.name}(${Math.ceil(e.remaining / 100)}턴)`);
+                effLine.textContent = `effects: ${list.join(', ')}`;
+                page1.appendChild(effLine);
+            }
 
             if (entity.fullness !== undefined) {
                 const fLine = document.createElement('div');
@@ -391,11 +421,16 @@ export class UIManager {
                 buttonElement.style.display = gameState.statPoints > 0 ? 'inline-block' : 'none';
             }
         });
-        if (this.hpElement) this.hpElement.textContent = Math.ceil(player.hp);
         if (this.maxHpElement) this.maxHpElement.textContent = stats.get('maxHp');
+        const shieldInfo = player.shield > 0 ? `+${player.shield.toFixed(1)}` : '';
+        if (this.hpElement) this.hpElement.innerHTML = `${Math.ceil(player.hp)}${shieldInfo ? ` <span style="color:blue">${shieldInfo}</span>` : ''}`;
         if (this.mpElement) this.mpElement.textContent = Math.ceil(player.mp);
         if (this.maxMpElement) this.maxMpElement.textContent = stats.get('maxMp');
-        if (this.attackPowerElement) this.attackPowerElement.textContent = stats.get('attackPower');
+        const atkBonus = player.damageBonus || 0;
+        if (this.attackPowerElement) {
+            const bonusText = atkBonus > 0 ? ` <span style="color:red">+${atkBonus}</span>` : '';
+            this.attackPowerElement.innerHTML = `${stats.get('attackPower')}${bonusText}`;
+        }
         if (this.movementSpeedElement) this.movementSpeedElement.textContent = stats.get('movementSpeed').toFixed(2);
         if (this.goldElement) this.goldElement.textContent = gameState.gold;
         const hpRatio = player.hp / player.maxHp;
