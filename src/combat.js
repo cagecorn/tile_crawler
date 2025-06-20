@@ -28,6 +28,14 @@ export class CombatCalculator {
         let finalDamage = 0;
         const details = { base: 0, fromSkill: 0, fromTags: 0, defenseReduction: 0 };
 
+        const chargeEffect = attacker.effects?.find(e => e.id === 'charging_shot_effect');
+        let damageMultiplier = 1.0;
+        if (chargeEffect) {
+            damageMultiplier = 1.5;
+            attacker.effects = attacker.effects.filter(e => e.id !== 'charging_shot_effect');
+            this.eventManager.publish('log', { message: `[충전된 사격]이 발동됩니다!`, color: 'magenta' });
+        }
+
         // 1. 기본 공격력 계산 (힘 기반)
         details.base = attacker.attackPower;
         finalDamage += details.base;
@@ -52,6 +60,8 @@ export class CombatCalculator {
         // 4. 방어력에 의한 피해 감소
         details.defenseReduction = defender.stats.get('defense');
         finalDamage = Math.max(1, finalDamage - details.defenseReduction);
+        finalDamage *= damageMultiplier;
+        finalDamage = Math.floor(finalDamage);
 
         details.finalDamage = finalDamage;
 

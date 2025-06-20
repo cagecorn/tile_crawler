@@ -33,4 +33,25 @@ test('피해량 계산 이벤트', () => {
     assert.ok(eventData.details);
 });
 
+test('charging shot effect boosts damage and then expires', () => {
+    const em = new EventManager();
+    const tagManager = new TagManager();
+    const calc = new CombatCalculator(em, tagManager);
+    let dmg = null;
+    em.subscribe('damage_calculated', d => { dmg = d.damage; });
+
+    const attacker = {
+        attackPower: 4,
+        equipment: { weapon: {} },
+        stats: { get: () => 0 },
+        effects: [{ id: 'charging_shot_effect' }]
+    };
+    const defender = { stats: { get: () => 0 } };
+
+    calc.handleAttack({ attacker, defender, skill: null });
+
+    assert.strictEqual(dmg, 6); // 4 * 1.5
+    assert.strictEqual(attacker.effects.length, 0);
+});
+
 });
