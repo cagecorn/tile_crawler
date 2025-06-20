@@ -11,6 +11,20 @@ export class CombatCalculator {
 
         // --- 패링 로직 시작 ---
         const defendingWeapon = defender.equipment?.weapon;
+
+        const parryReadyIndex = defender.effects?.findIndex(e => e.id === 'parry_ready');
+        if (parryReadyIndex >= 0 && defendingWeapon) {
+            this.eventManager.publish('log', {
+                message: `⚔️ ${defender.constructor.name}이 패링으로 공격을 막아냅니다!`,
+                color: 'cyan'
+            });
+            this.eventManager.publish('parry_success', { attacker, defender });
+            defender.effects.splice(parryReadyIndex, 1);
+            const cooldown = WEAPON_SKILLS.parry.cooldown;
+            defendingWeapon.weaponStats.setCooldown(cooldown);
+            return;
+        }
+
         if (defendingWeapon && defendingWeapon.weaponStats?.canUseSkill('parry')) {
             const parrySkillData = WEAPON_SKILLS.parry;
             if (Math.random() < parrySkillData.procChance) {

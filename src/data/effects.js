@@ -114,5 +114,13 @@ export const EFFECTS = {
         stats: {},
         tags: ['buff', 'attack_up', 'charge_shot'],
         iconKey: 'courage-hymn-effect',
+    },
+
+    parry_ready: {
+        name: '패링 준비',
+        type: 'buff',
+        duration: 60,
+        stats: {},
+        tags: ['buff', 'parry_ready']
     }
 };

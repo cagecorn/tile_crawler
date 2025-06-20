@@ -15,11 +15,37 @@ class BaseWeaponAI {
     }
 }
 
-// 검 AI: 일반적인 근접 전투 수행 및 패링 기회 탐색
+// 검 AI: 일반적인 근접 전투 수행 및 패링 자세 사용
 export class SwordAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        // TODO: MeleeAI와 유사한 타겟팅 로직 + 패링 스킬 사용 조건 확인
-        return { type: 'idle' }; // 임시
+        const { enemies } = context;
+        if (!enemies || enemies.length === 0) return { type: 'idle' };
+
+        let nearest = null;
+        let minDist = Infinity;
+        for (const enemy of enemies) {
+            const d = Math.hypot(enemy.x - wielder.x, enemy.y - wielder.y);
+            if (d < minDist) {
+                minDist = d;
+                nearest = enemy;
+            }
+        }
+
+        if (!nearest) return { type: 'idle' };
+
+        if (
+            weapon?.weaponStats?.canUseSkill('parry_stance') &&
+            minDist <= wielder.attackRange &&
+            wielder.attackCooldown > 0
+        ) {
+            return { type: 'weapon_skill', skillId: 'parry_stance', target: wielder };
+        }
+
+        if (minDist <= wielder.attackRange) {
+            return { type: 'attack', target: nearest };
+        }
+
+        return { type: 'move', target: nearest };
     }
 }
 

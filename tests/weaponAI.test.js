@@ -1,4 +1,4 @@
-import { BowAI, SpearAI } from '../src/micro/WeaponAI.js';
+import { BowAI, SpearAI, SwordAI } from '../src/micro/WeaponAI.js';
 import { describe, test, assert } from './helpers.js';
 
 const mapStub = { tileSize: 1, isWallAt: () => false };
@@ -22,5 +22,15 @@ describe('WeaponAI', () => {
     const action = ai.decideAction(wielder, weapon, { enemies: [enemy], mapManager: mapStub });
     assert.strictEqual(action.type, 'weapon_skill');
     assert.strictEqual(action.skillId, 'charge');
+  });
+
+  test('SwordAI uses parry stance when recovering attack cooldown', () => {
+    const ai = new SwordAI();
+    const wielder = { x: 0, y: 0, attackRange: 10, attackCooldown: 5 };
+    const weapon = { weaponStats: { canUseSkill: (id) => id === 'parry_stance' } };
+    const enemy = { x: 8, y: 0 };
+    const action = ai.decideAction(wielder, weapon, { enemies: [enemy], mapManager: mapStub });
+    assert.strictEqual(action.type, 'weapon_skill');
+    assert.strictEqual(action.skillId, 'parry_stance');
   });
 });

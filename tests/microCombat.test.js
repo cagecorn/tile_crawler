@@ -160,4 +160,27 @@ describe('Micro-World Combat Scenarios', () => {
       assert.ok(defender.hp < initialDefenderHP, '패링 실패 시 수비자는 피해를 입어야 합니다.');
       assert.strictEqual(parryEvent, false, '패링 실패 시 parry_success 이벤트가 발생하지 않아야 합니다.');
   });
+
+  test('패링 자세 사용 시 다음 공격을 완전히 막는다', () => {
+      const { eventManager, itemFactory, combatCalculator, attacker, defender } = setupTestEnvironment();
+
+      const sword = itemFactory.create('short_sword', 0, 0, 1);
+      defender.equipment.weapon = sword;
+      sword.weaponStats.skills.push('parry_stance');
+
+      eventManager.subscribe('parry_success', () => {});
+
+      // AI가 패링 자세 효과를 받았다고 가정
+      defender.effects.push({ id: 'parry_ready', remaining: 60 });
+
+      const originalRandom = Math.random;
+      Math.random = () => 0.99;
+
+      combatCalculator.handleAttack({ attacker, defender, skill: null });
+
+      Math.random = originalRandom;
+
+      assert.ok(defender.effects.length === 0, '패링 준비 효과는 한 번 사용 후 사라져야 한다.');
+      assert.ok(sword.weaponStats.cooldown > 0, '패링 자세 사용 후 쿨타임이 적용되어야 한다.');
+  });
 });

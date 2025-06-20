@@ -111,6 +111,10 @@ export class MetaAIManager {
                     context.effectManager.addEffect(action.target, 'charging_shot_effect');
                 }
 
+                if (action.skillId === 'parry_stance' && context.effectManager) {
+                    context.effectManager.addEffect(entity, 'parry_ready');
+                }
+
                 weapon.weaponStats.setCooldown(skillData.cooldown);
                 break; }
             case 'charge_attack': {
