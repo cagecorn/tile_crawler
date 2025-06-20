@@ -93,6 +93,23 @@ export const ITEMS = {
         toughness: 5,
     },
 
+    estoc: {
+        name: '에스톡',
+        type: 'weapon',
+        damageDice: '1d8',
+        tags: ['melee', 'sword', 'finesse_weapon'],
+        imageKey: 'sword',
+        stats: {
+            attackPower: 3,
+            movement: 2,
+            attackSpeed: 0.2,
+        },
+        tier: 'rare',
+        durability: 120,
+        weight: 7,
+        toughness: 7,
+    },
+
     // Parasite samples
     parasite_leech: {
         name: 'Leech',

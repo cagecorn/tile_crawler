@@ -30,6 +30,10 @@ class Entity {
         this.effects = []; // 적용중인 효과 목록 배열 추가
         this.unitType = 'generic'; // 기본 유닛 타입을 '일반'으로 설정
 
+        // --- AI 상태 저장용 프로퍼티 ---
+        this.aiState = null;      // 현재 AI의 상태 (예: 'retreating')
+        this.aiStateTimer = 0;    // 상태 지속 시간(프레임)
+
         // --- 생존 관련 수치 ---
         this.maxFullness = config.maxFullness ?? 100;
         this.fullness = config.fullness ?? this.maxFullness;
