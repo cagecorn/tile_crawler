@@ -14,6 +14,7 @@ export class ItemAIManager {
         ];
         for (const ent of entities) {
             this._handleHealingItems(ent, entities);
+            this._handleArtifacts(ent);
         }
     }
 
@@ -21,7 +22,7 @@ export class ItemAIManager {
         const inventory = self.consumables || self.inventory;
         if (!Array.isArray(inventory) || inventory.length === 0) return;
 
-        const item = inventory.find(i => i.tags?.includes('healing_item') || i.tags?.includes('체력 회복 아이템'));
+        const item = inventory.find(i => (i.tags?.includes('healing_item') || i.tags?.includes('체력 회복 아이템')) && i.type !== 'artifact');
         if (!item) return;
 
         const mbti = self.properties?.mbti || '';
@@ -69,10 +70,25 @@ export class ItemAIManager {
         }
     }
 
+    _handleArtifacts(entity) {
+        const inv = entity.consumables || entity.inventory;
+        if (!Array.isArray(inv)) return;
+        const item = inv.find(i => i.type === 'artifact' || i.tags?.includes('artifact'));
+        if (!item) return;
+        if (item.cooldownRemaining > 0) return;
+        if (item.healAmount) {
+            entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
+            if (this.eventManager) {
+                this.eventManager.publish('log', { message: `${entity.constructor.name} activates ${item.name}` });
+            }
+        }
+        item.cooldownRemaining = item.cooldown || 60;
+    }
+
     _useItem(user, item, target) {
         if (!item || (item.quantity && item.quantity <= 0)) return;
 
-        const heal = 5; // 아이템의 회복량 (나중에 데이터 기반으로 수정 가능)
+        const heal = item.healAmount || 5; // 기본 회복량 5
         target.hp = Math.min(target.maxHp, target.hp + heal);
 
         if (this.vfxManager) this.vfxManager.addItemUseEffect(target, item.image);

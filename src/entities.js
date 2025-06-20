@@ -109,6 +109,12 @@ class Entity {
                 this.skillCooldowns[skillId]--;
             }
         }
+        const inv = this.consumables || this.inventory;
+        if (Array.isArray(inv)) {
+            for (const it of inv) {
+                if (it.cooldownRemaining > 0) it.cooldownRemaining--;
+            }
+        }
     }
 
     applyRegen() {
@@ -294,6 +300,9 @@ export class Item {
         this.tags = [];
         this.range = 0;
         this.rank = 1;
+        this.cooldown = 0;
+        this.cooldownRemaining = 0;
+        this.healAmount = 0;
         const statsMap = new Map();
         statsMap.add = function(statObj) {
             for (const key in statObj) {
@@ -316,6 +325,7 @@ export class Item {
             this.bobbingAngle -= Math.PI * 2;
         }
         this.y = this.baseY + Math.sin(this.bobbingAngle) * this.bobbingAmount;
+        if (this.cooldownRemaining > 0) this.cooldownRemaining--;
     }
 
     render(ctx) {
