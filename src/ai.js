@@ -185,6 +185,14 @@ export class MeleeAI extends AIArchetype {
 export class HealerAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, mapManager, eventManager } = context;
+        const mbti = self.properties?.mbti || '';
+        if (eventManager) {
+            self._mbtiIconCooldown = (self._mbtiIconCooldown || 0) - 1;
+            if (self._mbtiIconCooldown <= 0 && mbti) {
+                eventManager.publish('vfx_request', { type: 'text_popup', text: mbti, target: self, options: { duration: 30 } });
+                self._mbtiIconCooldown = 120;
+            }
+        }
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
 
@@ -194,8 +202,6 @@ export class HealerAI extends AIArchetype {
             self.skills.includes(healId) &&
             self.mp >= healSkill.manaCost &&
             (self.skillCooldowns[healId] || 0) <= 0;
-
-        const mbti = self.properties?.mbti || '';
         // 성향에 따라 치유 시점 결정
         let healThreshold = 0.7;
         if (mbti.includes('S')) {
@@ -441,6 +447,13 @@ export class BardAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, mapManager, eventManager } = context;
         const mbti = self.properties?.mbti || '';
+        if (eventManager) {
+            self._mbtiIconCooldown = (self._mbtiIconCooldown || 0) - 1;
+            if (self._mbtiIconCooldown <= 0 && mbti) {
+                eventManager.publish('vfx_request', { type: 'text_popup', text: mbti, target: self, options: { duration: 30 } });
+                self._mbtiIconCooldown = 120;
+            }
+        }
         const songs = [SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id];
         for (const skillId of songs) {
             const skill = SKILLS[skillId];

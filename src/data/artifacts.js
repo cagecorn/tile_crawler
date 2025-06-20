@@ -9,4 +9,14 @@ export const ARTIFACTS = {
         tags: ['artifact', 'healing_item'],
         imageKey: 'talisman',
     },
+    fox_charm: {
+        id: 'fox_charm',
+        name: '여우의 부적',
+        type: 'artifact',
+        description: '사용 시 잠시 능력치를 향상시킵니다.',
+        cooldown: 120,
+        effectId: 'all_stat_buff',
+        tags: ['artifact', 'buff'],
+        imageKey: 'talisman',
+    },
 };

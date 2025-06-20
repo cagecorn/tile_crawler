@@ -119,7 +119,8 @@ export class Game {
         this.itemAIManager = new Managers.ItemAIManager(
             this.eventManager,
             this.projectileManager,
-            this.vfxManager
+            this.vfxManager,
+            this.effectManager
         );
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
@@ -169,7 +170,7 @@ export class Game {
         }
 
         // example feature: spawn several monsters for poison debuff testing
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 40; i++) {
             this.aquariumManager.addTestingFeature({
                 type: 'monster',
                 image: assets.monster,
@@ -243,11 +244,21 @@ export class Game {
                                 player.x + this.mapManager.tileSize * 2,
                                 player.y - this.mapManager.tileSize,
                                 this.mapManager.tileSize);
+        const foxEgg = this.itemFactory.create('pet_fox',
+                                player.x - this.mapManager.tileSize * 2,
+                                player.y,
+                                this.mapManager.tileSize);
+        const foxCharm = this.itemFactory.create('fox_charm',
+                                player.x,
+                                player.y - this.mapManager.tileSize * 2,
+                                this.mapManager.tileSize);
         this.itemManager.addItem(potion);
         if (dagger) this.itemManager.addItem(dagger);
         if (bow) this.itemManager.addItem(bow);
         if (violinBow) this.itemManager.addItem(violinBow);
         if (plateArmor) this.itemManager.addItem(plateArmor);
+        if (foxEgg) this.itemManager.addItem(foxEgg);
+        if (foxCharm) this.itemManager.addItem(foxCharm);
 
         // === 3. 몬스터 생성 ===
         const monsters = [];

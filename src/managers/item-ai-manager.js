@@ -1,8 +1,9 @@
 export class ItemAIManager {
-    constructor(eventManager = null, projectileManager = null, vfxManager = null) {
+    constructor(eventManager = null, projectileManager = null, vfxManager = null, effectManager = null) {
         this.eventManager = eventManager;
         this.projectileManager = projectileManager;
         this.vfxManager = vfxManager;
+        this.effectManager = effectManager;
     }
 
     update(context) {
@@ -78,9 +79,12 @@ export class ItemAIManager {
         if (item.cooldownRemaining > 0) return;
         if (item.healAmount) {
             entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
-            if (this.eventManager) {
-                this.eventManager.publish('log', { message: `${entity.constructor.name} activates ${item.name}` });
-            }
+        }
+        if (item.effectId && this.effectManager) {
+            this.effectManager.addEffect(entity, item.effectId);
+        }
+        if (this.eventManager) {
+            this.eventManager.publish('log', { message: `${entity.constructor.name} activates ${item.name}` });
         }
         item.cooldownRemaining = item.cooldown || 60;
     }
