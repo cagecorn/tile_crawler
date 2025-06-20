@@ -123,9 +123,16 @@ export class MetaAIManager {
             const membersSorted = [...group.members].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
             for (const member of membersSorted) {
                 if (member.hp <= 0) continue;
-                if (member.attackCooldown > 0) member.attackCooldown--;
-                if (typeof member.applyRegen === 'function') member.applyRegen();
 
+                // 1단계: 쿨다운 감소 등 상태 업데이트
+                if (typeof member.update === 'function') {
+                    member.update(currentContext);
+                } else {
+                    if (member.attackCooldown > 0) member.attackCooldown--;
+                    if (typeof member.applyRegen === 'function') member.applyRegen();
+                }
+
+                // 2단계: 업데이트 이후 행동 결정 및 실행
                 let action = { type: 'idle' };
                 if (group.strategy !== STRATEGY.IDLE && member.ai) {
                     action = member.ai.decideAction(member, currentContext);

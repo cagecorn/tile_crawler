@@ -101,13 +101,8 @@ class Entity {
         };
     }
 
-    update(context) {
+    update() {
         this.applyRegen();
-        if (this.ai) {
-            const action = this.ai.decideAction(this, context);
-            context.metaAIManager.executeAction(this, action, context);
-        }
-
         if (this.attackCooldown > 0) this.attackCooldown--;
         for (const skillId in this.skillCooldowns) {
             if (this.skillCooldowns[skillId] > 0) {
@@ -208,7 +203,7 @@ export class Mercenary extends Entity {
     update(context) {
         const prevX = this.x;
         const prevY = this.y;
-        super.update(context);
+        super.update();
 
         if (this.x === prevX && this.y === prevY) {
             this.stuckCounter++;
