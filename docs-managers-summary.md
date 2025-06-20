@@ -47,6 +47,7 @@
 | `movementManager.js` | 유닛의 좌표 이동과 충돌 판정을 계산합니다. |
 | `narrativeManager.js` | 스토리 플래그와 몬스터 도감 등 서사 관련 데이터를 저장합니다. |
 | `parasiteManager.js` | 기생 아이템 획득과 효과 적용을 전담합니다. |
+| `petManager.js` | 펫 소환과 성장, 중복 합성을 관리합니다. |
 | `particleDecoratorManager.js` | 파티클 효과에 장식용 이미지를 추가하는 유틸리티 매니저. |
 | `pathfindingManager.js` | BFS 기반 길찾기 알고리즘을 제공합니다. |
 | `projectileManager.js` | 투사체 생성과 업데이트, 충돌 처리를 담당합니다. |
