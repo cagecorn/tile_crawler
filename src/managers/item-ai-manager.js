@@ -6,6 +6,10 @@ export class ItemAIManager {
         this.effectManager = effectManager;
     }
 
+    setEffectManager(effectManager) {
+        this.effectManager = effectManager;
+    }
+
     update(context) {
         const { player, mercenaryManager, monsterManager } = context;
         const entities = [
@@ -13,9 +17,25 @@ export class ItemAIManager {
             ...(mercenaryManager?.mercenaries || []),
             ...(monsterManager?.monsters || [])
         ];
+
+        let allEnemies = [];
+        if (context.metaAIManager) {
+            allEnemies = Object.values(context.metaAIManager.groups)
+                .filter(g => g.id !== player.groupId)
+                .flatMap(g => g.members);
+        } else if (context.enemies) {
+            allEnemies = context.enemies;
+        }
+
         for (const ent of entities) {
+            const nearbyEnemies = allEnemies.filter(e => Math.hypot(e.x - ent.x, e.y - ent.y) < ent.visionRange);
+
             this._handleHealingItems(ent, entities);
             this._handleArtifacts(ent);
+
+            if (nearbyEnemies.length > 0) {
+                this._handleBuffItems(ent, entities);
+            }
         }
     }
 
@@ -89,15 +109,53 @@ export class ItemAIManager {
         item.cooldownRemaining = item.cooldown || 60;
     }
 
+    _handleBuffItems(self, allEntities) {
+        const inventory = self.consumables || self.inventory;
+        if (!Array.isArray(inventory) || inventory.length === 0) return;
+
+        const item = inventory.find(i => i.tags?.includes('buff_item'));
+        if (!item || !item.effectId) return;
+
+        const mbti = self.properties?.mbti || '';
+
+        if (mbti.includes('I')) {
+            if (!self.effects.some(e => e.id === item.effectId)) {
+                this._useItem(self, item, self);
+            }
+            return;
+        }
+
+        if (mbti.includes('E')) {
+            const allyToBuff = allEntities.find(e =>
+                e !== self &&
+                e.isFriendly === self.isFriendly &&
+                !e.effects.some(eff => eff.id === item.effectId)
+            );
+            if (allyToBuff) {
+                this._useItem(self, item, allyToBuff);
+                return;
+            }
+        }
+
+        if (!self.effects.some(e => e.id === item.effectId)) {
+            this._useItem(self, item, self);
+        }
+    }
+
     _useItem(user, item, target) {
         if (!item || (item.quantity && item.quantity <= 0)) return;
 
-        const heal = item.healAmount || 5; // 기본 회복량 5
-        target.hp = Math.min(target.maxHp, target.hp + heal);
+        if (item.healAmount) {
+            const heal = item.healAmount;
+            target.hp = Math.min(target.maxHp, target.hp + heal);
+        }
+
+        if (item.effectId && this.effectManager) {
+            this.effectManager.addEffect(target, item.effectId);
+        }
 
         if (this.vfxManager) this.vfxManager.addItemUseEffect(target, item.image);
-        
-        // 자신에게 사용하는 것이 아니라면 아이템을 던집니다.
+
         if (this.projectileManager && user !== target) {
             this.projectileManager.throwItem(user, target, item);
         }

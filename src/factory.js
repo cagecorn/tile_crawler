@@ -168,6 +168,7 @@ export class ItemFactory {
             item.cooldownRemaining = 0;
         }
         if (baseItem.healAmount) item.healAmount = baseItem.healAmount;
+        if (baseItem.effectId) item.effectId = baseItem.effectId;
 
         if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
