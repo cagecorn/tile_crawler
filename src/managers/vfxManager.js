@@ -7,6 +7,12 @@ export class VFXManager {
         this.emitters = [];
         this.eventManager = eventManager;
         this.itemManager = itemManager;
+        this.knockbackEffectDuration = 15;
+        if (this.eventManager) {
+            this.eventManager.subscribe('knockback_success', data => {
+                this.addKnockbackEffect(data.attacker, data.weapon);
+            });
+        }
         console.log("[VFXManager] Initialized");
     }
 
@@ -342,6 +348,18 @@ export class VFXManager {
         this.effects.push(effect);
     }
 
+    addKnockbackEffect(attacker, weapon) {
+        if (!attacker || !weapon || !weapon.image) return;
+        const effect = {
+            type: 'knockback_shine',
+            entity: attacker,
+            image: weapon.image,
+            duration: this.knockbackEffectDuration,
+            life: this.knockbackEffectDuration
+        };
+        this.effects.push(effect);
+    }
+
     update() {
         for (let i = this.emitters.length - 1; i >= 0; i--) {
             const e = this.emitters[i];
@@ -453,6 +471,11 @@ export class VFXManager {
             } else if (effect.type === 'arrow_trail') {
                 effect.life--;
                 if (effect.life <= 0 || effect.projectile.isDead) {
+                    this.effects.splice(i, 1);
+                }
+            } else if (effect.type === 'knockback_shine') {
+                effect.life--;
+                if (effect.life <= 0) {
                     this.effects.splice(i, 1);
                 }
             }
@@ -596,6 +619,19 @@ export class VFXManager {
                 ctx.lineWidth = 1.5;
                 ctx.globalAlpha = effect.life / effect.duration;
                 ctx.stroke();
+                ctx.restore();
+            } else if (effect.type === 'knockback_shine') {
+                const progress = 1 - effect.life / effect.duration;
+                const shine = 1 - progress;
+                const shake = Math.sin(progress * Math.PI * 4) * 2;
+                const { entity } = effect;
+                const centerX = entity.x + entity.width / 2 + shake;
+                const centerY = entity.y + entity.height / 2;
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalAlpha = shine;
+                ctx.drawImage(effect.image, -effect.image.width / 2, -effect.image.height / 2);
                 ctx.restore();
             }
         }

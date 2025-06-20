@@ -54,4 +54,28 @@ test('charging shot effect boosts damage and then expires', () => {
     assert.strictEqual(attacker.effects.length, 0);
 });
 
+test('knockback event fires when sword attack knocks back', () => {
+    const em = new EventManager();
+    const tm = new TagManager();
+    const calc = new CombatCalculator(em, tm);
+    let eventData = null;
+    em.subscribe('knockback_success', d => { eventData = d; });
+
+    const attacker = {
+        attackPower: 3,
+        equipment: { weapon: { tags: ['sword'], knockbackChance: 1, image: {} } },
+        stats: { get: () => 0 }
+    };
+    const defender = { stats: { get: () => 0 } };
+
+    const originalRandom = Math.random;
+    Math.random = () => 0;
+    calc.handleAttack({ attacker, defender, skill: null });
+    Math.random = originalRandom;
+
+    assert.ok(eventData, 'knockback_success 이벤트 발생 여부');
+    assert.strictEqual(eventData.attacker, attacker);
+    assert.strictEqual(eventData.weapon, attacker.equipment.weapon);
+});
+
 });
