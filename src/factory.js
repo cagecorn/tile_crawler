@@ -1,5 +1,5 @@
 // src/factory.js
-import { Player, Mercenary, Monster, Item } from './entities.js';
+import { Player, Mercenary, Monster, Item, Pet } from './entities.js';
 import { rollOnTable } from './utils/random.js';
 import { FAITHS } from './data/faiths.js';
 import { ORIGINS } from './data/origins.js';
@@ -11,6 +11,7 @@ import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
 import { RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, CompositeAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
+import { PETS } from './data/pets.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -102,6 +103,12 @@ export class CharacterFactory {
                 return merc;
             case 'monster':
                 return new Monster(finalConfig);
+            case 'pet':
+                const petData = PETS[config.petId] || PETS.fox;
+                finalConfig.stats = { ...finalConfig.stats, ...(petData.baseStats || {}) };
+                finalConfig.image = finalConfig.image || this.assets[petData.imageKey];
+                finalConfig.auraSkill = petData.auraSkill;
+                return new Pet(finalConfig);
         }
     }
     

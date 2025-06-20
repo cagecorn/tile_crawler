@@ -83,4 +83,17 @@ export const ITEMS = {
         imageKey: 'worm',
         stats: { intelligence: 1 },
     },
+    pet_fox: {
+        name: 'Fox Pet',
+        type: 'pet',
+        tags: ['pet'],
+        imageKey: 'pet-fox',
+        cooldown: 600,
+    },
+    pet_food: {
+        name: 'Pet Food',
+        type: 'consumable',
+        tags: ['pet_food'],
+        imageKey: 'potion',
+    },
 };

@@ -56,6 +56,7 @@ export class Game {
         this.loader.loadImage('plate-armor', 'assets/images/plate-armor.png');
         this.loader.loadImage('violin-bow', 'assets/images/violin-bow.png');
         this.loader.loadImage('skeleton', 'assets/images/skeleton.png');
+        this.loader.loadImage('pet-fox', 'assets/images/pet-fox.png');
         this.loader.loadImage('guardian-hymn-effect', 'assets/images/Guardian Hymn-effect.png');
         this.loader.loadImage('courage-hymn-effect', 'assets/images/Courage Hymn-effect.png');
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');

@@ -19,6 +19,7 @@ import { ParticleDecoratorManager } from './particleDecoratorManager.js';
 import { TraitManager } from './traitManager.js';
 import { ParasiteManager } from './parasiteManager.js';
 import { EffectIconManager } from './effectIconManager.js';
+import { PetManager } from './petManager.js';
 // 파일 기반 로거는 Node 환경 전용이라 기본 묶음에서 제외한다
 // import { FileLogManager } from './fileLogManager.js';
 // ... (나중에 다른 매니저가 생기면 여기에 추가)
@@ -41,5 +42,6 @@ export {
     ParticleDecoratorManager,
     TraitManager,
     ParasiteManager,
+    PetManager,
     EffectIconManager,
 };

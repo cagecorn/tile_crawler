@@ -291,6 +291,23 @@ export class Monster extends Entity {
     }
 }
 
+export class Pet extends Entity {
+    constructor(config) {
+        super(config);
+        this.owner = config.owner;
+        this.isFriendly = true;
+        this.unitType = 'pet';
+        this.ai = new MeleeAI();
+        if (config.auraSkill) {
+            this.skills.push(config.auraSkill);
+        }
+        this.consumables = [];
+        this.consumableCapacity = 0;
+    }
+
+    addConsumable() { return false; }
+}
+
 export class Item {
     constructor(x, y, tileSize, name, image) {
         this.x = x; this.y = y; this.width = tileSize; this.height = tileSize;
