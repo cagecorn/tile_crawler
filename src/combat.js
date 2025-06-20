@@ -37,6 +37,9 @@ export class CombatCalculator {
 
         details.finalDamage = finalDamage;
 
+        // 공격 판정이 성공적으로 끝났음을 미시 세계에 알린다
+        this.eventManager.publish('attack_landed', { attacker, defender, skill });
+
         this.eventManager.publish('damage_calculated', { ...data, damage: finalDamage, details });
     }
 }
