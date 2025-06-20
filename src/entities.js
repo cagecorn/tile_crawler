@@ -44,11 +44,21 @@ class Entity {
 
         // --- 장비창(Equipment) 추가 ---
         this.equipment = {
-            weapon: null,
-            armor: null,
-            accessory1: null,
-            accessory2: null,
+            main_hand: null,    // 주무기
+            off_hand: null,     // 보조장비
+            armor: null,        // 갑옷
+            helmet: null,       // 투구
+            gloves: null,       // 장갑
+            boots: null,        // 신발
+            accessory1: null,   // 장신구 1
+            accessory2: null,   // 장신구 2
         };
+        // 기존 코드와의 호환성을 위해 weapon 속성을 main_hand에 매핑
+        Object.defineProperty(this.equipment, 'weapon', {
+            get: () => this.equipment.main_hand,
+            set: (val) => { this.equipment.main_hand = val; },
+            enumerable: false,
+        });
 
         // 텔레포트 스킬 사용을 위한 위치 저장용 프로퍼티
         this.teleportSavedPos = null;
@@ -306,6 +316,7 @@ export class Item {
         this.durability = 0;
         this.weight = 0;
         this.toughness = 0;
+        this.synergies = []; // 아이템이 가진 시너지 목록
         const statsMap = new Map();
         statsMap.add = function(statObj) {
             for (const key in statObj) {

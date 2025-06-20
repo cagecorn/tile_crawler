@@ -129,6 +129,7 @@ export class Game {
         this.microItemAIManager = new Managers.MicroItemAIManager();
         this.microEngine = new MicroEngine(this.eventManager);
         this.microCombatManager = new MicroCombatManager(this.eventManager);
+        this.synergyManager = new Managers.SynergyManager(this.eventManager);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
