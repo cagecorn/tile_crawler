@@ -1,3 +1,5 @@
+import { WEAPON_SKILLS } from './data/weapon-skills.js';
+
 export class CombatCalculator {
     constructor(eventManager, tagManager) {
         this.eventManager = eventManager;
@@ -6,6 +8,22 @@ export class CombatCalculator {
 
     handleAttack(data) {
         const { attacker, defender, skill } = data;
+
+        // --- 패링 로직 시작 ---
+        const defendingWeapon = defender.equipment?.weapon;
+        if (defendingWeapon && defendingWeapon.weaponStats?.canUseSkill('parry')) {
+            const parrySkillData = WEAPON_SKILLS.parry;
+            if (Math.random() < parrySkillData.procChance) {
+                this.eventManager.publish('log', {
+                    message: `⚔️ ${defender.constructor.name}의 ${defendingWeapon.name}(이)가 ${attacker.constructor.name}의 공격을 쳐냈습니다! [패링]`,
+                    color: 'cyan'
+                });
+                this.eventManager.publish('parry_success', { attacker, defender });
+                defendingWeapon.weaponStats.setCooldown(parrySkillData.cooldown);
+                return;
+            }
+        }
+        // --- 패링 로직 끝 ---
 
         let finalDamage = 0;
         const details = { base: 0, fromSkill: 0, fromTags: 0, defenseReduction: 0 };

@@ -7,6 +7,7 @@ export const WEAPON_SKILLS = {
         name: '패링',
         description: '적의 근접 공격을 쳐내어 무효화합니다. (발동 확률 15%)',
         type: 'passive_proc',
+        procChance: 0.15,
         cooldown: 30,
         tags: ['weapon_skill', 'defensive', 'sword'],
     },
