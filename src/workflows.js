@@ -25,3 +25,49 @@ export function monsterDeathWorkflow(context) {
     // 4. 사망한 몬스터를 모든 매니저에서 확실하게 제거한다.
     eventManager.publish('entity_removed', { victimId: victim.id });
 }
+
+// === 무기 무장해제 워크플로우 ===
+export function disarmWorkflow(context) {
+    const { eventManager, owner, weapon, itemManager, equipmentManager, vfxManager } = context;
+
+    equipmentManager.equip(owner, null, null);
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 100 + Math.random() * 50;
+    const endX = owner.x + Math.cos(angle) * distance;
+    const endY = owner.y + Math.sin(angle) * distance;
+
+    weapon.x = endX;
+    weapon.y = endY;
+
+    if (vfxManager) {
+        vfxManager.addEjectAnimation(weapon, { x: owner.x, y: owner.y }, angle, distance);
+    } else {
+        itemManager.addItem(weapon);
+    }
+
+    setTimeout(() => {
+        if (itemManager) itemManager.addItem(weapon);
+    }, 350);
+
+    eventManager.publish('log', {
+        message: `💥 ${owner.constructor.name}의 ${weapon.name}(이)가 튕겨나갔습니다!`,
+        color: 'orange'
+    });
+}
+
+// === 방어구 파괴 워크플로우 ===
+export function armorBreakWorkflow(context) {
+    const { eventManager, owner, armor, equipmentManager, vfxManager } = context;
+
+    equipmentManager.equip(owner, null, null);
+
+    if (vfxManager) {
+        vfxManager.addArmorBreakAnimation(armor, owner);
+    }
+
+    eventManager.publish('log', {
+        message: `🛡️ ${owner.constructor.name}의 ${armor.name}(이)가 파괴되었습니다!`,
+        color: 'red'
+    });
+}

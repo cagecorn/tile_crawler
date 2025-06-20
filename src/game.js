@@ -28,6 +28,8 @@ import { rollOnTable } from './utils/random.js';
 import { getMonsterLootTable } from './data/tables.js';
 import { MicroEngine } from './micro/MicroEngine.js';
 import { MicroItemAIManager } from './managers/microItemAIManager.js';
+import { MicroCombatManager } from './micro/MicroCombatManager.js';
+import { disarmWorkflow, armorBreakWorkflow } from './workflows.js';
 
 export class Game {
     constructor() {
@@ -126,6 +128,7 @@ export class Game {
         this.itemAIManager.setEffectManager(this.effectManager);
         this.microItemAIManager = new Managers.MicroItemAIManager();
         this.microEngine = new MicroEngine(this.eventManager, this.itemManager);
+        this.microCombatManager = new MicroCombatManager(this.eventManager);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
@@ -508,8 +511,9 @@ export class Game {
         const { eventManager, combatCalculator, monsterManager, mercenaryManager, mapManager, metaAIManager, pathfindingManager } = this;
         const gameState = this.gameState;
 
-        // 공격 이벤트가 발생하면 CombatCalculator에 계산을 요청
+        // 공격 이벤트 처리
         eventManager.subscribe('entity_attack', (data) => {
+            this.microCombatManager.resolveAttack(data.attacker, data.defender);
             combatCalculator.handleAttack(data);
 
             const { attacker, defender, skill } = data;
@@ -636,6 +640,28 @@ export class Game {
             if (!item) return;
 
             this.vfxManager.addItemPopAnimation(item, startPos, endPos);
+        });
+
+        eventManager.subscribe('weapon_disarmed', (data) => {
+            const context = {
+                eventManager: this.eventManager,
+                itemManager: this.itemManager,
+                equipmentManager: this.equipmentManager,
+                vfxManager: this.vfxManager,
+                mapManager: this.mapManager,
+                ...data
+            };
+            disarmWorkflow(context);
+        });
+
+        eventManager.subscribe('armor_broken', (data) => {
+            const context = {
+                eventManager: this.eventManager,
+                equipmentManager: this.equipmentManager,
+                vfxManager: this.vfxManager,
+                ...data
+            };
+            armorBreakWorkflow(context);
         });
 
         eventManager.subscribe('skill_used', (data) => {

@@ -161,6 +161,11 @@ export class ItemFactory {
         item.baseId = itemId;
         item.type = baseItem.type;
         item.tags = [...baseItem.tags];
+
+        if (baseItem.tier) item.tier = baseItem.tier;
+        if (baseItem.durability) item.durability = baseItem.durability;
+        if (baseItem.weight) item.weight = baseItem.weight;
+        if (baseItem.toughness) item.toughness = baseItem.toughness;
         if (item.type === 'weapon' || item.tags.includes('weapon')) {
             item.weaponStats = new WeaponStatManager(itemId);
         }

@@ -301,6 +301,12 @@ export class Item {
         this.cooldown = 0;
         this.cooldownRemaining = 0;
         this.healAmount = 0;
+
+        // micro combat properties
+        this.tier = 'normal';
+        this.durability = 0;
+        this.weight = 0;
+        this.toughness = 0;
         const statsMap = new Map();
         statsMap.add = function(statObj) {
             for (const key in statObj) {

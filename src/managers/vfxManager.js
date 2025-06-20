@@ -151,6 +151,28 @@ export class VFXManager {
     }
 
     /**
+     * 아이템이 튕겨나가는 애니메이션을 추가합니다.
+     * @param {Item} item - 튕겨나갈 아이템 객체
+     * @param {{x, y}} startPos - 시작 위치
+     * @param {number} angle - 튕겨나갈 각도 (라디안)
+     * @param {number} distance - 튕겨나갈 거리
+     */
+    addEjectAnimation(item, startPos, angle, distance) {
+        const effect = {
+            type: 'eject_item',
+            item,
+            image: item.image,
+            startPos: { ...startPos },
+            duration: 20,
+            life: 20,
+            angle,
+            distance,
+            height: 48,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
      * 소모품 사용 시 해당 아이콘이 머리 위에 나타났다 사라지는 효과를 추가합니다.
      * @param {object} entity - 아이템을 사용한 유닛
      * @param {HTMLImageElement} image - 아이템 이미지
@@ -168,6 +190,23 @@ export class VFXManager {
             endScale: 1.5,
             scale: 0.5,
             alpha: 1.0,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
+     * 방어구가 깨지는 애니메이션을 추가합니다.
+     * @param {Item} armor - 파괴될 방어구 객체
+     * @param {{x, y, width, height}} targetRect - 효과가 표시될 위치와 크기
+     */
+    addArmorBreakAnimation(armor, targetRect) {
+        if (!armor || !armor.image) return;
+        const effect = {
+            type: 'armor_break',
+            image: armor.image,
+            rect: targetRect,
+            duration: 30,
+            life: 30,
         };
         this.effects.push(effect);
     }
@@ -350,16 +389,39 @@ export class VFXManager {
                 continue;
             }
 
-            if (effect.type === 'item_use') {
+            if (effect.type === 'eject_item') {
                 effect.life--;
-                const progress = 1 - effect.life / effect.duration;
-                effect.scale = effect.startScale + (effect.endScale - effect.startScale) * progress;
-                effect.alpha = 1 - progress;
                 if (effect.life <= 0) {
+                    if (this.itemManager && effect.item) {
+                        const endX = effect.startPos.x + Math.cos(effect.angle) * effect.distance;
+                        const endY = effect.startPos.y + Math.sin(effect.angle) * effect.distance;
+                        effect.item.x = endX;
+                        effect.item.y = endY;
+                        this.itemManager.addItem(effect.item);
+                    }
                     this.effects.splice(i, 1);
                 }
                 continue;
             }
+
+        if (effect.type === 'item_use') {
+            effect.life--;
+            const progress = 1 - effect.life / effect.duration;
+            effect.scale = effect.startScale + (effect.endScale - effect.startScale) * progress;
+            effect.alpha = 1 - progress;
+            if (effect.life <= 0) {
+                this.effects.splice(i, 1);
+            }
+            continue;
+        }
+
+        if (effect.type === 'armor_break') {
+            effect.life--;
+            if (effect.life <= 0) {
+                this.effects.splice(i, 1);
+            }
+            continue;
+        }
 
             if (effect.type === 'text_popup') {
                 effect.life--;
@@ -434,6 +496,15 @@ export class VFXManager {
                 if (item.image && item.image.width) {
                     ctx.drawImage(item.image, currentX, currentY - arc, item.width, item.height);
                 }
+            } else if (effect.type === 'eject_item') {
+                const progress = 1 - (effect.life / effect.duration);
+                const currentDist = effect.distance * progress;
+                const currentX = effect.startPos.x + Math.cos(effect.angle) * currentDist;
+                const currentY = effect.startPos.y + Math.sin(effect.angle) * currentDist;
+                const arc = Math.sin(progress * Math.PI) * effect.height;
+                if (effect.image && effect.image.width) {
+                    ctx.drawImage(effect.image, currentX, currentY - arc, effect.item.width, effect.item.height);
+                }
             } else if (effect.type === 'item_use') {
                 const w = effect.image.width * effect.scale;
                 const h = effect.image.height * effect.scale;
@@ -481,6 +552,39 @@ export class VFXManager {
                 ctx.globalCompositeOperation = 'source-atop';
                 ctx.fillStyle = effect.color;
                 ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                ctx.restore();
+            } else if (effect.type === 'armor_break') {
+                const { rect } = effect;
+                const progress = 1 - effect.life / effect.duration;
+                ctx.save();
+                ctx.globalAlpha = 1 - progress;
+
+                const centerX = rect.x + rect.width / 2;
+                const centerY = rect.y + rect.height / 2;
+                const moveAmount = progress * 20;
+
+                ctx.drawImage(
+                    effect.image,
+                    0,
+                    0,
+                    effect.image.width / 2,
+                    effect.image.height,
+                    centerX - rect.width / 2 - moveAmount,
+                    centerY - rect.height / 2,
+                    rect.width / 2,
+                    rect.height
+                );
+                ctx.drawImage(
+                    effect.image,
+                    effect.image.width / 2,
+                    0,
+                    effect.image.width / 2,
+                    effect.image.height,
+                    centerX + moveAmount,
+                    centerY - rect.height / 2,
+                    rect.width / 2,
+                    rect.height
+                );
                 ctx.restore();
             } else if (effect.type === 'arrow_trail') {
                 const p = effect.projectile;

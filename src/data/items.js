@@ -7,6 +7,10 @@ export const ITEMS = {
         tags: ['melee', 'sword'],
         imageKey: 'sword',
         stats: { attackPower: 2 },
+        tier: 'normal',
+        durability: 100,
+        weight: 10,
+        toughness: 5,
     },
     long_bow: {
         name: '장궁',
@@ -15,6 +19,10 @@ export const ITEMS = {
         tags: ['ranged', 'bow', 'finesse_weapon'],
         imageKey: 'bow',
         stats: { attackPower: 2, attackRange: 384 },
+        tier: 'normal',
+        durability: 80,
+        weight: 8,
+        toughness: 3,
     },
 
     violin_bow: {
@@ -24,6 +32,10 @@ export const ITEMS = {
         tags: ['ranged', 'bow', 'finesse_weapon', 'song'],
         imageKey: 'violin-bow',
         stats: { attackPower: 2, attackRange: 384 },
+        tier: 'normal',
+        durability: 70,
+        weight: 7,
+        toughness: 3,
     },
 
     plate_armor: {
@@ -32,6 +44,10 @@ export const ITEMS = {
         tags: ['armor', 'heavy_armor'],
         imageKey: 'plate-armor',
         stats: { maxHp: 10 },
+        tier: 'rare',
+        durability: 200,
+        weight: 15,
+        toughness: 12,
     },
 
     // 방어구
@@ -41,6 +57,10 @@ export const ITEMS = {
         tags: ['armor', 'light_armor'],
         imageKey: 'leather_armor',
         stats: { maxHp: 5 },
+        tier: 'normal',
+        durability: 60,
+        weight: 5,
+        toughness: 4,
     },
 
     // 기본 소모품 및 화폐
@@ -67,6 +87,10 @@ export const ITEMS = {
         tags: ['melee', 'sword'],
         imageKey: 'sword',
         stats: { attackPower: 2 },
+        tier: 'normal',
+        durability: 90,
+        weight: 9,
+        toughness: 5,
     },
 
     // Parasite samples
