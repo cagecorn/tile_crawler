@@ -396,7 +396,9 @@ export class VFXManager {
                 const currentX = startPos.x + (endPos.x - startPos.x) * progress;
                 const currentY = startPos.y + (endPos.y - startPos.y) * progress;
                 const arc = Math.sin(progress * Math.PI) * popHeight;
-                ctx.drawImage(item.image, currentX, currentY - arc, item.width, item.height);
+                if (item.image && item.image.width) {
+                    ctx.drawImage(item.image, currentX, currentY - arc, item.width, item.height);
+                }
             } else if (effect.type === 'item_use') {
                 const w = effect.image.width * effect.scale;
                 const h = effect.image.height * effect.scale;
