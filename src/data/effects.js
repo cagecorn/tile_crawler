@@ -86,6 +86,7 @@ export const EFFECTS = {
         duration: 300,
         shieldAmount: 10,
         tags: ['buff', 'shield'],
+        iconKey: 'guardian-hymn-effect',
     },
 
     bonus_damage: {
@@ -94,6 +95,7 @@ export const EFFECTS = {
         duration: 300,
         bonusDamage: 2,
         tags: ['buff', 'attack_up'],
+        iconKey: 'courage-hymn-effect',
     },
 
     slow: {
