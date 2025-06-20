@@ -15,7 +15,7 @@ class BaseWeaponAI {
     }
 }
 
-// 검 AI: 일반적인 근접 전투 수행 및 패링 기회 탐색
+// 검 AI: 일반적인 근접 전투 수행 및 패링 자세 사용
 export class SwordAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
         const { enemies } = context;
@@ -32,6 +32,14 @@ export class SwordAI extends BaseWeaponAI {
         }
 
         if (!nearest) return { type: 'idle' };
+
+        if (
+            weapon?.weaponStats?.canUseSkill('parry_stance') &&
+            minDist <= wielder.attackRange &&
+            wielder.attackCooldown > 0
+        ) {
+            return { type: 'weapon_skill', skillId: 'parry_stance', target: wielder };
+        }
 
         if (minDist <= wielder.attackRange) {
             return { type: 'attack', target: nearest };

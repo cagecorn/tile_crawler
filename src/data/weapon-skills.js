@@ -11,6 +11,15 @@ export const WEAPON_SKILLS = {
         cooldown: 30,
         tags: ['weapon_skill', 'defensive', 'sword'],
     },
+
+    parry_stance: {
+        id: 'parry_stance',
+        name: '패링 자세',
+        description: '다음 근접 공격을 확실히 막아냅니다.',
+        type: 'active',
+        cooldown: 20,
+        tags: ['weapon_skill', 'defensive', 'sword']
+    },
     // 단검 레벨 1
     backstab: {
         id: 'backstab',
