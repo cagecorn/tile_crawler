@@ -97,6 +97,9 @@ export class ItemAIManager {
         const item = inv.find(i => i.type === 'artifact' || i.tags?.includes('artifact'));
         if (!item) return;
         if (item.cooldownRemaining > 0) return;
+        if (this.vfxManager && item.image) {
+            this.vfxManager.addItemUseEffect(entity, item.image);
+        }
         if (item.healAmount) {
             entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
         }
