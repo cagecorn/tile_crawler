@@ -51,7 +51,15 @@ export class MovementManager {
             this.stuckTimers.set(entity.id, stuckTime);
 
             if (stuckTime > 180) { // 3초 이상 끼어있으면
-                const safePos = this.mapManager.getRandomFloorPosition(null, { around: target, maxRange: 2 });
+                // --- BUG FIX START ---
+                // 유닛의 크기를 타일 단위로 계산하여 올바른 인자로 함수를 호출합니다.
+                const sizeInTiles = {
+                    w: Math.ceil(entity.width / this.mapManager.tileSize),
+                    h: Math.ceil(entity.height / this.mapManager.tileSize)
+                };
+                const safePos = this.mapManager.getRandomFloorPosition(sizeInTiles);
+                // --- BUG FIX END ---
+                
                 if (safePos) {
                     entity.x = safePos.x;
                     entity.y = safePos.y;
