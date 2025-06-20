@@ -9,6 +9,12 @@ export class MercenaryManager {
         this.equipmentRenderManager = null;
         this.traitManager = null;
         console.log("[MercenaryManager] Initialized");
+
+        if (this.eventManager) {
+            this.eventManager.subscribe('entity_removed', (data) => {
+                this.mercenaries = this.mercenaries.filter(m => m.id !== data.victimId);
+            });
+        }
     }
 
     setTraitManager(traitManager) {

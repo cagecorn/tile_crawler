@@ -998,7 +998,8 @@ export class Game {
         });
         monster.isFriendly = caster.isFriendly;
         monster.properties.summonedBy = caster.id;
-        this.monsterManager.monsters.push(monster);
+        // 소환수는 용병 매니저에서 관리한다
+        this.mercenaryManager.mercenaries.push(monster);
         const group = this.metaAIManager.groups[caster.groupId];
         if (group) group.addMember(monster);
     }
