@@ -12,6 +12,15 @@ export class MovementManager {
             return;
         }
 
+        // 목표까지 남은 거리가 이동 속도 이하라면 바로 도착 처리하여
+        // 소수점 이동으로 인한 떨림을 방지한다
+        if (distance <= entity.speed) {
+            entity.x = target.x;
+            entity.y = target.y;
+            this.stuckTimers.delete(entity.id);
+            return;
+        }
+
         // 1. 관성: 거리가 멀수록 속도 증가
         const speedBonus = Math.min(5, Math.floor(distance / this.mapManager.tileSize / 2));
         const currentSpeed = entity.speed + speedBonus;
