@@ -52,13 +52,34 @@ class AIArchetype {
 // --- 전사형 AI ---
 export class MeleeAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, enemies, mapManager } = context;
+        const { player, allies, enemies, mapManager, eventManager } = context;
         const targetList = enemies;
 
         // 1. 가장 가까운 적 찾기
         let nearestTarget = null;
         let minDistance = Infinity;
-        for (const target of targetList) {
+
+        // T/F 성향에 따른 타겟팅 로직
+        const mbti = self.properties?.mbti || '';
+        let potentialTargets = [...targetList];
+        if (mbti.includes('T')) {
+            potentialTargets.sort((a, b) => a.hp - b.hp);
+            if (potentialTargets.length > 0) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'T', target: self });
+            }
+        } else if (mbti.includes('F')) {
+            const allyTargets = new Set();
+            allies.forEach(ally => {
+                if (ally.currentTarget) allyTargets.add(ally.currentTarget.id);
+            });
+            const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
+            if (focusedTarget) {
+                potentialTargets = [focusedTarget];
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'F', target: self });
+            }
+        }
+
+        for (const target of potentialTargets) {
             const dx = target.x - self.x;
             const dy = target.y - self.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -67,6 +88,8 @@ export class MeleeAI extends AIArchetype {
                 nearestTarget = target;
             }
         }
+
+        self.currentTarget = nearestTarget;
 
         // 2. 행동 결정
         if (nearestTarget && minDistance < self.visionRange) {
@@ -84,9 +107,13 @@ export class MeleeAI extends AIArchetype {
                     return { type: 'move', target: player };
                 }
             }
+            // 돌진 스킬 확인 및 P 성향 표시
             const chargeSkill = Array.isArray(self.skills)
                 ? self.skills.map(id => SKILLS[id]).find(s => s && s.tags && s.tags.includes('charge'))
                 : null;
+            if (mbti.includes('P')) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'P', target: self });
+            }
 
             if (
                 !self.isPlayer &&
@@ -108,6 +135,11 @@ export class MeleeAI extends AIArchetype {
                     self.mp >= skill.manaCost &&
                     (self.skillCooldowns[skillId] || 0) <= 0
                 ) {
+                    if (mbti.includes('S')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+                    } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+                    }
                     return { type: 'skill', target: nearestTarget, skillId };
                 }
 
@@ -137,7 +169,7 @@ export class MeleeAI extends AIArchetype {
 // --- 힐러형 AI ---
 export class HealerAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, mapManager } = context;
+        const { player, allies, mapManager, eventManager } = context;
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
 
@@ -151,8 +183,13 @@ export class HealerAI extends AIArchetype {
         const mbti = self.properties?.mbti || '';
         // 성향에 따라 치유 시점 결정
         let healThreshold = 0.7;
-        if (mbti.includes('S')) healThreshold = 0.9;
-        else if (mbti.includes('N')) healThreshold = 0.5;
+        if (mbti.includes('S')) {
+            healThreshold = 0.9;
+            eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+        } else if (mbti.includes('N')) {
+            healThreshold = 0.5;
+            eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+        }
 
         // 체력이 일정 비율 이하로 떨어진 아군만 후보로 선정
         const candidates = allies.filter(
@@ -172,10 +209,12 @@ export class HealerAI extends AIArchetype {
         let target = null;
         if (mbti.includes('I')) {
             target = candidates.find(c => c === self) || candidates[0];
+            if (target) eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
         } else if (mbti.includes('E')) {
             target = candidates.reduce((lowest, cur) =>
                 cur.hp / cur.maxHp < lowest.hp / lowest.maxHp ? cur : lowest,
             candidates[0]);
+            if (target) eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
         } else {
             target = candidates[0];
         }
@@ -200,7 +239,7 @@ export class HealerAI extends AIArchetype {
 // --- 원거리형 AI ---
 export class RangedAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, enemies, mapManager } = context;
+        const { player, allies, enemies, mapManager, eventManager } = context;
         const targetList = enemies;
 
         let nearestTarget = null;
@@ -245,6 +284,10 @@ export class RangedAI extends AIArchetype {
                 }
 
                 if (minDistance <= self.attackRange * 0.5) {
+                    const mbti = self.properties?.mbti || '';
+                    if (mbti.includes('J')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'J', target: self });
+                    }
                     const dx = nearestTarget.x - self.x;
                     const dy = nearestTarget.y - self.y;
                     return { type: 'move', target: { x: self.x - dx, y: self.y - dy } };
