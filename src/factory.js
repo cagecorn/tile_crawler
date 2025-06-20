@@ -5,6 +5,7 @@ import { FAITHS } from './data/faiths.js';
 import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
 import { ITEMS } from './data/items.js';
+import { ARTIFACTS } from './data/artifacts.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
@@ -137,7 +138,7 @@ export class ItemFactory {
     }
 
     create(itemId, x, y, tileSize) {
-        const baseItem = ITEMS[itemId];
+        const baseItem = ITEMS[itemId] || ARTIFACTS[itemId];
         if (!baseItem) return null;
 
         // 아이템 생성 시 imageKey로부터 올바른 이미지를 불러온다
@@ -155,6 +156,11 @@ export class ItemFactory {
         if (baseItem.stats) {
             item.stats.add(baseItem.stats);
         }
+        if (baseItem.cooldown) {
+            item.cooldown = baseItem.cooldown;
+            item.cooldownRemaining = 0;
+        }
+        if (baseItem.healAmount) item.healAmount = baseItem.healAmount;
 
         if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
