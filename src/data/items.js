@@ -96,4 +96,12 @@ export const ITEMS = {
         tags: ['pet_food'],
         imageKey: 'potion',
     },
+    // 버프 아이템
+    strength_elixir: {
+        name: '힘의 비약',
+        type: 'consumable',
+        tags: ['consumable', 'buff_item'],
+        imageKey: 'potion',
+        effectId: 'strength_buff'
+    },
 };

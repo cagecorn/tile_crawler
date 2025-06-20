@@ -119,9 +119,9 @@ export class Game {
         this.itemAIManager = new Managers.ItemAIManager(
             this.eventManager,
             this.projectileManager,
-            this.vfxManager,
-            this.effectManager
+            this.vfxManager
         );
+        this.itemAIManager.setEffectManager(this.effectManager);
         this.equipmentRenderManager = this.managers.EquipmentRenderManager;
         this.mercenaryManager.equipmentRenderManager = this.equipmentRenderManager;
         this.traitManager = this.managers.TraitManager;
@@ -912,6 +912,7 @@ export class Game {
             projectileManager: this.projectileManager,
             itemManager: this.itemManager,
             equipmentManager: this.equipmentManager,
+            metaAIManager,
         };
         metaAIManager.update(context);
         this.itemAIManager.update(context);
