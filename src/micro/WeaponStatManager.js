@@ -1,4 +1,4 @@
-import { SwordAI, BowAI, SpearAI, SaberAI } from './WeaponAI.js';
+import { SwordAI, DaggerAI, BowAI, SpearAI, ViolinBowAI, EstocAI } from './WeaponAI.js';
 
 export class WeaponStatManager {
     constructor(itemId) {
@@ -28,10 +28,12 @@ export class WeaponStatManager {
     }
 
     _getAIByItemId(itemId) {
-        if (itemId.includes('sword')) return new SwordAI();
+        if (itemId.includes('violin_bow')) return new ViolinBowAI();
         if (itemId.includes('bow')) return new BowAI();
+        if (itemId.includes('dagger')) return new DaggerAI();
+        if (itemId.includes('estoc')) return new EstocAI();
         if (itemId.includes('spear')) return new SpearAI();
-        if (itemId.includes('saber')) return new SaberAI();
+        if (itemId.includes('sword')) return new SwordAI();
         return new SwordAI();
     }
 }
