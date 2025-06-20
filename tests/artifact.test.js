@@ -8,7 +8,7 @@ describe('Artifact Item', () => {
     test('healing talisman heals without consumption and has cooldown', () => {
         const charFactory = new CharacterFactory(assets);
         const itemFactory = new ItemFactory(assets);
-        const itemAI = new ItemAIManager(null, null, null, { addEffect(){}});
+        const itemAI = new ItemAIManager(null, null, null, { addEffect(){} });
         const merc = charFactory.create('mercenary', { x:0, y:0, tileSize:1, groupId:'g', jobId:'warrior', image:null });
         merc.consumables = [];
         const arti = itemFactory.create('healing_talisman', 0,0,1);
@@ -24,5 +24,21 @@ describe('Artifact Item', () => {
         merc.hp = merc.maxHp - 2;
         itemAI.update(context);
         assert.ok(arti.cooldownRemaining > 0, 'cooldown reset after reuse');
+    });
+
+    test('talisman use triggers vfx', () => {
+        const charFactory = new CharacterFactory(assets);
+        const itemFactory = new ItemFactory(assets);
+        const vfxLog = [];
+        const itemAI = new ItemAIManager(null, null, { addItemUseEffect:(e,img)=>vfxLog.push({e,img}) }, { addEffect(){} });
+        const merc = charFactory.create('mercenary', { x:0, y:0, tileSize:1, groupId:'g', jobId:'warrior', image:null });
+        merc.consumables = [];
+        const arti = itemFactory.create('healing_talisman', 0,0,1);
+        merc.consumables.push(arti);
+        merc.hp = merc.maxHp - 1;
+        const context = { player:merc, mercenaryManager:{ mercenaries:[merc] }, monsterManager:{ monsters:[] } };
+        itemAI.update(context);
+        assert.strictEqual(vfxLog.length, 1, 'vfx triggered');
+        assert.strictEqual(vfxLog[0].img, arti.image, 'correct image used');
     });
 });
