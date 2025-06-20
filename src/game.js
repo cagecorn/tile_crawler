@@ -305,8 +305,8 @@ export class Game {
                 monsters.push(monster);
             }
         }
-        this.monsterManager.monsters = monsters;
-        monsters.forEach(m => this.monsterGroup.addMember(m));
+        this.monsterManager.monsters.push(...monsters);
+        this.monsterManager.monsters.forEach(m => this.monsterGroup.addMember(m));
 
         // === 4. 용병 고용 로직 ===
         const hireBtn = document.getElementById('hire-mercenary');
