@@ -98,7 +98,7 @@ export class ItemAIManager {
         if (!item) return;
         if (item.cooldownRemaining > 0) return;
         if (this.vfxManager && item.image) {
-            this.vfxManager.addItemUseEffect(entity, item.image);
+            this.vfxManager.addItemUseEffect(entity, item.image, { scale: 0.33 });
         }
         if (item.healAmount) {
             entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
@@ -157,7 +157,10 @@ export class ItemAIManager {
             this.effectManager.addEffect(target, item.effectId);
         }
 
-        if (this.vfxManager) this.vfxManager.addItemUseEffect(target, item.image);
+        if (this.vfxManager) {
+            const scale = (item.type === 'artifact' || item.tags?.includes('artifact')) ? 0.33 : 1;
+            this.vfxManager.addItemUseEffect(target, item.image, { scale });
+        }
 
         if (this.projectileManager && user !== target) {
             this.projectileManager.throwItem(user, target, item);

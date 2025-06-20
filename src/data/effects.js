@@ -34,6 +34,7 @@ export const EFFECTS = {
         duration: 300,
         stats: { strength: 2, agility: 2, endurance: 2, intelligence: 2 },
         tags: ['buff', 'stat_up'],
+        iconKey: 'talisman2',
     },
     // 디버프
     armor_break: {

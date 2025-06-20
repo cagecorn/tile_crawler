@@ -183,18 +183,21 @@ export class VFXManager {
      * @param {object} entity - 아이템을 사용한 유닛
      * @param {HTMLImageElement} image - 아이템 이미지
      */
-    addItemUseEffect(entity, image) {
-        if (!image) return;
+    addItemUseEffect(entity, image, options = {}) {
+        if (!image || !entity) return;
+        const scale = options.scale || 1;
+        const startScale = (options.startScale ?? 0.5) * scale;
+        const endScale = (options.endScale ?? 1.5) * scale;
         const effect = {
             type: 'item_use',
             image,
             x: entity.x + entity.width / 2,
             y: entity.y - entity.height * 0.5,
-            duration: 30,
-            life: 30,
-            startScale: 0.5,
-            endScale: 1.5,
-            scale: 0.5,
+            duration: options.duration || 30,
+            life: options.duration || 30,
+            startScale,
+            endScale,
+            scale: startScale,
             alpha: 1.0,
         };
         this.effects.push(effect);
