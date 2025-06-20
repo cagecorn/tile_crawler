@@ -14,10 +14,15 @@ export class EffectManager {
         // 이미 같은 효과가 걸려있다면, 지속시간만 갱신 (나중에 중첩 로직 추가 가능)
         const existingEffect = target.effects.find(e => e.id === effectId);
         if (existingEffect) {
-            existingEffect.duration = effectData.duration;
+            existingEffect.remaining = effectData.duration;
         } else {
-            const newEffect = { ...effectData, remaining: effectData.duration };
+            const newEffect = { id: effectId, ...effectData, remaining: effectData.duration };
             target.effects.push(newEffect);
+            if (effectData.type === 'shield') {
+                target.shield = (target.shield || 0) + effectData.shieldAmount;
+            } else if (effectData.type === 'damage_buff') {
+                target.damageBonus = (target.damageBonus || 0) + effectData.bonusDamage;
+            }
         }
 
         // 효과가 적용되면 스탯을 다시 계산하도록 이벤트 발행
@@ -29,22 +34,28 @@ export class EffectManager {
         entities.forEach(entity => {
             if (entity.effects.length === 0) return;
 
-            // 효과 지속시간 감소
             entity.effects.forEach(effect => {
                 effect.remaining--;
-                // (미래 구멍) '독' 같은 상태이상 데미지 처리
+
                 if (effect.type === 'dot' && effect.remaining % 100 === 0) {
-                    // entity.takeDamage(effect.damagePerTurn);
+                    entity.takeDamage(effect.damagePerTurn);
                 }
             });
 
-            // 지속시간이 다 된 효과 제거
             const initialCount = entity.effects.length;
-            entity.effects = entity.effects.filter(effect => effect.remaining > 0);
+            entity.effects = entity.effects.filter(effect => {
+                if (effect.remaining > 0) return true;
 
-            // 효과가 제거되었다면, 스탯 재계산 이벤트 발행
+                if (effect.type === 'shield') {
+                    entity.shield = Math.max(0, entity.shield - (effect.shieldAmount || 0));
+                } else if (effect.type === 'damage_buff') {
+                    entity.damageBonus = Math.max(0, entity.damageBonus - (effect.bonusDamage || 0));
+                }
+                return false;
+            });
+
             if (entity.effects.length < initialCount) {
-                this.eventManager.publish('stats_changed', { entity: entity });
+                this.eventManager.publish('stats_changed', { entity });
             }
         });
     }

@@ -48,10 +48,16 @@ class Entity {
         // 텔레포트 스킬 사용을 위한 위치 저장용 프로퍼티
         this.teleportSavedPos = null;
         this.teleportReturnPos = null;
+
+        // --- 상태이상 및 버프 관련 수치 ---
+        this.shield = 0;       // 보호막
+        this.damageBonus = 0;  // 추가 공격력
     }
 
     get speed() { return this.stats.get('movementSpeed'); }
-    get attackPower() { return this.stats.get('attackPower'); }
+    get attackPower() {
+        return this.stats.get('attackPower') + (this.damageBonus || 0);
+    }
     get maxHp() { return this.stats.get('maxHp'); }
     get maxMp() { return this.stats.get('maxMp'); }
     get hpRegen() { return this.stats.get('hpRegen'); }
@@ -121,7 +127,15 @@ class Entity {
         }
     }
 
-    takeDamage(damage) { this.hp -= damage; if (this.hp < 0) this.hp = 0; }
+    takeDamage(damage) {
+        if (this.shield > 0) {
+            const blocked = Math.min(this.shield, damage);
+            this.shield -= blocked;
+            damage -= blocked;
+        }
+        this.hp -= damage;
+        if (this.hp < 0) this.hp = 0;
+    }
 }
 
 export class Player extends Entity {

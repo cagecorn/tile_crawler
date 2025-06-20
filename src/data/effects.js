@@ -78,5 +78,29 @@ export const EFFECTS = {
         duration: 500, // 5턴 (100프레임당 1턴 기준)
         damagePerTurn: 2,
         tags: ['status_ailment', 'poison'],
+    },
+
+    shield: {
+        name: '보호막',
+        type: 'shield',
+        duration: 300,
+        shieldAmount: 10,
+        tags: ['buff', 'shield'],
+    },
+
+    bonus_damage: {
+        name: '공격력 증가',
+        type: 'damage_buff',
+        duration: 300,
+        bonusDamage: 2,
+        tags: ['buff', 'attack_up'],
+    },
+
+    slow: {
+        name: '감속',
+        type: 'debuff',
+        duration: 300,
+        stats: { movementSpeed: -1 },
+        tags: ['debuff', 'slow'],
     }
 };
