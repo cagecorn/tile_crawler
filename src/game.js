@@ -55,6 +55,7 @@ export class Game {
         this.loader.loadImage('leather_armor', 'assets/images/leatherarmor.png');
         this.loader.loadImage('plate-armor', 'assets/images/plate-armor.png');
         this.loader.loadImage('violin-bow', 'assets/images/violin-bow.png');
+        this.loader.loadImage('skeleton', 'assets/images/skeleton.png');
         this.loader.loadImage('guardian-hymn-effect', 'assets/images/Guardian Hymn-effect.png');
         this.loader.loadImage('courage-hymn-effect', 'assets/images/Courage Hymn-effect.png');
         this.loader.loadImage('fire-ball', 'assets/images/fire-ball.png');
@@ -646,6 +647,29 @@ export class Game {
                 this.handleTeleportSkill(caster);
             }
 
+            if (skill.id === SKILLS.guardian_hymn.id || skill.id === SKILLS.courage_hymn.id) {
+                const effectId = skill.id === SKILLS.guardian_hymn.id ? 'shield' : 'bonus_damage';
+                const imgKey = skill.id === SKILLS.guardian_hymn.id ? 'guardian-hymn-effect' : 'courage-hymn-effect';
+                const group = this.metaAIManager.groups[caster.groupId];
+                const allies = group ? group.members : [caster];
+                allies.forEach(ally => {
+                    this.effectManager.addEffect(ally, effectId);
+                    const img = assets[imgKey];
+                    if (img) {
+                        this.vfxManager.addSpriteEffect(
+                            img,
+                            ally.x + ally.width / 2,
+                            ally.y + ally.height / 2,
+                            { width: ally.width, height: ally.height, blendMode: 'screen', duration: 30 }
+                        );
+                    }
+                });
+            }
+
+            if (skill.id === SKILLS.summon_skeleton.id) {
+                this.handleSummonSkill(caster);
+            }
+
             if (skill.tags.includes('attack')) {
                 const range = skill.range || Infinity;
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
@@ -948,6 +972,24 @@ export class Game {
             caster.y = y;
             this.eventManager.publish('log', { message: '🌀 이전 위치로 돌아왔습니다.' });
         }
+    }
+
+    handleSummonSkill(caster) {
+        const pos = this.findRandomEmptyAdjacentTile(caster.x, caster.y);
+        if (!pos) return;
+        const monster = this.factory.create('monster', {
+            x: pos.x,
+            y: pos.y,
+            tileSize: this.mapManager.tileSize,
+            groupId: caster.groupId,
+            image: this.assets.skeleton,
+            baseStats: { strength: 3, agility: 3, endurance: 5, movement: 6, expValue: 0 }
+        });
+        monster.isFriendly = caster.isFriendly;
+        monster.properties.summonedBy = caster.id;
+        this.monsterManager.monsters.push(monster);
+        const group = this.metaAIManager.groups[caster.groupId];
+        if (group) group.addMember(monster);
     }
 
     /**

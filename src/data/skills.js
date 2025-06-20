@@ -73,6 +73,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 180,
         tags: ['skill', 'buff', 'shield', 'song', 'support', '버프', '연주'],
+        effects: { target: ['shield'] },
     },
     courage_hymn: {
         id: 'courage_hymn',
@@ -81,6 +82,7 @@ export const SKILLS = {
         manaCost: 12,
         cooldown: 180,
         tags: ['skill', 'buff', 'attack_up', 'song', 'support', '버프', '연주'],
+        effects: { target: ['bonus_damage'] },
     },
     hawk_eye: {
         id: 'hawk_eye',
