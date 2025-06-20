@@ -45,6 +45,7 @@ export class MicroEngine {
         if (!itemId) return null;
         if (itemId.includes('sword')) return 'sword';
         if (itemId.includes('dagger')) return 'dagger';
+        if (itemId.includes('estoc')) return 'estoc';
         if (itemId.includes('saber')) return 'saber';
         if (itemId.includes('spear')) return 'spear';
         if (itemId.includes('violin_bow')) return 'violin_bow';

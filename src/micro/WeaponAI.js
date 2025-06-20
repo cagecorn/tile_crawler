@@ -104,9 +104,37 @@ export class ViolinBowAI extends BowAI {
 // 에스톡 AI: 히트 앤 런 전술 구사
 export class EstocAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        // TODO: 빠른 속도로 접근해 공격 후, 즉시 뒤로 빠지는 로직 구현
-        return { type: 'idle' };
+        const { enemies } = context;
+        if (!enemies || enemies.length === 0) {
+            wielder.aiState = null;
+            return { type: 'idle' };
+        }
+
+        const nearestTarget = enemies.sort((a, b) => Math.hypot(a.x - wielder.x, a.y - wielder.y) - Math.hypot(b.x - wielder.x, b.y - wielder.y))[0];
+        const distance = Math.hypot(nearestTarget.x - wielder.x, nearestTarget.y - wielder.y);
+
+        if (wielder.aiState === 'retreating') {
+            if (wielder.aiStateTimer > 0) {
+                wielder.aiStateTimer--;
+                const retreatTarget = {
+                    x: wielder.x - (nearestTarget.x - wielder.x),
+                    y: wielder.y - (nearestTarget.y - wielder.y)
+                };
+                return { type: 'move', target: retreatTarget };
+            }
+            wielder.aiState = null;
+        }
+
+        if (distance <= wielder.attackRange) {
+            wielder.aiState = 'retreating';
+            wielder.aiStateTimer = 30;
+            return { type: 'attack', target: nearestTarget };
+        }
+
+        return { type: 'move', target: nearestTarget };
     }
 }
+
+export class SaberAI extends EstocAI {}
 
 export { BaseWeaponAI };
