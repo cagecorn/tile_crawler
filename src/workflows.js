@@ -30,7 +30,9 @@ export function monsterDeathWorkflow(context) {
 export function disarmWorkflow(context) {
     const { eventManager, owner, weapon, itemManager, equipmentManager, vfxManager } = context;
 
-    equipmentManager.equip(owner, null, null);
+    if (equipmentManager && typeof equipmentManager.unequip === 'function') {
+        equipmentManager.unequip(owner, 'weapon');
+    }
 
     const angle = Math.random() * Math.PI * 2;
     const distance = 100 + Math.random() * 50;
@@ -60,7 +62,9 @@ export function disarmWorkflow(context) {
 export function armorBreakWorkflow(context) {
     const { eventManager, owner, armor, equipmentManager, vfxManager } = context;
 
-    equipmentManager.equip(owner, null, null);
+    if (equipmentManager && typeof equipmentManager.unequip === 'function') {
+        equipmentManager.unequip(owner, 'armor');
+    }
 
     if (vfxManager) {
         vfxManager.addArmorBreakAnimation(armor, owner);
