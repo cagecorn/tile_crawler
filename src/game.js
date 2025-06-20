@@ -40,7 +40,7 @@ export class Game {
         this.loader.loadImage('archer', 'assets/images/archer.png');
         this.loader.loadImage('healer', 'assets/images/healer.png');
         this.loader.loadImage('wizard', 'assets/images/wizard.png');
-        this.loader.loadImage('summoner', 'assets/images/dark_mage.png');
+        this.loader.loadImage('summoner', 'assets/images/summoner.png');
         // 기존 호환성을 위해 기본 mercenary 키도 전사 이미지로 유지
         this.loader.loadImage('mercenary', 'assets/images/warrior.png');
         this.loader.loadImage('floor', 'assets/floor.png');
@@ -58,6 +58,9 @@ export class Game {
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
         this.loader.loadImage('healing-effect', 'assets/images/healing-effect.png');
         this.loader.loadImage('corpse', 'assets/images/corpse.png');
+        this.loader.loadImage('parasite', 'assets/images/parasite.png');
+        this.loader.loadImage('leech', 'assets/images/parasite.png');
+        this.loader.loadImage('worm', 'assets/images/parasite.png');
 
         this.loader.onReady(assets => this.init(assets));
     }
