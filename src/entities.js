@@ -25,6 +25,8 @@ class Entity {
         this.isPlayer = false;
         this.isFriendly = false;
         this.ai = null;
+        this.roleAI = null;     // 힐러, 소환사 등 직업 역할 AI
+        this.fallbackAI = null; // 무기가 없을 때 사용할 기본 전투 AI
         this.effects = []; // 적용중인 효과 목록 배열 추가
         this.unitType = 'generic'; // 기본 유닛 타입을 '일반'으로 설정
 
@@ -55,12 +57,11 @@ class Entity {
         this.proficiency = {
             sword: { level: 1, exp: 0, expNeeded: 10 },
             dagger: { level: 1, exp: 0, expNeeded: 10 },
+            estoc: { level: 1, exp: 0, expNeeded: 10 },
             spear: { level: 1, exp: 0, expNeeded: 10 },
             bow: { level: 1, exp: 0, expNeeded: 10 },
+            violin_bow: { level: 1, exp: 0, expNeeded: 10 },
         };
-
-        this.roleAI = null;
-        this.fallbackAI = null;
     }
 
     get speed() { return this.stats.get('movementSpeed'); }

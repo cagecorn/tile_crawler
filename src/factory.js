@@ -89,7 +89,7 @@ export class CharacterFactory {
                 } else if (config.jobId === 'wizard') {
                     const mageSkill = Math.random() < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id;
                     merc.skills.push(mageSkill);
-                    merc.fallbackAI = new WizardAI();
+                    merc.roleAI = new WizardAI();
                 } else if (config.jobId === 'summoner') {
                     merc.skills.push(SKILLS.summon_skeleton.id);
                     merc.properties.maxMinions = 2;
