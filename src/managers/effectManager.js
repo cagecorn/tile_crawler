@@ -29,6 +29,15 @@ export class EffectManager {
         this.eventManager.publish('stats_changed', { entity: target });
     }
 
+    removeEffectsByTag(target, tag) {
+        if (!target.effects || target.effects.length === 0) return;
+        const initialCount = target.effects.length;
+        target.effects = target.effects.filter(eff => !(eff.tags && eff.tags.includes(tag)));
+        if (target.effects.length < initialCount) {
+            this.eventManager.publish('stats_changed', { entity: target });
+        }
+    }
+
     // 매 프레임 모든 유닛의 효과를 업데이트
     update(entities) {
         entities.forEach(entity => {

@@ -49,6 +49,21 @@ class AIArchetype {
     }
 }
 
+export class CompositeAI extends AIArchetype {
+    constructor(...ais) {
+        super();
+        this.ais = ais;
+    }
+
+    decideAction(self, context) {
+        for (const ai of this.ais) {
+            const action = ai.decideAction(self, context);
+            if (action && action.type !== 'idle') return action;
+        }
+        return { type: 'idle' };
+    }
+}
+
 // --- 전사형 AI ---
 export class MeleeAI extends AIArchetype {
     decideAction(self, context) {
@@ -230,6 +245,61 @@ export class HealerAI extends AIArchetype {
 
         if (distance <= self.attackRange && hasLOS && skillReady) {
             return { type: 'skill', target, skillId: healId };
+        }
+
+        return { type: 'move', target };
+    }
+}
+
+// --- 정화 전용 AI ---
+export class PurifierAI extends AIArchetype {
+    decideAction(self, context) {
+        const { player, allies, mapManager } = context;
+        const purifyId = SKILLS.purify?.id;
+        const skill = SKILLS[purifyId];
+        const ready =
+            purifyId &&
+            Array.isArray(self.skills) &&
+            self.skills.includes(purifyId) &&
+            self.mp >= skill.manaCost &&
+            (self.skillCooldowns[purifyId] || 0) <= 0;
+
+        const mbti = self.properties?.mbti || '';
+        let candidates = allies.filter(a =>
+            (a.effects || []).some(e => e.tags?.includes('status_ailment'))
+        );
+        if (candidates.length === 0) {
+            if (self.isFriendly && !self.isPlayer && player) {
+                const t = this._getWanderPosition(self, player, allies, mapManager);
+                if (Math.hypot(t.x - self.x, t.y - self.y) > self.tileSize * 0.3) {
+                    return { type: 'move', target: t };
+                }
+            }
+            return { type: 'idle' };
+        }
+
+        let target = null;
+        if (mbti.includes('I')) {
+            target = candidates.find(c => c === self) || candidates[0];
+        } else {
+            target = candidates[0];
+        }
+
+        if (mbti.includes('P') && Math.random() < 0.3) {
+            return { type: 'idle' };
+        }
+
+        const dist = Math.hypot(target.x - self.x, target.y - self.y);
+        const hasLOS = hasLineOfSight(
+            Math.floor(self.x / mapManager.tileSize),
+            Math.floor(self.y / mapManager.tileSize),
+            Math.floor(target.x / mapManager.tileSize),
+            Math.floor(target.y / mapManager.tileSize),
+            mapManager,
+        );
+
+        if (dist <= self.attackRange && hasLOS && ready) {
+            return { type: 'skill', target, skillId: purifyId };
         }
 
         return { type: 'move', target };

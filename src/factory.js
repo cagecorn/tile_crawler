@@ -8,7 +8,7 @@ import { ITEMS } from './data/items.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { RangedAI, HealerAI, WizardAI, SummonerAI, BardAI } from './ai.js';
+import { RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, CompositeAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 
 export class CharacterFactory {
@@ -78,7 +78,8 @@ export class CharacterFactory {
                     merc.skills.push(SKILLS.charge_attack.id);
                 } else if (config.jobId === 'healer') {
                     merc.skills.push(SKILLS.heal.id);
-                    merc.ai = new HealerAI();
+                    merc.skills.push(SKILLS.purify.id);
+                    merc.ai = new CompositeAI(new PurifierAI(), new HealerAI());
                 } else if (config.jobId === 'wizard') {
                     const mageSkill = Math.random() < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id;
                     merc.skills.push(mageSkill);

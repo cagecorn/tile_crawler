@@ -78,6 +78,7 @@ export const EFFECTS = {
         duration: 500, // 5턴 (100프레임당 1턴 기준)
         damagePerTurn: 2,
         tags: ['status_ailment', 'poison'],
+        iconKey: 'parasite',
     },
 
     shield: {

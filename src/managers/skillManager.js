@@ -16,15 +16,22 @@ export class SkillManager {
     }
 
     applySkillEffects(caster, skill, target = null) {
-        if (!skill || !skill.effects || !this.effectManager) return;
-        if (skill.effects.self) {
-            for (const eff of skill.effects.self) {
-                this.effectManager.addEffect(caster, eff);
+        if (!skill || !this.effectManager) return;
+        if (skill.effects) {
+            if (skill.effects.self) {
+                for (const eff of skill.effects.self) {
+                    this.effectManager.addEffect(caster, eff);
+                }
+            }
+            if (skill.effects.target && target) {
+                for (const eff of skill.effects.target) {
+                    this.effectManager.addEffect(target, eff);
+                }
             }
         }
-        if (skill.effects.target && target) {
-            for (const eff of skill.effects.target) {
-                this.effectManager.addEffect(target, eff);
+        if (skill.removeTags && target) {
+            for (const tag of skill.removeTags) {
+                this.effectManager.removeEffectsByTag(target, tag);
             }
         }
     }

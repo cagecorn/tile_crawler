@@ -256,6 +256,9 @@ export class Monster extends Entity {
         if (this.isFriendly) this.affinity = this.maxAffinity;
         this.consumables = [];
         this.consumableCapacity = 4;
+        if (Array.isArray(config.skills)) {
+            this.skills.push(...config.skills);
+        }
     }
 
     render(ctx) {
