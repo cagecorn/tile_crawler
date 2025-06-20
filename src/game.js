@@ -62,6 +62,7 @@ export class Game {
         this.loader.loadImage('ice-ball', 'assets/images/ice-ball-effect.png');
         this.loader.loadImage('strike-effect', 'assets/images/strike-effect.png');
         this.loader.loadImage('healing-effect', 'assets/images/healing-effect.png');
+        this.loader.loadImage('purify-effect', 'assets/images/purify-effect.png');
         this.loader.loadImage('corpse', 'assets/images/corpse.png');
         this.loader.loadImage('parasite', 'assets/images/parasite.png');
         this.loader.loadImage('leech', 'assets/images/parasite.png');
@@ -185,7 +186,8 @@ export class Game {
                 endurance: 20,
                 movement: 6,
                 expValue: 100
-            }
+            },
+            skills: [SKILLS.poison_sting.id]
         });
         this.aquariumInspector.run();
 

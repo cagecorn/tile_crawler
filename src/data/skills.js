@@ -27,6 +27,17 @@ export const SKILLS = {
         manaCost: 8,
         cooldown: 90,
         tags: ['skill', 'support', 'cleanse', 'magic', '정화', '마법'],
+        removeTags: ['status_ailment'],
+    },
+    poison_sting: {
+        id: 'poison_sting',
+        name: '맹독 침',
+        description: '대상에게 독을 부여합니다.',
+        manaCost: 5,
+        cooldown: 120,
+        damageDice: '1d6',
+        tags: ['skill', 'attack', 'melee', 'poison'],
+        effects: { target: ['poison'] },
     },
     charge_attack: {
         id: 'charge_attack',

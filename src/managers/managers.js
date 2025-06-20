@@ -36,6 +36,7 @@ export class MonsterManager {
                     movement: 6,
                     expValue: 100,
                 } };
+                config.skills = [SKILLS.poison_sting.id];
             } else {
                 size = { w: 1, h: 1 };
                 image = this.assets.monster;
