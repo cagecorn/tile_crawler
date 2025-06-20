@@ -30,6 +30,9 @@
 드랍 테이블(`LOOT_DROP_TABLE`)은 `src/data/tables.js`에서 관리합니다. 몬스터별로
 다른 드랍 구성을 만들고 싶다면 `getMonsterLootTable` 함수를 수정하세요.
 
+## 통합 테스트 가이드
+복잡한 통합 테스트에서 임시 객체를 만들 때는 실제 게임 객체와 동일하게 위치(`x`, `y`), 크기(`width`, `height`), 그리고 `tileSize` 같은 필수 속성을 포함해야 합니다. 이러한 정보가 빠지면 AI 로직이 잘못된 값을 계산하여 테스트가 멈출 수 있습니다.
+
 ## 개발 방식
 이 프로젝트는 하루 단위의 "Content-First / Smoke-Test-Later" 흐름으로 개발됩니다.
 
