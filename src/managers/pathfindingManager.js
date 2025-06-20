@@ -60,7 +60,7 @@ export class PathfindingManager {
             return [];
         }
 
-        console.log(`Pathfinding from (${startX},${startY}) to (${endX},${endY})`);
+        // debug logging removed to avoid performance issues
 
         const basePath = this._bfs(startX, startY, endX, endY, isBlocked);
         if (basePath.length > 0) return basePath;

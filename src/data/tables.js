@@ -17,6 +17,7 @@ export const LOOT_DROP_TABLE = [
     { id: 'gold', weight: 70 },
     { id: 'potion', weight: 25 },
     { id: 'sword', weight: 5 },
+    { id: 'fox_charm', weight: 10 },
 ];
 
 // 확장성을 위해 몬스터 타입을 매개변수로 받아 드랍 테이블을 반환하는 함수
