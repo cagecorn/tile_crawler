@@ -32,6 +32,7 @@ export class EquipmentManager {
 
         if (this.eventManager && item) {
             this.eventManager.publish('log', { message: `${entity.constructor.name}(이)가 ${item.name} (을)를 장착했습니다.` });
+            this.eventManager.publish('equipment_changed', { entity });
         }
     }
 
@@ -64,6 +65,7 @@ export class EquipmentManager {
 
         if (this.eventManager) {
             this.eventManager.publish('log', { message: `${entity.constructor.name}(이)가 ${slot}을/를 해제했습니다.` });
+            this.eventManager.publish('equipment_changed', { entity });
         }
     }
 

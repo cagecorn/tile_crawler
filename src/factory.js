@@ -13,6 +13,7 @@ import { MeleeAI, RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, 
 import { MBTI_TYPES } from './data/mbti.js';
 import { PETS } from './data/pets.js';
 import { WeaponStatManager } from './micro/WeaponStatManager.js';
+import { SYNERGIES } from './data/synergies.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -182,6 +183,10 @@ export class ItemFactory {
         if (baseItem.healAmount) item.healAmount = baseItem.healAmount;
         if (baseItem.effectId) item.effectId = baseItem.effectId;
 
+        if (item.type === 'weapon' || item.type === 'armor') {
+            this._applySynergies(item);
+        }
+
         if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
 
@@ -204,6 +209,18 @@ export class ItemFactory {
             };
         }
         item.stats.add(affix.stats);
+    }
+
+    _applySynergies(item) {
+        const synergyKeys = Object.keys(SYNERGIES);
+        const synergyCount = Math.floor(Math.random() * 4); // 0 ~ 3개
+        const available = [...synergyKeys];
+        for (let i = 0; i < synergyCount; i++) {
+            if (available.length === 0) break;
+            const idx = Math.floor(Math.random() * available.length);
+            const chosen = available.splice(idx, 1)[0];
+            item.synergies.push(chosen);
+        }
     }
 
     _createSockets() {
