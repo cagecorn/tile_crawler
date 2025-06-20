@@ -1,13 +1,16 @@
 import { SwordAI, DaggerAI, BowAI, SpearAI, ViolinBowAI, EstocAI } from './WeaponAI.js';
+import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 
 export class WeaponStatManager {
     constructor(itemId) {
         this.level = 1;
         this.exp = 0;
-        this.expNeeded = 10;
-        this.skills = [];
-        this.cooldown = 0;
+        this.expNeeded = 20; // 초기 필요 경험치
+        this.skills = [];    // 이 무기가 현재 사용할 수 있는 스킬 목록
+        this.cooldown = 0;   // 이 무기의 스킬 쿨다운
         this.ai = this._getAIByItemId(itemId);
+
+        this._unlockSkills(); // 1레벨 스킬 즉시 해금
     }
 
     gainExp(amount) {
@@ -19,21 +22,43 @@ export class WeaponStatManager {
 
     levelUp() {
         this.level++;
-        this.exp = 0;
-        this.expNeeded = Math.floor(this.expNeeded * 1.5);
+        this.exp -= this.expNeeded;
+        this.expNeeded = Math.floor(this.expNeeded * 1.8); // 레벨업 시 필요 경험치 증가
+        console.log(`[Micro-World] 무기가 ${this.level}레벨로 성장했습니다!`);
+        this._unlockSkills();
+    }
+
+    _unlockSkills() {
+        for (const skillId in WEAPON_SKILLS) {
+            const skill = WEAPON_SKILLS[skillId];
+            if (!this.skills.includes(skillId) && this.level >= (skill.requiredLevel || 1)) {
+                this.skills.push(skillId);
+                console.log(`[Micro-World] 새로운 무기 스킬 [${skill.name}]을 배웠습니다!`);
+            }
+        }
     }
 
     getAI() {
         return this.ai;
     }
 
+    canUseSkill(skillId) {
+        return this.skills.includes(skillId) && this.cooldown <= 0;
+    }
+
+    setCooldown(duration) {
+        this.cooldown = duration;
+    }
+
     _getAIByItemId(itemId) {
-        if (itemId.includes('violin_bow')) return new ViolinBowAI();
-        if (itemId.includes('bow')) return new BowAI();
-        if (itemId.includes('dagger')) return new DaggerAI();
-        if (itemId.includes('estoc')) return new EstocAI();
-        if (itemId.includes('spear')) return new SpearAI();
         if (itemId.includes('sword')) return new SwordAI();
-        return new SwordAI();
+        if (itemId.includes('dagger')) return new DaggerAI();
+        if (itemId.includes('bow')) {
+            if (itemId.includes('violin')) return new ViolinBowAI();
+            return new BowAI();
+        }
+        if (itemId.includes('spear')) return new SpearAI();
+        if (itemId.includes('estoc')) return new EstocAI();
+        return new SwordAI(); // 기본값은 검 AI
     }
 }
