@@ -19,6 +19,7 @@
 | `legacy-blueprint.md` | 과거 단일 파일 버전 구조를 분석하고 모듈화 방향성을 제시합니다. |
 | `legacy-data-summary.md` | 이전 버전에서 사용된 아이템/몬스터 데이터 테이블을 보존용으로 요약합니다. |
 | `src/data/artifacts.js` | 쿨다운을 가진 아티팩트 아이템 정의 모음입니다. |
+| `WORKFLOWS_GUIDE.md` | `workflows.js` 모듈을 이용한 로직 묶기 지침을 설명합니다. |
 | `test-log/embargo-review.md` | 엠바고 테스트 수행 결과와 특이사항을 기록합니다. |
 | `codex's room/*` | Codex가 남긴 개발 계획(`plans.md`)과 세션별 작업 일지(`dev-log.md`) 등을 보관하는 디렉터리입니다. |
 | `gemini's_room/*` | 외부 자문원인 Gemini의 피드백(`review-log.md`)과 장기 제안(`recommendations.md`)을 정리한 공간입니다. |
