@@ -14,9 +14,18 @@ export const MONSTER_SPAWN_TABLE = [
  * getMonsterLootTable()을 수정하세요.
  */
 export const LOOT_DROP_TABLE = [
-    { id: 'gold', weight: 70 },
-    { id: 'potion', weight: 25 },
+    { id: 'gold', weight: 60 },
+    { id: 'potion', weight: 20 },
     { id: 'sword', weight: 5 },
+    { id: 'spear', weight: 5 },
+    { id: 'dagger', weight: 5 },
+    { id: 'axe', weight: 5 },
+    { id: 'mace', weight: 5 },
+    { id: 'staff', weight: 5 },
+    { id: 'whip', weight: 5 },
+    { id: 'scythe', weight: 5 },
+    { id: 'violin_bow', weight: 5 },
+    { id: 'estoc', weight: 5 },
     { id: 'fox_charm', weight: 10 },
 ];
 
