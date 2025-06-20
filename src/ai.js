@@ -291,9 +291,11 @@ export class PurifierAI extends AIArchetype {
             target = candidates[0];
         }
 
-        if (mbti.includes('P') && Math.random() < 0.3) {
-            return { type: 'idle' };
-        }
+
+        // Purifiers used to occasionally idle based on 'P' MBTI, which made
+        // their behavior unpredictable during tests. That randomness has been
+        // removed so that allies afflicted with a status ailment are always
+        // cleansed when possible.
 
         const dist = Math.hypot(target.x - self.x, target.y - self.y);
         const hasLOS = hasLineOfSight(
