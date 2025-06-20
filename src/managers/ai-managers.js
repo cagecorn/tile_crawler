@@ -47,11 +47,18 @@ export class MetaAIManager {
         if (!action || !action.type || action.type === 'idle') return;
         const { eventManager } = context;
 
-        // 행동 결정 로그
-        eventManager.publish('debug', {
-            tag: 'AI',
-            message: `${entity.constructor.name} (id: ${entity.id.substr(0,4)}) decided action: ${action.type}`
-        });
+        // 행동 결정 로그는 너무 잦은 호출이 성능 문제를 일으킬 수 있어
+        // 간단한 쿨다운 메커니즘으로 빈도를 제한한다.
+        if (!entity._aiLogCooldown) entity._aiLogCooldown = 0;
+        if (entity._aiLogCooldown <= 0) {
+            eventManager.publish('debug', {
+                tag: 'AI',
+                message: `${entity.constructor.name} (id: ${entity.id.substr(0,4)}) decided action: ${action.type}`
+            });
+            entity._aiLogCooldown = 30; // 약 0.5초(60fps 기준) 동안 로그 억제
+        } else {
+            entity._aiLogCooldown--;
+        }
 
         switch (action.type) {
             case 'attack':
