@@ -2,7 +2,8 @@ import { AquariumMapManager } from '../src/aquariumMap.js';
 import { AquariumManager, AquariumInspector } from '../src/managers/aquariumManager.js';
 import { CharacterFactory } from '../src/factory.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import { MonsterManager, ItemManager } from '../src/managers/managers.js';
+import { MonsterManager } from '../src/managers/monsterManager.js';
+import { ItemManager } from '../src/managers/itemManager.js';
 import { VFXManager } from '../src/managers/vfxManager.js';
 import { describe, test, assert } from './helpers.js';
 

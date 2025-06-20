@@ -1,8 +1,28 @@
+import { Item } from '../entities.js';
+
 export class ItemManager {
-    constructor() {
-        // 게임 맵에 존재하는 모든 아이템을 저장
+    constructor(count = 0, mapManager = null, assets = null) {
         this.items = [];
+        this.mapManager = mapManager;
+        this.assets = assets;
         console.log("[ItemManager] Initialized");
+
+        if (count > 0 && this.mapManager && this.assets) {
+            this._spawnItems(count);
+        }
+    }
+
+    _spawnItems(count) {
+        for (let i = 0; i < count; i++) {
+            const pos = this.mapManager.getRandomFloorPosition();
+            if (pos) {
+                if (Math.random() < 0.5) {
+                    this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'gold', this.assets.gold));
+                } else {
+                    this.items.push(new Item(pos.x, pos.y, this.mapManager.tileSize, 'potion', this.assets.potion));
+                }
+            }
+        }
     }
 
     addItem(item) {

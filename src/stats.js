@@ -107,6 +107,23 @@ export class StatManager {
             finalAmount = Math.floor(amount * 0.8);
         }
         this._baseStats.exp += finalAmount;
+
+        while (this.get('exp') >= this.get('expNeeded')) {
+            this.levelUp();
+            this.entity.hp = this.entity.maxHp;
+            this.entity.mp = this.entity.maxMp;
+
+            if (this.entity.isPlayer) {
+                if (this.entity.eventManager) {
+                    this.entity.eventManager.publish('player_levelup_bonus', { statPoints: 5 });
+                }
+            }
+
+            if (this.entity.eventManager) {
+                this.entity.eventManager.publish('level_up', { player: this.entity, level: this.get('level') });
+            }
+        }
+
         this.recalculate();
     }
 
