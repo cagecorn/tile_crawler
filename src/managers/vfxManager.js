@@ -173,6 +173,31 @@ export class VFXManager {
     }
 
     /**
+     * 간단한 텍스트 팝업 효과를 추가합니다.
+     * 지정된 텍스트가 잠시 떠올랐다가 사라집니다.
+     * @param {string} text
+     * @param {object} target Entity or object with x,y,width,height
+     * @param {object} [options]
+     */
+    addTextPopup(text, target, options = {}) {
+        if (!target) return;
+        const duration = options.duration || 30;
+        const effect = {
+            type: 'text_popup',
+            text,
+            x: target.x + (target.width || 0) / 2,
+            y: target.y - (options.offsetY || (target.height || 0) * 0.5),
+            duration,
+            life: duration,
+            color: options.color || 'white',
+            floatSpeed: options.floatSpeed || 0.5,
+            alpha: 1.0,
+            font: options.font || '16px Arial'
+        };
+        this.effects.push(effect);
+    }
+
+    /**
      * 시전 이펙트: 지정 유닛 주변에서 파티클이 모여드는 애니메이션을 생성합니다.
      * 시전 속도가 빠를수록 파티클이 더 빠르게 모여듭니다.
      * 색상은 스킬 태그에 따라 달라집니다.
@@ -336,6 +361,16 @@ export class VFXManager {
                 continue;
             }
 
+            if (effect.type === 'text_popup') {
+                effect.life--;
+                effect.y -= effect.floatSpeed;
+                effect.alpha = effect.life / effect.duration;
+                if (effect.life <= 0) {
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
 
             if (effect.type === 'glow') {
                 effect.alpha -= effect.decay;
@@ -405,6 +440,14 @@ export class VFXManager {
                 ctx.save();
                 ctx.globalAlpha = effect.alpha;
                 ctx.drawImage(effect.image, effect.x - w / 2, effect.y - h / 2, w, h);
+                ctx.restore();
+            } else if (effect.type === 'text_popup') {
+                ctx.save();
+                ctx.globalAlpha = effect.alpha;
+                ctx.fillStyle = effect.color;
+                ctx.font = effect.font;
+                ctx.textAlign = 'center';
+                ctx.fillText(effect.text, effect.x, effect.y);
                 ctx.restore();
             } else if (effect.type === 'glow') {
                 const { x, y, radius } = effect;
