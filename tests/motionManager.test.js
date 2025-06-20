@@ -22,4 +22,22 @@ test('dashTowards 이동 거리 제한', () => {
     assert.strictEqual(entity.y, 0);
 });
 
+test('pullTargetTo moves target in front of subject', () => {
+    const mapManager = {
+        tileSize: 1,
+        width: 5,
+        height: 5,
+        tileTypes: { FLOOR: 0, WALL: 1 },
+        map: Array.from({ length: 5 }, () => Array(5).fill(0)),
+        isWallAt: () => false,
+    };
+    const pathManager = new PathfindingManager(mapManager);
+    const motion = new MotionManager(mapManager, pathManager);
+    const subject = { x: 2, y: 2, width: 1, height: 1 };
+    const target = { x: 4, y: 4, width: 1, height: 1, constructor: { name: 'Dummy' } };
+    motion.pullTargetTo(target, subject);
+    assert.strictEqual(target.x, subject.x);
+    assert.strictEqual(target.y, subject.y - mapManager.tileSize);
+});
+
 });

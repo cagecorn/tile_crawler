@@ -1,4 +1,4 @@
-import { BowAI, SpearAI, SwordAI } from '../src/micro/WeaponAI.js';
+import { BowAI, SpearAI, SwordAI, WhipAI } from '../src/micro/WeaponAI.js';
 import { describe, test, assert } from './helpers.js';
 
 const mapStub = { tileSize: 1, isWallAt: () => false };
@@ -32,5 +32,27 @@ describe('WeaponAI', () => {
     const action = ai.decideAction(wielder, weapon, { enemies: [enemy], mapManager: mapStub });
     assert.strictEqual(action.type, 'weapon_skill');
     assert.strictEqual(action.skillId, 'parry_stance');
+  });
+
+  test('WhipAI uses pull when target within skill range', () => {
+    const ai = new WhipAI();
+    const wielder = { x: 0, y: 0, attackRange: 10, properties: { mbti: 'INTP' } };
+    const weapon = { weaponStats: { canUseSkill: () => true } };
+    const enemy = { x: 30, y: 0, hp: 5 };
+    const action = ai.decideAction(wielder, weapon, { enemies: [enemy], mapManager: mapStub });
+    assert.strictEqual(action.type, 'weapon_skill');
+    assert.strictEqual(action.skillId, 'pull');
+  });
+
+  test('WhipAI with T-type personality targets weakest enemy', () => {
+    const ai = new WhipAI();
+    const wielder = { x: 0, y: 0, attackRange: 10, properties: { mbti: 'INTJ' } };
+    const weapon = { weaponStats: { canUseSkill: () => true } };
+    const weak = { x: 25, y: 0, hp: 3 };
+    const strong = { x: 24, y: 0, hp: 8 };
+    const action = ai.decideAction(wielder, weapon, { enemies: [weak, strong], mapManager: mapStub });
+    assert.strictEqual(action.type, 'weapon_skill');
+    assert.strictEqual(action.skillId, 'pull');
+    assert.strictEqual(action.target, weak);
   });
 });

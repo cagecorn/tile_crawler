@@ -174,7 +174,37 @@ export class StaffAI extends BowAI {
 
 // 낫, 채찍 AI: 창과 같은 중거리 유지 AI
 export class ScytheAI extends SpearAI {}
-export class WhipAI extends SpearAI {}
+export class WhipAI extends SpearAI {
+    decideAction(wielder, weapon, context) {
+        const { enemies } = context;
+        if (!enemies || enemies.length === 0) return { type: 'idle' };
+
+        const nearestTarget = [...enemies]
+            .sort((a, b) => Math.hypot(a.x - wielder.x, a.y - wielder.y) - Math.hypot(b.x - wielder.x, b.y - wielder.y))[0];
+        const distance = Math.hypot(nearestTarget.x - wielder.x, nearestTarget.y - wielder.y);
+
+        const pullSkillId = 'pull';
+        const pullSkillData = WEAPON_SKILLS[pullSkillId];
+
+        if (
+            weapon.weaponStats.canUseSkill(pullSkillId) &&
+            distance > wielder.attackRange &&
+            distance <= pullSkillData.range
+        ) {
+            if (wielder.properties?.mbti?.includes('T')) {
+                const weakestTarget = enemies
+                    .filter(e => Math.hypot(e.x - wielder.x, e.y - wielder.y) <= pullSkillData.range)
+                    .sort((a, b) => a.hp - b.hp)[0];
+                if (weakestTarget) {
+                    return { type: 'weapon_skill', skillId: pullSkillId, target: weakestTarget };
+                }
+            }
+            return { type: 'weapon_skill', skillId: pullSkillId, target: nearestTarget };
+        }
+
+        return super.decideAction(wielder, weapon, context);
+    }
+}
 // --- 여기까지 ---
 
 export { BaseWeaponAI };

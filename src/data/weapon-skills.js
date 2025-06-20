@@ -48,6 +48,16 @@ export const WEAPON_SKILLS = {
         range: 192 * 3,
         tags: ['weapon_skill', 'movement', 'spear'],
     },
+    // 샤벨 1레벨 스킬 아래에 추가
+    pull: {
+        id: 'pull',
+        name: '끌어당기기',
+        description: '멀리 있는 대상을 자신의 앞으로 끌어당깁니다.',
+        type: 'active',
+        range: 192 * 4,
+        cooldown: 45,
+        tags: ['weapon_skill', 'utility', 'whip'],
+    },
     // 바이올린 활 레벨 1
     sonic_arrow: {
         id: 'sonic_arrow',
