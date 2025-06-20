@@ -389,9 +389,14 @@ export class UIManager {
         gameState.inventory.forEach((item, index) => {
             const slotDiv = document.createElement('div');
             slotDiv.className = 'inventory-item-slot';
-            const img = document.createElement('img');
-            img.src = item.image.src;
-            slotDiv.appendChild(img);
+            if (item.image) {
+                const img = document.createElement('img');
+                img.src = item.image.src;
+                img.alt = item.name;
+                slotDiv.appendChild(img);
+            } else {
+                slotDiv.textContent = item.name;
+            }
             if (item.quantity > 1) {
                 const qty = document.createElement('span');
                 qty.className = 'item-qty';
@@ -447,9 +452,14 @@ export class UIManager {
             gameState.inventory.forEach((item, index) => {
                 const slot = document.createElement('div');
                 slot.className = 'inventory-slot';
-                const img = document.createElement('img');
-                img.src = item.image.src;
-                img.alt = item.name;
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image.src;
+                    img.alt = item.name;
+                    slot.appendChild(img);
+                } else {
+                    slot.textContent = item.name;
+                }
                 if (item.quantity > 1) {
                     const qty = document.createElement('span');
                     qty.className = 'item-qty';
@@ -460,7 +470,6 @@ export class UIManager {
                 slot.onclick = () => {
                     if (this.callbacks.onItemUse) this.callbacks.onItemUse(index);
                 };
-                slot.appendChild(img);
                 this.inventorySlotsElement.appendChild(slot);
             });
             this._lastInventory = [...gameState.inventory];
