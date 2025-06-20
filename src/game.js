@@ -129,7 +129,6 @@ export class Game {
         this.parasiteManager = this.managers.ParasiteManager;
 
         // 매니저 간 의존성 연결
-        this.skillManager.setEffectManager(this.effectManager);
         this.equipmentManager.setTagManager(this.tagManager);
 
         this.itemFactory = new ItemFactory(assets);
@@ -146,6 +145,7 @@ export class Game {
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
         this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
+        this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager);
         this.aquariumManager = new AquariumManager(
             this.eventManager,
             this.monsterManager,
@@ -598,8 +598,10 @@ export class Game {
         eventManager.subscribe('exp_gained', (data) => {
             const { player, exp } = data;
             player.stats.addExp(exp);
-            this.combatLogManager.add(`%c${exp}의 경험치를 획득했습니다.`);
-            this.checkForLevelUp(player);
+        });
+
+        eventManager.subscribe('player_levelup_bonus', (data) => {
+            this.gameState.statPoints += data.statPoints;
         });
 
         eventManager.subscribe('drop_loot', (data) => {
@@ -647,9 +649,6 @@ export class Game {
                 }
             }
 
-            if (skill.teleport) {
-                this.handleTeleportSkill(caster);
-            }
 
             if (skill.id === SKILLS.guardian_hymn.id || skill.id === SKILLS.courage_hymn.id) {
                 const effectId = skill.id === SKILLS.guardian_hymn.id ? 'shield' : 'bonus_damage';
@@ -670,9 +669,6 @@ export class Game {
                 });
             }
 
-            if (skill.id === SKILLS.summon_skeleton.id) {
-                this.handleSummonSkill(caster);
-            }
 
             if (skill.tags.includes('attack')) {
                 const range = skill.range || Infinity;
@@ -959,54 +955,6 @@ export class Game {
         this.eventManager.publish('entity_attack', { attacker, defender, skill });
     }
 
-    checkForLevelUp(player) {
-        const stats = player.stats;
-        while (stats.get('exp') >= stats.get('expNeeded')) {
-            stats.levelUp();
-            stats.recalculate();
-            player.hp = player.maxHp;
-            player.mp = player.maxMp;
-            this.gameState.statPoints += 5;
-            this.eventManager.publish('level_up', { player: player, level: stats.get('level') });
-        }
-    }
-
-    handleTeleportSkill(caster) {
-        if (!caster.teleportSavedPos) {
-            caster.teleportSavedPos = { x: caster.x, y: caster.y };
-            this.eventManager.publish('log', { message: '🌀 위치를 저장했습니다.' });
-        } else if (!caster.teleportReturnPos) {
-            caster.teleportReturnPos = { x: caster.x, y: caster.y };
-            caster.x = caster.teleportSavedPos.x;
-            caster.y = caster.teleportSavedPos.y;
-            this.eventManager.publish('log', { message: '🌀 저장된 위치로 이동했습니다.' });
-        } else {
-            const { x, y } = caster.teleportReturnPos;
-            caster.teleportReturnPos = null;
-            caster.x = x;
-            caster.y = y;
-            this.eventManager.publish('log', { message: '🌀 이전 위치로 돌아왔습니다.' });
-        }
-    }
-
-    handleSummonSkill(caster) {
-        const pos = this.findRandomEmptyAdjacentTile(caster.x, caster.y);
-        if (!pos) return;
-        const monster = this.factory.create('monster', {
-            x: pos.x,
-            y: pos.y,
-            tileSize: this.mapManager.tileSize,
-            groupId: caster.groupId,
-            image: this.assets.skeleton,
-            baseStats: { strength: 3, agility: 3, endurance: 5, movement: 6, expValue: 0 }
-        });
-        monster.isFriendly = caster.isFriendly;
-        monster.properties.summonedBy = caster.id;
-        // 소환수는 용병 매니저에서 관리한다
-        this.mercenaryManager.mercenaries.push(monster);
-        const group = this.metaAIManager.groups[caster.groupId];
-        if (group) group.addMember(monster);
-    }
 
     /**
      * 지정된 좌표 인근의 비어 있는 임의 타일을 찾는다.

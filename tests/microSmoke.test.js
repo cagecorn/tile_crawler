@@ -1,6 +1,6 @@
 import { MapManager } from '../src/map.js';
 import { CharacterFactory, ItemFactory } from '../src/factory.js';
-import { MercenaryManager } from '../src/managers/managers.js';
+import { MercenaryManager } from '../src/managers/mercenaryManager.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { monsterDeathWorkflow } from '../src/workflows.js';
 import { describe, test, assert } from './helpers.js';
@@ -15,7 +15,7 @@ test('간단한 게임 흐름', () => {
     const factory = new CharacterFactory(assets);
     const itemFactory = new ItemFactory(assets);
     const eventManager = new EventManager();
-    const mercManager = new MercenaryManager(assets, factory);
+    const mercManager = new MercenaryManager(eventManager, assets, factory);
 
     const player = factory.create('player', { x:0, y:0, tileSize:1, groupId:'player_party' });
     assert.ok(player.stats.get('maxHp') > 0, '플레이어 스탯 확인');
