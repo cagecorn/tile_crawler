@@ -820,7 +820,7 @@ export class Game {
     }
 
     update = (deltaTime) => {
-        const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager } = this;
+        const { gameState, mercenaryManager, monsterManager, itemManager, mapManager, inputHandler, effectManager, turnManager, pathfindingManager, metaAIManager, eventManager, equipmentManager } = this;
         if (gameState.isPaused || gameState.isGameOver) return;
 
         const allEntities = [gameState.player, ...mercenaryManager.mercenaries, ...monsterManager.monsters];
@@ -880,7 +880,18 @@ export class Game {
             this.itemManager.removeItem(itemToPick);
         }
         this.fogManager.update(player, mapManager);
-        const context = { eventManager, player, mapManager, monsterManager, mercenaryManager, pathfindingManager, movementManager: this.movementManager, projectileManager: this.projectileManager };
+        const context = {
+            eventManager,
+            player,
+            mapManager,
+            monsterManager,
+            mercenaryManager,
+            pathfindingManager,
+            movementManager: this.movementManager,
+            projectileManager: this.projectileManager,
+            itemManager: this.itemManager,
+            equipmentManager: this.equipmentManager,
+        };
         metaAIManager.update(context);
         this.itemAIManager.update(context);
         this.projectileManager.update();
