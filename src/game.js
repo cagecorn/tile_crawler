@@ -189,7 +189,7 @@ export class Game {
         this.aquariumInspector.run();
 
         this.playerGroup = this.metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
-        this.metaAIManager.setGroupStrategy('player_party', STRATEGY.IDLE); // prevent player AI actions
+        // 플레이어는 직접 조종하므로 AI를 비활성화하지만 용병은 계속 행동하게 둡니다.
         this.monsterGroup = this.metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
         // === 2. 플레이어 생성 ===
