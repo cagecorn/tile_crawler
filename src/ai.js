@@ -312,9 +312,29 @@ export class RangedAI extends AIArchetype {
         const { player, allies, enemies, mapManager, eventManager } = context;
         const targetList = enemies;
 
+        // T/F 성향에 따른 타겟팅 우선순위 결정
+        const mbti = self.properties?.mbti || '';
+        let potentialTargets = [...targetList];
+        if (mbti.includes('T')) {
+            potentialTargets.sort((a, b) => a.hp - b.hp);
+            if (potentialTargets.length > 0) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'T', target: self });
+            }
+        } else if (mbti.includes('F')) {
+            const allyTargets = new Set();
+            allies.forEach(ally => {
+                if (ally.currentTarget) allyTargets.add(ally.currentTarget.id);
+            });
+            const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
+            if (focusedTarget) {
+                potentialTargets = [focusedTarget];
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'F', target: self });
+            }
+        }
+
         let nearestTarget = null;
         let minDistance = Infinity;
-        for (const target of targetList) {
+        for (const target of potentialTargets) {
             const dx = target.x - self.x;
             const dy = target.y - self.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -341,6 +361,13 @@ export class RangedAI extends AIArchetype {
 
             if (hasLOS) {
                 if (minDistance <= self.attackRange && minDistance > self.attackRange * 0.5) {
+                    // S/N 성향에 따른 스킬 사용 시점 표시
+                    if (mbti.includes('S')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+                    } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+                    }
+
                     const skillId = self.skills && self.skills[0];
                     const skill = SKILLS[skillId];
                     if (
@@ -354,7 +381,11 @@ export class RangedAI extends AIArchetype {
                 }
 
                 if (minDistance <= self.attackRange * 0.5) {
-                    const mbti = self.properties?.mbti || '';
+                    // P 성향은 후퇴하지 않고 돌격
+                    if (mbti.includes('P')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'P', target: self });
+                        return { type: 'move', target: nearestTarget };
+                    }
                     if (mbti.includes('J')) {
                         eventManager?.publish('vfx_request', { type: 'text_popup', text: 'J', target: self });
                     }
@@ -408,7 +439,8 @@ export class SummonerAI extends RangedAI {
 
 export class BardAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, mapManager } = context;
+        const { player, allies, mapManager, eventManager } = context;
+        const mbti = self.properties?.mbti || '';
         const songs = [SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id];
         for (const skillId of songs) {
             const skill = SKILLS[skillId];
@@ -418,7 +450,20 @@ export class BardAI extends AIArchetype {
                 (self.skillCooldowns[skillId] || 0) <= 0 &&
                 self.equipment.weapon && self.equipment.weapon.tags.includes('song')
             ) {
-                const target = player; // 간단히 플레이어 중심으로 시전
+                let target = player; // 기본 대상은 플레이어
+
+                // E/I 성향에 따라 대상 선택
+                if (mbti.includes('E')) {
+                    eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+                    const woundedAlly = allies
+                        .filter(a => a !== self)
+                        .sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+                    if (woundedAlly) target = woundedAlly;
+                } else if (mbti.includes('I')) {
+                    eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
+                    target = self;
+                }
+
                 const distance = Math.hypot(target.x - self.x, target.y - self.y);
                 if (distance <= self.attackRange) {
                     return { type: 'skill', target, skillId };
