@@ -553,6 +553,20 @@ export class Game {
             }
         });
 
+        // 'charge_hit' 이벤트 리스너 추가
+        eventManager.subscribe('charge_hit', (data) => {
+            const { attacker, defender } = data;
+            if (!defender || defender.hp <= 0) return;
+
+            // 1. 피해를 입힙니다.
+            this.handleAttack(attacker, defender, { name: '돌진' });
+            
+            // 2. 에어본 효과를 적용합니다.
+            this.effectManager.addEffect(defender, 'airborne');
+
+            this.eventManager.publish('log', { message: `\uD83D\uDCA8 ${defender.constructor.name}를 공중에 띄웠습니다!`, color: 'lightblue' });
+        });
+
         // 피해량 계산 완료 이벤트를 받아 실제 피해 적용
         eventManager.subscribe('damage_calculated', (data) => {
             data.defender.takeDamage(data.damage);
