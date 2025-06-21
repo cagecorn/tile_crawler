@@ -229,7 +229,8 @@ export class Game {
             tileSize: this.mapManager.tileSize,
             groupId: this.playerGroup.id,
             image: assets.player,
-            baseStats: { strength: 5, agility: 5, endurance: 15, movement: 10 }
+            // 초반 난이도를 맞추기 위해 이동 속도를 낮춘다
+            baseStats: { strength: 5, agility: 5, endurance: 15, movement: 4 }
         });
         player.ai = null; // disable any automatic skills for the player
         player.equipmentRenderManager = this.equipmentRenderManager;

@@ -6,7 +6,8 @@ export const JOBS = {
             strength: 8,
             agility: 4,
             endurance: 6,
-            movement: 10,
+            // 초반 밸런스에 맞춰 이동 속도를 낮춘다
+            movement: 4,
             hp: 40,
             attackPower: 17,
         }
@@ -18,7 +19,7 @@ export const JOBS = {
             strength: 5,
             agility: 8,
             endurance: 4,
-            movement: 10,
+            movement: 4,
             hp: 30,
             attackPower: 15,
         }
@@ -31,7 +32,7 @@ export const JOBS = {
             agility: 5,
             endurance: 4,
             focus: 8,
-            movement: 10,
+            movement: 4,
             hp: 28,
             attackPower: 10,
         }
@@ -45,7 +46,7 @@ export const JOBS = {
             endurance: 3,
             focus: 9,
             intelligence: 8,
-            movement: 10,
+            movement: 4,
             hp: 24,
             attackPower: 12,
         }
@@ -59,7 +60,7 @@ export const JOBS = {
             endurance: 3,
             focus: 10,
             intelligence: 9,
-            movement: 10,
+            movement: 4,
             hp: 22,
             attackPower: 11,
         }
@@ -72,7 +73,7 @@ export const JOBS = {
             agility: 6,
             endurance: 4,
             focus: 8,
-            movement: 10,
+            movement: 4,
             hp: 26,
             attackPower: 10,
         }

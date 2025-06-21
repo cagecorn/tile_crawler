@@ -13,14 +13,16 @@ export class StatManager {
             endurance: config.endurance || 1,
             focus: config.focus || 1,
             intelligence: config.intelligence || 1,
-            movement: config.movement || 3,
+            // 초반 밸런스를 고려하여 기본 이동 속도를 낮춘다
+            movement: config.movement || 2,
             expValue: config.expValue || 0,
             sizeInTiles_w: config.sizeInTiles_w || 1,
             sizeInTiles_h: config.sizeInTiles_h || 1,
             visionRange: config.visionRange || 192 * 4,
             attackRange: config.attackRange || 192,
-            castingSpeed: config.castingSpeed || 1,
-            attackSpeed: config.attackSpeed || 1,
+            // 지나치게 빠른 전투 템포를 완화하기 위해 기본 시전/공격 속도를 하향한다
+            castingSpeed: config.castingSpeed || 0.5,
+            attackSpeed: config.attackSpeed || 0.5,
             hpRegen: config.hpRegen || 0,
             mpRegen: config.mpRegen || 0,
         };
