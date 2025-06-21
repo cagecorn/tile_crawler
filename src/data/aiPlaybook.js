@@ -3,7 +3,6 @@
 // Tactical behavior helpers
 const TACTICAL_ACTIONS = {
     ENGAGE_AND_HOLD: (entity, target) => {
-        if (!target) return { type: 'idle' };
         const distance = Math.hypot(target.x - entity.x, target.y - entity.y);
         if (distance < (entity.attackRange || 1)) {
             return { type: 'attack', target };
@@ -11,7 +10,6 @@ const TACTICAL_ACTIONS = {
         return { type: 'move', target };
     },
     FLANK: (entity, target, direction = 'left') => {
-        if (!target) return { type: 'idle' };
         const offsetAngle = direction === 'left' ? -Math.PI / 2 : Math.PI / 2;
         const targetAngle = Math.atan2(target.y - entity.y, target.x - entity.x);
         const finalAngle = targetAngle + offsetAngle;
@@ -25,8 +23,8 @@ const TACTICAL_ACTIONS = {
         }
         return { type: 'move', target: flankPos };
     },
-    PURSUE: (entity, target) => target ? { type: 'move', target } : { type: 'idle' },
-    ATTACK: (entity, target) => target ? { type: 'attack', target } : { type: 'idle' },
+    PURSUE: (entity, target) => ({ type: 'move', target }),
+    ATTACK: (entity, target) => ({ type: 'attack', target }),
     IDLE: () => ({ type: 'idle' })
 };
 
@@ -65,10 +63,7 @@ export const AI_PLAYBOOK = {
                 selector: (ctx, assigned) => {
                     const anvil = assigned.anvil?.[0];
                     if (!anvil) return ctx.enemies[0];
-                    return ctx.enemies.slice().sort((a,b) => (
-                        Math.hypot(a.x - anvil.x, a.y - anvil.y) -
-                        Math.hypot(b.x - anvil.x, b.y - anvil.y)
-                    ))[0];
+                    return ctx.enemies.sort((a,b) => Math.hypot(a.x - anvil.x, a.y - anvil.y) - Math.hypot(b.x - anvil.x, b.y - anvil.y))[0];
                 }
             }
         ],

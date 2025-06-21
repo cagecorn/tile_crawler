@@ -66,6 +66,11 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.microCombatManager = new MicroCombatManager(eventManager);
     managers.microItemAIManager = new Managers.MicroItemAIManager();
 
+    // --- 여기에 로그 매니저 생성 코드를 추가합니다. ---
+    managers.combatLogManager = new Managers.CombatLogManager(eventManager);
+    managers.systemLogManager = new Managers.SystemLogManager(eventManager);
+    // --- 여기까지 추가 ---
+
     // UI Manager는 콜백 등으로 인해 별도 처리될 수 있으므로 마지막에 추가
     managers.uiManager = new Managers.UIManager();
     managers.uiManager.mercenaryManager = managers.mercenaryManager;
