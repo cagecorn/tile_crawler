@@ -1128,6 +1128,8 @@ export class Game {
             assets: this.loader.assets,
             metaAIManager,
             microItemAIManager,
+            playerGroup: this.playerGroup,
+            monsterGroup: this.monsterGroup,
             speechBubbleManager: this.speechBubbleManager,
             enemies: metaAIManager.groups['dungeon_monsters']?.members || []
         };
