@@ -927,6 +927,13 @@ export class Game {
             }
         });
 
+        // AI가 성격 특성을 발동했을 때 텍스트 팝업으로 표시
+        eventManager.subscribe('ai_mbti_trait_triggered', (data) => {
+            if (this.vfxManager) {
+                this.vfxManager.addTextPopup(data.trait, data.entity);
+            }
+        });
+
         // 스탯 변경 이벤트 구독 (효과 적용/해제 시 스탯 재계산)
         eventManager.subscribe('stats_changed', (data) => {
             data.entity.stats.recalculate();

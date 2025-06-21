@@ -3,15 +3,8 @@
 import { hasLineOfSight } from './utils/geometry.js';
 import { SKILLS } from './data/skills.js';
 
-// Utility to show MBTI text popups above a unit
-function showMBTIPopup(eventManager, char, self) {
-    if (!eventManager || !char) return;
-    eventManager.publish('vfx_request', {
-        type: 'text_popup',
-        text: char,
-        target: self,
-    });
-}
+// AI 내에서 직접 팝업을 호출하지 않고 이벤트만 발생시켜
+// 시각 효과 로직과 분리한다.  실제 팝업 처리는 game.js가 담당한다.
 
 // --- AI 유형(Archetype)의 기반이 될 부모 클래스 ---
 class AIArchetype {
@@ -109,7 +102,7 @@ export class MeleeAI extends AIArchetype {
         if (mbti.includes('T')) {
             potentialTargets.sort((a, b) => a.hp - b.hp);
             if (potentialTargets.length > 0) {
-                showMBTIPopup(eventManager, 'T', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'T' });
             }
         } else if (mbti.includes('F')) {
             const allyTargets = new Set();
@@ -119,7 +112,7 @@ export class MeleeAI extends AIArchetype {
             const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
             if (focusedTarget) {
                 potentialTargets = [focusedTarget];
-                showMBTIPopup(eventManager, 'F', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'F' });
             }
         }
 
@@ -156,7 +149,7 @@ export class MeleeAI extends AIArchetype {
                 ? self.skills.map(id => SKILLS[id]).find(s => s && s.tags && s.tags.includes('charge'))
                 : null;
             if (mbti.includes('P')) {
-                showMBTIPopup(eventManager, 'P', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'P' });
             }
 
             if (
@@ -180,9 +173,9 @@ export class MeleeAI extends AIArchetype {
                     (self.skillCooldowns[skillId] || 0) <= 0
                 ) {
                     if (mbti.includes('S')) {
-                        showMBTIPopup(eventManager, 'S', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'S' });
                     } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
-                        showMBTIPopup(eventManager, 'N', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'N' });
                     }
                     return { type: 'skill', target: nearestTarget, skillId };
                 }
@@ -238,7 +231,7 @@ export class HealerAI extends AIArchetype {
                 let targetCandidate = null;
                 if (mbti.includes('T')) {
                     targetCandidate = potential.reduce((low, cur) => cur.hp < low.hp ? cur : low, potential[0]);
-                    showMBTIPopup(eventManager, 'T', self);
+                    eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'T' });
                 } else if (mbti.includes('F')) {
                     const allyTargets = new Set();
                     allies.forEach(a => {
@@ -247,7 +240,7 @@ export class HealerAI extends AIArchetype {
                     const focused = potential.find(t => allyTargets.has(t.id));
                     if (focused) {
                         targetCandidate = focused;
-                        showMBTIPopup(eventManager, 'F', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'F' });
                     }
                 }
                 const nearest = targetCandidate || potential.reduce(
@@ -313,16 +306,16 @@ export class HealerAI extends AIArchetype {
 
         if (distance <= self.attackRange && hasLOS && skillReady) {
             if (mbti.includes('S')) {
-                showMBTIPopup(eventManager, 'S', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'S' });
             } else if (mbti.includes('N')) {
-                showMBTIPopup(eventManager, 'N', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'N' });
             }
 
             // E/I 성향을 실제 힐 순간에 표시
             if (mbti.includes('E')) {
-                showMBTIPopup(eventManager, 'E', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'E' });
             } else if (mbti.includes('I')) {
-                showMBTIPopup(eventManager, 'I', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'I' });
             }
 
             return { type: 'skill', target, skillId: healId };
@@ -416,7 +409,7 @@ export class RangedAI extends AIArchetype {
         if (mbti.includes('T')) {
             potentialTargets.sort((a, b) => a.hp - b.hp);
             if (potentialTargets.length > 0) {
-                showMBTIPopup(eventManager, 'T', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'T' });
             }
         } else if (mbti.includes('F')) {
             const allyTargets = new Set();
@@ -426,7 +419,7 @@ export class RangedAI extends AIArchetype {
             const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
             if (focusedTarget) {
                 potentialTargets = [focusedTarget];
-                showMBTIPopup(eventManager, 'F', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'F' });
             }
         }
 
@@ -461,9 +454,9 @@ export class RangedAI extends AIArchetype {
                 if (minDistance <= self.attackRange && minDistance > self.attackRange * 0.5) {
                     // S/N 성향에 따른 스킬 사용 시점 표시
                     if (mbti.includes('S')) {
-                        showMBTIPopup(eventManager, 'S', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'S' });
                     } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
-                        showMBTIPopup(eventManager, 'N', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'N' });
                     }
 
                     const skillId = self.skills && self.skills[0];
@@ -481,11 +474,11 @@ export class RangedAI extends AIArchetype {
                 if (minDistance <= self.attackRange * 0.5) {
                     // P 성향은 후퇴하지 않고 돌격
                     if (mbti.includes('P')) {
-                        showMBTIPopup(eventManager, 'P', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'P' });
                         return { type: 'move', target: nearestTarget };
                     }
                     if (mbti.includes('J')) {
-                        showMBTIPopup(eventManager, 'J', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'J' });
                     }
                     const dx = nearestTarget.x - self.x;
                     const dy = nearestTarget.y - self.y;
@@ -831,9 +824,9 @@ export class BardAI extends AIArchetype {
                 if (distance <= self.attackRange) {
                     // E/I 성향을 실제 노래 시점에 표시
                     if (mbti.includes('E')) {
-                        showMBTIPopup(eventManager, 'E', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'E' });
                     } else if (mbti.includes('I')) {
-                        showMBTIPopup(eventManager, 'I', self);
+                        eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'I' });
                     }
                     return { type: 'skill', target, skillId };
                 }
@@ -847,7 +840,7 @@ export class BardAI extends AIArchetype {
             let targetCandidate = null;
             if (mbti.includes('T')) {
                 targetCandidate = potential.reduce((low, cur) => cur.hp < low.hp ? cur : low, potential[0]);
-                showMBTIPopup(eventManager, 'T', self);
+                eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'T' });
             } else if (mbti.includes('F')) {
                 const allyTargets = new Set();
                 allies.forEach(a => {
@@ -856,7 +849,7 @@ export class BardAI extends AIArchetype {
                 const focused = potential.find(t => allyTargets.has(t.id));
                 if (focused) {
                     targetCandidate = focused;
-                    showMBTIPopup(eventManager, 'F', self);
+                    eventManager?.publish('ai_mbti_trait_triggered', { entity: self, trait: 'F' });
                 }
             }
             const nearest = targetCandidate || potential.reduce(
