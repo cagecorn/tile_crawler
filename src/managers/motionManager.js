@@ -25,7 +25,7 @@ export class MotionManager {
         const destY = dest.y * tileSize;
 
         if (vfxManager) {
-            vfxManager.createDashTrail(startPos.x, startPos.y, destX, destY, { color: 'rgba(255,255,255,0.7)', lifespan: 25 });
+            vfxManager.createDashTrail(startPos.x, startPos.y, destX, destY);
         }
 
         const hitEnemies = new Set();
@@ -38,7 +38,8 @@ export class MotionManager {
             for(const enemy of enemiesInPath) {
                 if(!hitEnemies.has(enemy.id)) {
                     if(eventManager) {
-                        eventManager.publish('entity_attack', { attacker: entity, defender: enemy, skill: {name: '돌진'}});
+                        // entity_attack 대신 charge_hit 이벤트를 발생시킵니다.
+                        eventManager.publish('charge_hit', { attacker: entity, defender: enemy });
                     }
                     if (vfxManager && strikeImage) {
                          vfxManager.addSpriteEffect(strikeImage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, { blendMode: 'screen' });

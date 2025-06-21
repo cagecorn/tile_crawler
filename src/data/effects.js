@@ -130,5 +130,11 @@ export const EFFECTS = {
         duration: 60,
         stats: { hpRegen: 0.1 },
         tags: ['aura', 'regen', 'regeneration_aura'],
+    },
+    airborne: {
+        name: '에어본',
+        type: 'cc', // Crowd Control
+        duration: 75, // 1.25초 (60fps 기준)
+        tags: ['status_ailment', 'cc', 'airborne'],
     }
 };

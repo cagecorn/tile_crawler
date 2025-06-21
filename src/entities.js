@@ -111,16 +111,40 @@ class Entity {
     }
 
     render(ctx) {
-        ctx.save();
-        ctx.translate(this.x + this.width / 2, this.y + this.height);
-        ctx.scale(this.direction || 1, 1);
+        // 에어본 효과가 있는지 확인
+        const airborneEffect = this.effects.find(e => e.id === 'airborne');
+        let yOffset = 0;
+        let shadowScale = 1;
 
-        if (this.image) {
-            ctx.drawImage(this.image, -this.width / 2, -this.height, this.width, this.height);
+        if (airborneEffect) {
+            // 에어본 지속시간에 따라 위아래로 움직이는 yOffset 계산 (sin 곡선 활용)
+            const progress = 1 - (airborneEffect.remaining / airborneEffect.duration);
+            yOffset = -Math.sin(progress * Math.PI) * (this.height * 0.5); // 키의 절반만큼 떠오름
+            shadowScale = 1 - Math.sin(progress * Math.PI) * 0.4; // 공중에 뜨면 그림자 작아짐
         }
 
+        ctx.save();
+        // 캔버스 원점을 유닛의 발 중앙으로 이동
+        ctx.translate(this.x + this.width / 2, this.y + this.height);
+
+        // 1. 그림자 먼저 그리기 (yOffset의 영향을 받지 않음)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, (this.width / 2) * shadowScale, (this.width / 4) * shadowScale, 0, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // 2. 유닛 이미지 그리기 (yOffset 적용)
+        ctx.scale(this.direction || 1, 1);
+        if (this.image) {
+            ctx.drawImage(this.image, -this.width / 2, -this.height + yOffset, this.width, this.height);
+        }
+
+        // 3. 장비 그리기 (yOffset 적용)
         if (this.equipmentRenderManager) {
+            ctx.save();
+            ctx.translate(0, yOffset); // 장비도 유닛을 따라 위로 이동
             this.equipmentRenderManager.drawEquipment(ctx, this);
+            ctx.restore();
         }
 
         ctx.restore();
