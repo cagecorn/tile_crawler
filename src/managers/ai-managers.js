@@ -23,6 +23,7 @@ class AIGroup {
 export class MetaAIManager {
     constructor(eventManager) {
         this.groups = {};
+        this.eventManager = eventManager;
         // "몬스터 제거" 이벤트를 구독하여 그룹에서 멤버를 제거
         eventManager.subscribe('entity_removed', (data) => {
             for (const groupId in this.groups) {
@@ -47,6 +48,12 @@ export class MetaAIManager {
     executeAction(entity, action, context) {
         if (!action || !action.type || action.type === 'idle') return;
         const { eventManager } = context;
+
+        if (action.triggeredTraits) {
+            action.triggeredTraits.forEach(trait => {
+                eventManager.publish('ai_mbti_trait_triggered', { entity, trait });
+            });
+        }
 
         // 행동 결정 로그는 너무 잦은 호출이 성능 문제를 일으킬 수 있어
         // 간단한 쿨다운 메커니즘으로 빈도를 제한한다.
@@ -201,49 +208,25 @@ export class MetaAIManager {
 
             const membersSorted = [...group.members].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
             for (const member of membersSorted) {
-                if (member.hp <= 0) continue;
+                if (member.hp <= 0 || !member.behaviors || member.behaviors.length === 0) continue;
 
-                // 에어본 상태이면, 이번 턴 행동을 건너뜀
-                if (Array.isArray(member.effects) && member.effects.some(e => e.id === 'airborne')) {
-                    if (typeof member.update === 'function') member.update(currentContext);
+                if (typeof member.update === 'function') member.update(currentContext);
+
+                // CC 상태 확인
+                if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) {
                     continue;
                 }
 
-                // 1단계: 쿨다운 감소 등 상태 업데이트
-                if (typeof member.update === 'function') {
-                    member.update(currentContext);
-                } else {
-                    if (member.attackCooldown > 0) member.attackCooldown--;
-                    if (typeof member.applyRegen === 'function') member.applyRegen();
-                }
-
-                // 2단계: 행동 결정
-                let action = { type: 'idle' };
-
-                // 2.1: 역할(Role) AI가 먼저 행동을 결정 (힐, 소환 등)
-                if (member.roleAI) {
-                    action = member.roleAI.decideAction(member, currentContext);
-                }
-
-                // 2.2: 역할 AI가 특별한 행동을 하지 않으면, 무기(Weapon) AI가 전투 행동을 결정
-                if (action.type === 'idle') {
-                    const weapon = member.equipment?.weapon;
-                    const combatAI = context.microItemAIManager?.getWeaponAI(weapon);
-                    if (combatAI) {
-                        action = combatAI.decideAction(member, weapon, currentContext);
+                let finalAction = { type: 'idle' };
+                for (const behavior of member.behaviors) {
+                    const action = behavior.decideAction(member, currentContext);
+                    if (action && action.type !== 'idle') {
+                        finalAction = action;
+                        break;
                     }
                 }
 
-                // 2.3: 무기 AI도 할 일이 없으면, 최후의 보루(Fallback) AI가 기본 행동 결정
-                if (action.type === 'idle') {
-                    if (member.fallbackAI) {
-                        action = member.fallbackAI.decideAction(member, currentContext);
-                    } else if (member.ai && !member.roleAI) { // 이전 버전 호환성
-                        action = member.ai.decideAction(member, currentContext);
-                    }
-                }
-                
-                this.executeAction(member, action, currentContext);
+                this.executeAction(member, finalAction, currentContext);
             }
         }
     }
