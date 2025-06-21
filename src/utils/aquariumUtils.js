@@ -23,7 +23,12 @@ export function adjustMonsterStatsForAquarium(baseStats = {}) {
     // Double the final value while keeping other bonuses intact.
     const originalHp = 10 + endurance * 5;
     const targetHp = originalHp * 2;
+
     adjusted.endurance = (targetHp - 10) / 5;
+
+    // Restrict monster vision so they remain idle when far from the player
+    const defaultVision = 192 * 2; // keep aquarium encounters manageable
+    adjusted.visionRange = Math.min(baseStats.visionRange ?? 192 * 4, defaultVision);
 
     return adjusted;
 }

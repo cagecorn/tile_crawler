@@ -327,7 +327,8 @@ export class Game {
 
         // === 3. 몬스터 생성 ===
         const monsters = [];
-        for (let i = 0; i < 40; i++) {
+        const baseMonsterCount = this.mapManager.name === 'aquarium' ? 10 : 40;
+        for (let i = 0; i < baseMonsterCount; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
                 let stats = {};
