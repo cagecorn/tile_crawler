@@ -70,14 +70,25 @@ export class StatManager {
 
         for (const slot in this.entity.equipment) {
             const item = this.entity.equipment[slot];
-            if (item && item.stats) {
-                if (item.stats instanceof Map) {
-                    for (const [stat, value] of item.stats.entries()) {
-                        this._fromEquipment[stat] = (this._fromEquipment[stat] || 0) + value;
-                    }
-                } else {
-                    for (const [stat, value] of Object.entries(item.stats)) {
-                        this._fromEquipment[stat] = (this._fromEquipment[stat] || 0) + value;
+            if (!item) continue;
+
+            // 1. 아이템 자체 스탯
+            if (item.stats) {
+                const statsSource = item.stats instanceof Map ? item.stats.entries() : Object.entries(item.stats);
+                for (const [stat, value] of statsSource) {
+                    this._fromEquipment[stat] = (this._fromEquipment[stat] || 0) + value;
+                }
+            }
+
+            // 2. 소켓 룬 스탯
+            if (item.sockets && item.sockets.length > 0) {
+                for (const rune of item.sockets) {
+                    if (!rune) continue;
+
+                    if (item.type === 'armor' && rune.armorResist) {
+                        const map = { fire: 'burnResist', ice: 'freezeResist', poison: 'poisonResist' };
+                        const resistStatName = map[rune.elementType] || `${rune.elementType}Resist`;
+                        this._fromEquipment[resistStatName] = (this._fromEquipment[resistStatName] || 0) + rune.armorResist;
                     }
                 }
             }

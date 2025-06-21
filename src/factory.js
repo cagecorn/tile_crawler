@@ -185,13 +185,15 @@ export class ItemFactory {
         if (baseItem.effectId) item.effectId = baseItem.effectId;
 
         if (item.type === 'weapon' || item.type === 'armor') {
+            const numSockets = Math.floor(Math.random() * 4); // 0~3개 소켓
+            item.sockets = Array(numSockets).fill(null);
             this._applySynergies(item);
+        } else {
+            item.sockets = [];
         }
 
         if (Math.random() < 0.5) this._applyAffix(item, PREFIXES, 'prefix');
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
-
-        item.sockets = this._createSockets();
 
         if (baseItem.possessionAI) {
             item.possessionAI = baseItem.possessionAI;

@@ -1,3 +1,5 @@
+// src/combat.js
+
 import { WEAPON_SKILLS } from './data/weapon-skills.js';
 
 export class CombatCalculator {
@@ -6,12 +8,46 @@ export class CombatCalculator {
         this.tagManager = tagManager;
     }
 
+    _calculateRuneDamage(weapon, skill) {
+        if (!weapon || !weapon.sockets || weapon.sockets.length === 0) {
+            return 0;
+        }
+
+        let totalRuneDamage = 0;
+        for (const rune of weapon.sockets) {
+            if (!rune || !rune.weaponDamage) continue;
+
+            const skillElementTags = skill?.tags.filter(t => ['fire', 'ice', 'poison'].includes(t)) || [];
+
+            // 1. 일반 공격 혹은 비속성 스킬: 1.0배
+            if (skillElementTags.length === 0) {
+                totalRuneDamage += rune.weaponDamage;
+                continue;
+            }
+
+            // 2. 속성 스킬
+            if (skillElementTags.includes(rune.elementType)) {
+                totalRuneDamage += rune.weaponDamage * 1.5; // 속성 일치
+            }
+            // 속성 불일치 시 데미지 없음
+        }
+        return Math.floor(totalRuneDamage);
+    }
+
+    _isBehind(attacker, defender) {
+        if (!attacker || !defender) return false;
+        const dx = defender.x - attacker.x;
+        const dy = defender.y - attacker.y;
+        const facing = defender.direction || { x: 0, y: 1 };
+        return (dx * facing.x + dy * facing.y) > 0;
+    }
+
     handleAttack(data) {
         const { attacker, defender, skill } = data;
-        const attackingWeapon = attacker.equipment?.weapon;
+        const attackingWeapon = attacker.equipment?.main_hand || attacker.equipment?.weapon;
 
         // --- 패링 로직 시작 ---
-        const defendingWeapon = defender.equipment?.weapon;
+        const defendingWeapon = defender.equipment?.main_hand || defender.equipment?.weapon;
 
         const parryReadyIndex = defender.effects?.findIndex(e => e.id === 'parry_ready');
         if (parryReadyIndex >= 0 && defendingWeapon) {
@@ -41,7 +77,7 @@ export class CombatCalculator {
         // --- 패링 로직 끝 ---
 
         let finalDamage = 0;
-        const details = { base: 0, fromSkill: 0, fromTags: 0, defenseReduction: 0 };
+        const details = { base: 0, fromSkill: 0, fromTags: 0, fromRunes: 0, defenseReduction: 0, isBackstab: false };
 
         const chargeEffect = attacker.effects?.find(e => e.id === 'charging_shot_effect');
         let damageMultiplier = 1.0;
@@ -49,32 +85,37 @@ export class CombatCalculator {
             damageMultiplier = 1.5;
             attacker.effects = attacker.effects.filter(e => e.id !== 'charging_shot_effect');
             this.eventManager.publish('log', { message: `[충전된 사격]이 발동됩니다!`, color: 'magenta' });
-            // 넉백 요청 이벤트 발행
             this.eventManager.publish('knockback_request', { attacker, defender, distance: 128 });
         }
 
-        // 1. 기본 공격력 계산 (힘 기반)
+        if (skill && skill.id === 'backstab' && this._isBehind(attacker, defender)) {
+            details.isBackstab = true;
+            damageMultiplier *= 1.5;
+        }
+
+        // 1. 기본 공격력
         details.base = attacker.attackPower;
         finalDamage += details.base;
 
-        // 2. 스킬에 의한 데미지 계산
+        // 2. 스킬 데미지
         if (skill) {
             if (this.tagManager.hasTag(skill, 'physical')) {
-                // 물리 스킬은 공격력 계수
                 details.fromSkill = (attacker.attackPower * (skill.damageMultiplier || 1)) - attacker.attackPower;
             } else if (this.tagManager.hasTag(skill, 'magic')) {
-                // 마법 스킬은 지능 계수 (나중에 추가) + 기본 데미지
                 details.fromSkill = skill.damage || 0;
             }
             finalDamage += details.fromSkill;
 
-            // 3. 태그 조합에 따른 추가 데미지
             const bonus = this.tagManager.calculateDamageBonus(attacker, skill);
             details.fromTags = bonus;
             finalDamage += bonus;
         }
 
-        // 4. 방어력에 의한 피해 감소
+        // 3. 룬 데미지
+        details.fromRunes = this._calculateRuneDamage(attackingWeapon, skill);
+        finalDamage += details.fromRunes;
+
+        // 4. 방어력에 의한 감소
         details.defenseReduction = defender.stats.get('defense');
         finalDamage = Math.max(1, finalDamage - details.defenseReduction);
         finalDamage *= damageMultiplier;
@@ -82,9 +123,7 @@ export class CombatCalculator {
 
         details.finalDamage = finalDamage;
 
-        // 공격 판정이 성공적으로 끝났음을 미시 세계에 알린다
         this.eventManager.publish('attack_landed', { attacker, defender, skill });
-
         this.eventManager.publish('damage_calculated', { ...data, damage: finalDamage, details });
 
         if (attackingWeapon && attackingWeapon.tags?.includes('sword')) {
