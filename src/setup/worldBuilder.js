@@ -1,4 +1,4 @@
-import { STRATEGY } from '../managers/ai-managers.js';
+import { STRATEGY } from '../engines/aiEngine.js';
 import { SKILLS } from '../data/skills.js';
 import { EMBLEMS } from '../data/emblems.js';
 

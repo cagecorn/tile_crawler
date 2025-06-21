@@ -1,6 +1,12 @@
 import { SKILLS } from '../data/skills.js';
 import { AI_PLAYBOOK } from '../data/aiPlaybook.js';
 
+export const STRATEGY = {
+    IDLE: 'idle',
+    AGGRESSIVE: 'aggressive',
+    DEFENSIVE: 'defensive',
+};
+
 export class AIEngine {
     constructor(eventManager, mbtiEngine) {
         this.eventManager = eventManager;
@@ -154,7 +160,6 @@ export class AIEngine {
         const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
         for (const member of membersSorted) {
             if (member.hp <= 0 || !member.behaviors || member.isPlayer) continue;
-            if (typeof member.update === 'function') member.update(context);
             if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
 
             let baseAction = { type: 'idle' };

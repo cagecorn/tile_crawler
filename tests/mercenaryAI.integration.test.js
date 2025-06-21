@@ -1,6 +1,6 @@
 import { describe, test, assert } from './helpers.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
+import { AIEngine, STRATEGY } from '../src/engines/aiEngine.js';
 import { CharacterFactory } from '../src/factory.js';
 import { MicroItemAIManager } from '../src/managers/microItemAIManager.js';
 import { HealerAI } from '../src/ai.js';
@@ -12,7 +12,7 @@ describe('Integration', () => {
     const assets = { player:{}, mercenary:{}, monster:{} };
     const factory = new CharacterFactory(assets);
     const eventManager = new EventManager();
-    const aiManager = new MetaAIManager(eventManager);
+    const aiManager = new AIEngine(eventManager);
     const microItemAIManager = new MicroItemAIManager();
 
     const mapStub = { tileSize:1, isWallAt: () => false };

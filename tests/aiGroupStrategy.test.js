@@ -1,4 +1,4 @@
-import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
+import { AIEngine, STRATEGY } from '../src/engines/aiEngine.js';
 import { MeleeAI } from '../src/ai.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { describe, test, assert } from './helpers.js';
@@ -7,7 +7,7 @@ describe('AI', () => {
 
 test('setGroupStrategy updates strategy', () => {
     const em = new EventManager();
-    const aiManager = new MetaAIManager(em);
+    const aiManager = new AIEngine(em);
     const group = aiManager.createGroup('g1', STRATEGY.AGGRESSIVE);
     aiManager.setGroupStrategy('g1', STRATEGY.IDLE);
     assert.strictEqual(group.strategy, STRATEGY.IDLE);
@@ -15,7 +15,7 @@ test('setGroupStrategy updates strategy', () => {
 
 test('IDLE strategy prevents movement', () => {
     const em = new EventManager();
-    const aiManager = new MetaAIManager(em);
+    const aiManager = new AIEngine(em);
     const mapManager = { tileSize: 1, isWallAt: () => false };
     const pathfindingManager = { findPath: () => [{ x: 1, y: 0 }] };
     const player = { x: 0, y: 0 };
