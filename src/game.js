@@ -107,7 +107,13 @@ export class Game {
         // VFXManager는 ItemManager와 EventManager가 모두 필요합니다.
         this.managers.VFXManager = new Managers.VFXManager(this.eventManager, this.itemManager);
 
-        const otherManagerNames = Object.keys(Managers).filter(name => name !== 'VFXManager' && name !== 'ItemManager');
+        const otherManagerNames = Object.keys(Managers).filter(
+            name =>
+                name !== 'VFXManager' &&
+                name !== 'ItemManager' &&
+                name !== 'AuraManager' &&
+                name !== 'ItemAIManager'
+        );
         for (const managerName of otherManagerNames) {
             this.managers[managerName] = new Managers[managerName](this.eventManager, assets, this.factory);
         }
