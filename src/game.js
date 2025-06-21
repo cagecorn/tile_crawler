@@ -80,6 +80,8 @@ export class Game {
         this.loader.loadImage('worm', 'assets/images/parasite.png');
         this.loader.loadImage('talisman1', 'assets/images/talisman-1.png');
         this.loader.loadImage('talisman2', 'assets/images/talisman-2.png');
+        // 휘장 아이템 이미지 로드
+        this.loader.loadEmblemImages();
 
         this.loader.onReady(assets => this.init(assets));
     }
@@ -296,6 +298,11 @@ export class Game {
                                 player.x,
                                 player.y - this.mapManager.tileSize * 2,
                                 this.mapManager.tileSize);
+        // --- 테스트용 휘장 아이템 4종 배치 ---
+        const emblemGuardian = this.itemFactory.create('emblem_guardian', player.x + 64, player.y + 64, this.mapManager.tileSize);
+        const emblemDestroyer = this.itemFactory.create('emblem_destroyer', player.x - 64, player.y + 64, this.mapManager.tileSize);
+        const emblemDevotion = this.itemFactory.create('emblem_devotion', player.x + 64, player.y - 64, this.mapManager.tileSize);
+        const emblemConductor = this.itemFactory.create('emblem_conductor', player.x - 64, player.y - 64, this.mapManager.tileSize);
         this.itemManager.addItem(potion);
         if (dagger) this.itemManager.addItem(dagger);
         if (bow) this.itemManager.addItem(bow);
@@ -303,6 +310,10 @@ export class Game {
         if (plateArmor) this.itemManager.addItem(plateArmor);
         if (foxEgg) this.itemManager.addItem(foxEgg);
         if (foxCharm) this.itemManager.addItem(foxCharm);
+        if(emblemGuardian) this.itemManager.addItem(emblemGuardian);
+        if(emblemDestroyer) this.itemManager.addItem(emblemDestroyer);
+        if(emblemDevotion) this.itemManager.addItem(emblemDevotion);
+        if(emblemConductor) this.itemManager.addItem(emblemConductor);
 
         // === 3. 몬스터 생성 ===
         const monsters = [];

@@ -37,10 +37,11 @@ export class PossessionAIManager {
     }
     
     update(context) {
+        // --- 1. 몬스터 빙의 로직 ---
         const unpossessedMonsters = context.monsterManager.monsters.filter(m => !m.possessedBy && m.hp > 0);
 
         for (const ghost of this.ghosts) {
-            if (ghost.host && (ghost.host.hp <= 0)) {
+            if (ghost.host && ghost.host.hp <= 0) {
                 this.removePossession(ghost.host);
                 ghost.host = null;
                 ghost.state = 'seeking';
@@ -59,11 +60,13 @@ export class PossessionAIManager {
                             isMatch = monster.equipment?.main_hand?.tags.includes('ranged');
                             break;
                         case 'supporter':
-                             isMatch = monster.skills.some(s => SKILLS[s]?.tags.includes('healing')) || monster.consumables.some(item => item.tags.includes('healing_item'));
+                            isMatch = monster.skills.some(s => SKILLS[s]?.tags.includes('healing')) ||
+                                monster.consumables.some(item => item.tags.includes('healing_item'));
                             break;
                         case 'cc':
                             const ccWeapons = ['spear', 'whip', 'estoc'];
-                            isMatch = ccWeapons.some(w => monster.equipment?.main_hand?.name.toLowerCase().includes(w)) || monster.skills.some(s => SKILLS[s]?.tags.includes('debuff'));
+                            isMatch = ccWeapons.some(w => monster.equipment?.main_hand?.name.toLowerCase().includes(w)) ||
+                                monster.skills.some(s => SKILLS[s]?.tags.includes('debuff'));
                             break;
                     }
                     if (isMatch) {
@@ -80,30 +83,47 @@ export class PossessionAIManager {
                 }
             }
         }
-        
-        // 빙의된 유닛들의 AI를 실행하기 전, 협동에 필요한 컨텍스트를 구축
-        const possessedAllies = Array.from(this.possessedEntities).filter(e => e.hp > 0);
-        const ghostContext = {
-            ...context,
-            possessedAllies,
-            possessedTankers: possessedAllies.filter(
-                e => e.possessedBy?.constructor.name === 'TankerGhostAI'
-            ),
-            possessedRanged: possessedAllies.filter(
-                e => e.possessedBy?.constructor.name === 'RangedGhostAI'
-            ),
-            possessedSupporters: possessedAllies.filter(
-                e => e.possessedBy?.constructor.name === 'SupporterGhostAI'
-            ),
-            possessedCC: possessedAllies.filter(
-                e => e.possessedBy?.constructor.name === 'CCGhostAI'
-            )
-        };
-        
-        for (const entity of this.possessedEntities) {
-            if (entity.possessedBy && entity.hp > 0) {
-                const action = entity.possessedBy.decideAction(entity, ghostContext);
-                context.metaAIManager.executeAction(entity, action, ghostContext);
+
+        // --- 2. 모든 빙의된 유닛의 AI 실행 로직 ---
+        const allPossessed = Array.from(this.possessedEntities).filter(e => e.hp > 0);
+
+        // 2-1. 적군(몬스터) AI 실행
+        const hostilePossessed = allPossessed.filter(e => !e.isFriendly);
+        if (hostilePossessed.length > 0) {
+            const hostileContext = {
+                ...context,
+                allies: hostilePossessed,
+                enemies: context.playerGroup.members,
+                possessedTankers: hostilePossessed.filter(e => e.possessedBy?.constructor.name === 'TankerGhostAI'),
+                possessedRanged: hostilePossessed.filter(e => e.possessedBy?.constructor.name === 'RangedGhostAI'),
+                possessedSupporters: hostilePossessed.filter(e => e.possessedBy?.constructor.name === 'SupporterGhostAI'),
+                possessedCC: hostilePossessed.filter(e => e.possessedBy?.constructor.name === 'CCGhostAI'),
+            };
+            for (const entity of hostilePossessed) {
+                if (entity.possessedBy) {
+                    const action = entity.possessedBy.decideAction(entity, hostileContext);
+                    context.metaAIManager.executeAction(entity, action, hostileContext);
+                }
+            }
+        }
+
+        // 2-2. 아군(플레이어 파티) AI 실행
+        const friendlyPossessed = allPossessed.filter(e => e.isFriendly);
+        if (friendlyPossessed.length > 0) {
+            const friendlyContext = {
+                ...context,
+                allies: context.playerGroup.members,
+                enemies: context.monsterManager.monsters,
+                possessedTankers: friendlyPossessed.filter(e => e.possessedBy?.constructor.name === 'TankerGhostAI'),
+                possessedRanged: friendlyPossessed.filter(e => e.possessedBy?.constructor.name === 'RangedGhostAI'),
+                possessedSupporters: friendlyPossessed.filter(e => e.possessedBy?.constructor.name === 'SupporterGhostAI'),
+                possessedCC: friendlyPossessed.filter(e => e.possessedBy?.constructor.name === 'CCGhostAI'),
+            };
+            for (const entity of friendlyPossessed) {
+                if (entity.possessedBy) {
+                    const action = entity.possessedBy.decideAction(entity, friendlyContext);
+                    context.metaAIManager.executeAction(entity, action, friendlyContext);
+                }
             }
         }
     }

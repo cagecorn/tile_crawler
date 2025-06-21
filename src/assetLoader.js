@@ -43,4 +43,15 @@ export class AssetLoader {
         ];
         weapons.forEach(([key, src]) => this.loadImage(key, src));
     }
+
+    // 휘장 아이템 이미지를 한 번에 로드하는 헬퍼 메서드
+    loadEmblemImages() {
+        const emblems = [
+            ['emblem_guardian', 'assets/images/emblem_guardian.png'],
+            ['emblem_destroyer', 'assets/images/emblem_destroyer.png'],
+            ['emblem_devotion', 'assets/images/emblem_devotion.png'],
+            ['emblem_conductor', 'assets/images/emblem_conductor.png'],
+        ];
+        emblems.forEach(([key, src]) => this.loadImage(key, src));
+    }
 }
