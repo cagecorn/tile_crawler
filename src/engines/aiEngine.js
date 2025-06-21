@@ -50,12 +50,6 @@ export class AIEngine {
                 enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
             };
 
-            // ==========================================================
-            // ✨ 전술 시스템 임시 비활성화
-            // 기존의 activeTactic 처리 로직 전체를 주석 처리하고,
-            // 항상 개별 행동 로직을 실행합니다. 이는 전술 시스템이
-            // 안정화될 때까지 게임 진행을 보장하기 위한 임시 조치입니다.
-            /*
             let activeTactic = this.activeTactics[groupId];
 
             if (activeTactic && activeTactic.life > 0) {
@@ -74,9 +68,6 @@ export class AIEngine {
             } else {
                 this.executeIndividualBehaviors(currentContext);
             }
-            */
-            this.executeIndividualBehaviors(currentContext);
-            // ==========================================================
         }
     }
 

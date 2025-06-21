@@ -1,15 +1,12 @@
 import { Item } from '../entities.js';
 
 export class ItemManager {
-    constructor(count = 0, mapManager = null, assets = null) {
+    constructor(eventManager, mapManager, assets) {
         this.items = [];
+        this.eventManager = eventManager;
         this.mapManager = mapManager;
         this.assets = assets;
         console.log("[ItemManager] Initialized");
-
-        if (count > 0 && this.mapManager && this.assets) {
-            this._spawnItems(count);
-        }
     }
 
     _spawnItems(count) {

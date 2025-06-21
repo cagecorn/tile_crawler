@@ -33,11 +33,8 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.fogManager = new FogManager(mapManager.width, mapManager.height);
 
     // 엔티티 및 아이템
-    // ItemManager does not currently use the event manager, so pass 0 for count
-    // and provide the mapManager and assets so that items can be spawned and
-    // rendered correctly.
-    managers.itemManager = new Managers.ItemManager(0, mapManager, assets);
-    managers.monsterManager = new Managers.MonsterManager(eventManager, assets, factory);
+    managers.itemManager = new Managers.ItemManager(eventManager, mapManager, assets);
+    managers.monsterManager = new Managers.MonsterManager(eventManager, mapManager, assets, factory);
     managers.mercenaryManager = new Managers.MercenaryManager(eventManager, assets, factory);
     managers.equipmentManager = new Managers.EquipmentManager(eventManager);
     managers.equipmentManager.setTagManager(managers.tagManager);
