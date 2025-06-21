@@ -104,7 +104,13 @@ export class MetaAIManager {
                 });
 
                 if (action.skillId === 'charge' && context.motionManager && action.target) {
-                    context.motionManager.dashTowards(entity, action.target, 3);
+                    context.motionManager.dashTowards(
+                        entity,
+                        action.target,
+                        3,
+                        context.enemies,
+                        context.eventManager
+                    );
                 }
 
                 if (action.skillId === 'pull' && context.motionManager && action.target) {

@@ -1,4 +1,5 @@
 import { Projectile } from "../entities.js";
+import { findEntitiesInRadius } from '../utils/entityUtils.js';
 
 export class ProjectileManager {
     constructor(eventManager, assets, vfxManager = null) {
@@ -57,7 +58,7 @@ export class ProjectileManager {
         this.projectiles.push(projectile);
     }
 
-    update() {
+    update(allEntities = []) {
         this.projectiles.forEach((proj, index) => {
             if (!proj.target || proj.target.hp <= 0 || proj.target.isDying) {
                 proj.isDead = true;
@@ -72,6 +73,19 @@ export class ProjectileManager {
                     defender: result.target,
                     damage: proj.damage,
                 });
+
+                const weapon = proj.caster.equipment.weapon;
+                if (weapon && weapon.weaponStats?.skills.includes('sonic_arrow')) {
+                    const radius = 128;
+                    const aoeTargets = findEntitiesInRadius(result.target.x, result.target.y, radius, allEntities, result.target);
+                    for (const aoeTarget of aoeTargets) {
+                        if (aoeTarget.isFriendly !== proj.caster.isFriendly) {
+                            this.eventManager.publish('log', { message: `[음파 화살]이 ${aoeTarget.constructor.name}에게 피해를 입힙니다!`, color: '#add8e6' });
+                            this.eventManager.publish('entity_attack', { attacker: proj.caster, defender: aoeTarget, damage: proj.damage * 0.5 });
+                        }
+                    }
+                }
+
                 this.projectiles.splice(index, 1);
             }
         });

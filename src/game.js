@@ -153,7 +153,7 @@ export class Game {
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
-        this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager, this.eventManager);
+        this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);
         this.movementManager = new MovementManager(this.mapManager);
         this.fogManager = new FogManager(this.mapManager.width, this.mapManager.height);
         this.particleDecoratorManager = new Managers.ParticleDecoratorManager();
@@ -793,7 +793,13 @@ export class Game {
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
                 if (nearestEnemy) {
                     if (skill.dashRange) {
-                        this.motionManager.dashTowards(caster, nearestEnemy, skill.dashRange);
+                        this.motionManager.dashTowards(
+                            caster,
+                            nearestEnemy,
+                            skill.dashRange,
+                            monsterManager.monsters,
+                            eventManager
+                        );
                     }
                     const hits = skill.hits || 1;
                     for (let i = 0; i < hits; i++) {
@@ -1058,10 +1064,11 @@ export class Game {
             metaAIManager,
             microItemAIManager,
             speechBubbleManager: this.speechBubbleManager,
+            enemies: metaAIManager.groups['dungeon_monsters']?.members || []
         };
         metaAIManager.update(context);
         this.itemAIManager.update(context);
-        this.projectileManager.update();
+        this.projectileManager.update(allEntities);
         this.vfxManager.update();
         this.speechBubbleManager.update();
         // micro-world engine runs after visuals and item logic
