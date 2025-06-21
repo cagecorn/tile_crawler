@@ -13,6 +13,10 @@ import { Ghost } from '../entities.js';
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
 
+    // 외부에서 전달된 기본 도구 보존
+    managers.factory = factory;
+    managers.mapManager = mapManager;
+
     // 기본 관리자
     managers.tagManager = new TagManager();
     managers.combatCalculator = new CombatCalculator(eventManager, managers.tagManager);
