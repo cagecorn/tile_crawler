@@ -428,6 +428,20 @@ export class WizardAI extends RangedAI {
     // 추가적인 마법사 전용 로직이 들어갈 수 있습니다
 }
 
+// --- 빙의 AI 클래스 ---
+export class TankerGhostAI extends AIArchetype {
+    decideAction(self, context) { return { type: 'idle' }; }
+}
+export class RangedGhostAI extends AIArchetype {
+    decideAction(self, context) { return { type: 'idle' }; }
+}
+export class SupporterGhostAI extends AIArchetype {
+    decideAction(self, context) { return { type: 'idle' }; }
+}
+export class CCGhostAI extends AIArchetype {
+    decideAction(self, context) { return { type: 'idle' }; }
+}
+
 // --- 소환사형 AI ---
 export class SummonerAI extends RangedAI {
     decideAction(self, context) {

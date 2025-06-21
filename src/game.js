@@ -30,6 +30,9 @@ import { MicroEngine } from './micro/MicroEngine.js';
 import { MicroItemAIManager } from './managers/microItemAIManager.js';
 import { MicroCombatManager } from './micro/MicroCombatManager.js';
 import { disarmWorkflow, armorBreakWorkflow } from './workflows.js';
+import { PossessionAIManager } from './managers/possessionAIManager.js';
+import { Ghost } from './entities.js';
+import { TankerGhostAI, RangedGhostAI, SupporterGhostAI, CCGhostAI } from './ai.js';
 
 export class Game {
     constructor() {
@@ -166,6 +169,18 @@ export class Game {
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
         this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
+        this.possessionAIManager = new PossessionAIManager(this.eventManager);
+        const ghostTypes = [
+            { type: 'tanker', ai: new TankerGhostAI() },
+            { type: 'ranged', ai: new RangedGhostAI() },
+            { type: 'supporter', ai: new SupporterGhostAI() },
+            { type: 'cc', ai: new CCGhostAI() }
+        ];
+        const numGhosts = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < numGhosts; i++) {
+            const randomGhost = ghostTypes[Math.floor(Math.random() * ghostTypes.length)];
+            this.possessionAIManager.addGhost(new Ghost(randomGhost.type, randomGhost.ai));
+        }
         this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager, this.auraManager, this.vfxManager);
         this.managers.PetManager = this.petManager;
         this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager, this.monsterManager);
@@ -1080,7 +1095,7 @@ export class Game {
             monsterManager,
             mercenaryManager,
             pathfindingManager,
-            motionManager: this.motionManager, // 이 줄이 추가되었습니다!
+            motionManager: this.motionManager,
             movementManager: this.movementManager,
             projectileManager: this.projectileManager,
             itemManager: this.itemManager,
@@ -1093,6 +1108,7 @@ export class Game {
             enemies: metaAIManager.groups['dungeon_monsters']?.members || []
         };
         metaAIManager.update(context);
+        this.possessionAIManager.update(context);
         this.itemAIManager.update(context);
         this.projectileManager.update(allEntities);
         this.vfxManager.update();
