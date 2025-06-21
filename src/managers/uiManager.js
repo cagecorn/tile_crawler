@@ -52,6 +52,23 @@ export class UIManager {
         this._isInitialized = false;
         this.particleDecoratorManager = null;
         this.vfxManager = null;
+
+        // 스탯 표시용 이름 매핑
+        this.statDisplayNames = {
+            strength: '💪 힘',
+            agility: '🏃 민첩',
+            endurance: '🛡 체력',
+            focus: '🔮 집중',
+            intelligence: '📖 지능',
+            movement: '👣 이동',
+            maxHp: '❤️ 최대 HP',
+            maxMp: '💧 최대 MP',
+            attackPower: '⚔️ 공격력',
+            movementSpeed: '🚶 이동 속도',
+            hpRegen: '❤️+ HP 재생',
+            mpRegen: '💧+ MP 재생',
+            visionRange: '👁️ 시야',
+        };
     }
 
     init(callbacks) {
@@ -115,7 +132,7 @@ export class UIManager {
 
         this.mercDetailName.textContent = `${mercenary.constructor.name} (Lv.${mercenary.stats.get('level')})`;
 
-        const statsToShow = ['attackPower', 'strength', 'agility', 'endurance', 'movementSpeed', 'hpRegen', 'mpRegen'];
+        const statsToShow = ['attackPower', 'strength', 'agility', 'endurance', 'visionRange', 'movementSpeed', 'hpRegen', 'mpRegen'];
         this.mercStatsContainer.innerHTML = '';
 
         // 레벨 및 경험치 표시
@@ -186,13 +203,14 @@ export class UIManager {
         statsToShow.forEach(stat => {
             const statDiv = document.createElement('div');
             statDiv.className = 'stat-line';
-            let statValue = mercenary.stats.get(stat);
+            const displayName = this.statDisplayNames[stat] || stat;
+            const statValue = mercenary.stats.get(stat);
             if (stat === 'attackPower') {
                 const bonus = mercenary.damageBonus || 0;
                 const bonusText = bonus > 0 ? ` <span style="color:red">+${bonus}</span>` : '';
-                statDiv.innerHTML = `${stat}: ${statValue}${bonusText}`;
+                statDiv.innerHTML = `${displayName}: ${statValue}${bonusText}`;
             } else {
-                statDiv.textContent = `${stat}: ${statValue}`;
+                statDiv.textContent = `${displayName}: ${statValue}`;
             }
             this.mercStatsContainer.appendChild(statDiv);
         });
@@ -325,17 +343,18 @@ export class UIManager {
         const page1 = this.characterSheetPanel.querySelector('#stat-page-1');
         if (page1) {
             page1.innerHTML = '';
-            const statsToShow = ['strength','agility','endurance','focus','intelligence','movement','maxHp','maxMp','attackPower','movementSpeed','hpRegen','mpRegen'];
+            const statsToShow = ['strength','agility','endurance','focus','intelligence','movement','maxHp','maxMp','attackPower','movementSpeed','visionRange','hpRegen','mpRegen'];
             statsToShow.forEach(stat => {
                 const line = document.createElement('div');
                 line.className = 'stat-line';
+                const displayName = this.statDisplayNames[stat] || stat;
                 if (stat === 'attackPower') {
                     const base = entity.stats.get(stat);
                     const bonus = entity.damageBonus || 0;
                     const bonusText = bonus > 0 ? ` <span style="color:red">+${bonus}</span>` : '';
-                    line.innerHTML = `<span>${stat}:</span> <span>${base}${bonusText}</span>`;
+                    line.innerHTML = `<span>${displayName}:</span> <span>${base}${bonusText}</span>`;
                 } else {
-                    line.innerHTML = `<span>${stat}:</span> <span>${entity.stats.get(stat)}</span>`;
+                    line.innerHTML = `<span>${displayName}:</span> <span>${entity.stats.get(stat)}</span>`;
                 }
                 page1.appendChild(line);
             });
