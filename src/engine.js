@@ -33,6 +33,14 @@ export class Engine {
     }
 
     update = (deltaTime) => {
+        // Publish a simple frame debug event so SystemLogManager can display
+        // periodic heartbeat logs. The SystemLogManager throttles 'Frame'
+        // tagged events to once every ~60 frames, so this won't spam the log.
+        this.eventManager.publish('debug', {
+            tag: 'Frame',
+            message: `dt=${Math.round(deltaTime)}`
+        });
+
         if (this.gameState.isPaused || this.gameState.isGameOver) return;
 
         const { player } = this.gameState;
