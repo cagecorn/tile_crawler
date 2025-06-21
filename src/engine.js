@@ -48,8 +48,9 @@ export class Engine {
 
         // Update all managers
         const allEntities = [player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...petManager.pets];
-        Object.values(this.managers).forEach(manager => {
+        Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function') {
+                if (name === 'fogManager') return; // 시야 매니저는 별도 처리
                 manager.update(allEntities);
             }
         });
