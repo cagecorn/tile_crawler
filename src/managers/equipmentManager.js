@@ -14,6 +14,9 @@ export class EquipmentManager {
         if (!slot) return;
 
         const oldItem = entity.equipment[slot];
+        if (oldItem?.tags.includes('emblem')) {
+            this.eventManager?.publish('emblem_unequipped', { entity });
+        }
         if (oldItem && inventory) {
             inventory.push(oldItem);
         }
@@ -33,6 +36,9 @@ export class EquipmentManager {
         if (this.eventManager && item) {
             this.eventManager.publish('log', { message: `${entity.constructor.name}(이)가 ${item.name} (을)를 장착했습니다.` });
             this.eventManager.publish('equipment_changed', { entity });
+            if (item.tags.includes('emblem')) {
+                this.eventManager.publish('emblem_equipped', { entity, emblemItem: item });
+            }
         }
     }
 
@@ -47,6 +53,9 @@ export class EquipmentManager {
         if (!slot || !entity.equipment[slot]) return;
 
         const oldItem = entity.equipment[slot];
+        if (oldItem?.tags.includes('emblem')) {
+            this.eventManager?.publish('emblem_unequipped', { entity });
+        }
         if (oldItem && inventory) {
             inventory.push(oldItem);
         }

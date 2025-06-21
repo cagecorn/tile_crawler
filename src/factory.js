@@ -6,6 +6,7 @@ import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
 import { ITEMS } from './data/items.js';
 import { ARTIFACTS } from './data/artifacts.js';
+import { EMBLEMS } from './data/emblems.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
@@ -150,7 +151,7 @@ export class ItemFactory {
     }
 
     create(itemId, x, y, tileSize) {
-        const baseItem = ITEMS[itemId] || ARTIFACTS[itemId];
+        const baseItem = ITEMS[itemId] || ARTIFACTS[itemId] || EMBLEMS[itemId];
         if (!baseItem) return null;
 
         // 아이템 생성 시 imageKey로부터 올바른 이미지를 불러온다
@@ -191,6 +192,10 @@ export class ItemFactory {
         if (Math.random() < 0.5) this._applyAffix(item, SUFFIXES, 'suffix');
 
         item.sockets = this._createSockets();
+
+        if (baseItem.possessionAI) {
+            item.possessionAI = baseItem.possessionAI;
+        }
 
         return item;
     }
