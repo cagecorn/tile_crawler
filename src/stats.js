@@ -1,5 +1,16 @@
 // src/stats.js
 
+const STATE_BONUSES = {
+    state_E: { agility: 1 },
+    state_I: { strength: 1 },
+    state_S: { attackSpeed: 0.1 },
+    state_N: { intelligence: 1 },
+    state_T: { attackSpeed: 0.1 },
+    state_F: { hpRegen: 0.05 },
+    state_P: { movement: 1 },
+    state_J: { movement: -1 },
+};
+
 export class StatManager {
     constructor(entity, config = {}) {
         // entity 자신을 참조할 수 있도록 저장
@@ -108,6 +119,17 @@ export class StatManager {
         for (const stat in this._fromEquipment) {
             if (!(stat in final)) {
                 final[stat] = this._fromEquipment[stat];
+            }
+        }
+
+        if (this.entity && Array.isArray(this.entity.effects)) {
+            for (const effect of this.entity.effects) {
+                const bonus = STATE_BONUSES[effect.id];
+                if (bonus) {
+                    for (const [stat, val] of Object.entries(bonus)) {
+                        final[stat] = (final[stat] || 0) + val;
+                    }
+                }
             }
         }
 
