@@ -1,3 +1,4 @@
+// src/managers/possessionAIManager.js
 import { SKILLS } from '../data/skills.js';
 
 export class PossessionAIManager {
@@ -8,7 +9,7 @@ export class PossessionAIManager {
 
         if (this.eventManager) {
             this.eventManager.subscribe('emblem_equipped', ({ entity, emblemItem }) => {
-                this.addPossession(entity, emblemItem.possessionAI);
+                if(emblemItem.possessionAI) this.addPossession(entity, emblemItem.possessionAI);
             });
             this.eventManager.subscribe('emblem_unequipped', ({ entity }) => {
                 this.removePossession(entity);
@@ -25,7 +26,6 @@ export class PossessionAIManager {
         if (entity.possessedBy) this.removePossession(entity);
         entity.possessedBy = ghostAI;
         this.possessedEntities.add(entity);
-        // TODO: 빙의 시 시각 효과(VFX) 추가
         this.eventManager.publish('log', { message: `👻 유령(${ghostAI.constructor.name.replace('AI','')})이 ${entity.constructor.name}에게 빙의했습니다!`, color: 'magenta' });
     }
 
@@ -40,14 +40,12 @@ export class PossessionAIManager {
         const unpossessedMonsters = context.monsterManager.monsters.filter(m => !m.possessedBy && m.hp > 0);
 
         for (const ghost of this.ghosts) {
-            // 1. 숙주가 죽었으면 새로운 숙주를 찾음
-            if (ghost.host && (ghost.host.hp <= 0 || !ghost.host.isFriendly)) {
+            if (ghost.host && (ghost.host.hp <= 0)) {
                 this.removePossession(ghost.host);
                 ghost.host = null;
                 ghost.state = 'seeking';
             }
 
-            // 2. 숙주를 찾는 중이라면
             if (ghost.state === 'seeking' && unpossessedMonsters.length > 0) {
                 let foundHost = null;
                 for (let i = unpossessedMonsters.length - 1; i >= 0; i--) {
@@ -61,7 +59,7 @@ export class PossessionAIManager {
                             isMatch = monster.equipment?.main_hand?.tags.includes('ranged');
                             break;
                         case 'supporter':
-                            isMatch = monster.skills.some(s => SKILLS[s]?.tags.includes('healing')) || monster.consumables.some(item => item.tags.includes('healing_item'));
+                             isMatch = monster.skills.some(s => SKILLS[s]?.tags.includes('healing')) || monster.consumables.some(item => item.tags.includes('healing_item'));
                             break;
                         case 'cc':
                             const ccWeapons = ['spear', 'whip', 'estoc'];
@@ -83,12 +81,29 @@ export class PossessionAIManager {
             }
         }
         
-        // 3. 빙의된 유닛의 AI 실행 (3단계에서 구현)
+        // 빙의된 유닛들의 AI를 실행하기 전, 협동에 필요한 컨텍스트를 구축
+        const possessedAllies = Array.from(this.possessedEntities).filter(e => e.hp > 0);
+        const ghostContext = {
+            ...context,
+            possessedAllies,
+            possessedTankers: possessedAllies.filter(
+                e => e.possessedBy?.constructor.name === 'TankerGhostAI'
+            ),
+            possessedRanged: possessedAllies.filter(
+                e => e.possessedBy?.constructor.name === 'RangedGhostAI'
+            ),
+            possessedSupporters: possessedAllies.filter(
+                e => e.possessedBy?.constructor.name === 'SupporterGhostAI'
+            ),
+            possessedCC: possessedAllies.filter(
+                e => e.possessedBy?.constructor.name === 'CCGhostAI'
+            )
+        };
+        
         for (const entity of this.possessedEntities) {
             if (entity.possessedBy && entity.hp > 0) {
-                const action = entity.possessedBy.decideAction(entity, context);
-                // context에 MetaAIManager가 없으므로, game.js에서 가져와야 함
-                context.metaAIManager.executeAction(entity, action, context);
+                const action = entity.possessedBy.decideAction(entity, ghostContext);
+                context.metaAIManager.executeAction(entity, action, ghostContext);
             }
         }
     }
