@@ -1,4 +1,5 @@
 // src/stats.js
+import { FAITHS } from './data/faiths.js';
 
 const STATE_BONUSES = {
     state_E: { agility: 1 },
@@ -119,6 +120,14 @@ export class StatManager {
         for (const stat in this._fromEquipment) {
             if (!(stat in final)) {
                 final[stat] = this._fromEquipment[stat];
+            }
+        }
+
+        // 신앙 보너스 합산
+        const faithId = this.entity?.properties?.faith;
+        if (faithId && FAITHS[faithId] && FAITHS[faithId].statBonuses) {
+            for (const [stat, bonus] of Object.entries(FAITHS[faithId].statBonuses)) {
+                final[stat] = (final[stat] || 0) + bonus;
             }
         }
 

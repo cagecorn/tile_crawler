@@ -32,6 +32,7 @@ export class CharacterFactory {
         }
         const originId = this._rollRandomKey(ORIGINS);
         let faithId = null;
+        // unit-features-plan.md에 따라 플레이어는 신앙을 갖지 않음
         if (type !== 'player') {
             faithId = this._rollRandomKey(FAITHS);
         }
