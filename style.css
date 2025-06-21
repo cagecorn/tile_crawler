@@ -13,32 +13,10 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* 가장 아래에 있는 레이어 */
 }
 
-/* 상단 메뉴 바가 캔버스 레이어 위에 보이도록 설정 */
-#top-menu-bar {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 120;
-    padding: 5px 10px;
-}
-
-.menu-btn {
-    margin-right: 5px;
-    color: #fff;
-    background: #333;
-    border: 1px solid #777;
-    padding: 4px 8px;
-    cursor: pointer;
-}
-
-.menu-btn:last-child {
-    margin-right: 0;
-}
-
+/* --- Z-INDEX 계층 구조 정리 --- */
+/* 게임 월드 레이어 (10-99) */
 .game-layer {
     position: absolute;
     top: 0;
@@ -46,7 +24,6 @@ body, html {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
-
 #map-base-canvas    { z-index: 10; }
 #map-decor-canvas   { z-index: 20; }
 #ground-fx-canvas   { z-index: 30; }
@@ -54,7 +31,45 @@ body, html {
 #vfx-canvas         { z-index: 50; }
 #weather-canvas     { z-index: 60; }
 
-/* 모든 UI 패널들은 캔버스 위에 위치 (z-index: 10) */
+/* 고정 HUD UI (100-199) */
+#ui-panel, #combat-log-panel, #system-log-panel, #minimap-canvas, #skill-bar {
+    position: fixed;
+    z-index: 100;
+}
+#top-menu-bar {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110; /* HUD보다 위에 표시 */
+    padding: 5px 10px;
+}
+
+
+/* 모달 패널 (200-299) */
+.modal-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+}
+.modal-panel.hidden {
+    display: none;
+}
+
+/* 툴팁 (최상위) */
+.tooltip {
+    position: fixed;
+    z-index: 300;
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+    max-width: 200px;
+}
+
 
 /* 공통 UI 프레임 스타일 */
 .ui-frame {
@@ -69,11 +84,6 @@ body, html {
     font-family: sans-serif;
     font-weight: bold;
     color: #4a3b2a;
-}
-
-#ui-panel, #combat-log-panel, #system-log-panel, .modal-panel {
-    position: fixed; /* 다른 요소 위에 올리기 위해 fixed 사용 */
-    z-index: 100; /* 레이어 캔버스(최대 60) 위에 오도록 */
 }
 
 #ui-panel {
@@ -91,7 +101,6 @@ body, html {
     margin-bottom: 5px;
 }
 
-/* HP 바 스타일 */
 .hp-bar-container {
     width: 100%;
     height: 15px;
@@ -109,7 +118,6 @@ body, html {
     transition: width 0.2s ease-in-out;
 }
 
-/* EXP 바 스타일 */
 .exp-bar-container {
     width: 100%;
     height: 15px;
@@ -146,7 +154,6 @@ body, html {
     cursor: pointer;
 }
 
-/* 인벤토리 UI 스타일 */
 #inventory-section {
     margin-top: 15px;
     padding-top: 10px;
@@ -180,8 +187,6 @@ body, html {
     height: 100%;
 }
 
-/* ... (기존 HP 바, 경험치 바 스타일은 변경 없음) ... */
-
 #combat-log-panel {
     bottom: 20px;
     left: 20px;
@@ -213,20 +218,6 @@ body, html {
     margin-bottom: 5px;
 }
 
-.modal-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px;
-    z-index: 100;
-    padding: 10px;
-}
-
-.modal-panel.hidden {
-    display: none;
-}
-
 .close-btn {
     position: absolute;
     top: -15px;
@@ -242,19 +233,14 @@ body, html {
     font-weight: bold;
 }
 
-##이는 다중 레이어 시스템 만들기 전에 작성된 패치이므로, 그 시스템에 유연하게 적용시켜줘.##
-
 #minimap-canvas {
-    position: fixed;
     top: 20px;
     right: 20px;
     width: 200px;
     height: 150px;
     background-color: black;
-    z-index: 100;
 }
 
-/* Inventory modal panel styles */
 .modal-panel.wide {
     width: 60vw;
     max-width: 800px;
@@ -337,29 +323,17 @@ body, html {
     border-radius: 2px;
 }
 
-.tooltip {
-    position: fixed;
-    color: #fff;
-    padding: 6px 8px;
-    border-radius: 4px;
-    pointer-events: none;
-    z-index: 1000;
-    font-size: 12px;
-    max-width: 200px;
-}
 .hidden { display: none; }
 
 .mp-bar-container { width: 100%; height: 10px; background-color: #333; border-radius: 3px; margin-top: 2px; }
 .mp-bar-fill { width: 100%; height: 100%; background-color: #3a7bd5; border-radius: 2px; }
 
 #skill-bar {
-    position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 8px;
-    z-index: 50;
     padding: 5px;
 }
 .skill-slot { width: 48px; height: 48px; border: 2px solid #888; background-color: #111; position: relative; }
@@ -385,7 +359,6 @@ body, html {
 .stat-tab-btn.active { background: #eee; color: #333; }
 .stat-page.hidden { display: none; }
 
-/* Mercenary panel styles */
 #mercenary-list {
     max-height: 300px;
     overflow-y: auto;
@@ -421,7 +394,6 @@ body, html {
     padding: 5px 0;
 }
 
-/* 무기 숙련도 UI */
 .proficiency-list { display: flex; flex-direction: column; gap: 8px; }
 .proficiency-line { display: grid; grid-template-columns: 80px 50px 1fr; align-items: center; font-size: 12px; }
 .prof-name { font-weight: bold; }
@@ -429,3 +401,14 @@ body, html {
 .prof-exp-bar-fill { height: 100%; background-color: #a2d2ff; border-radius: 3px; }
 .prof-exp-text { position: absolute; width: 100%; text-align: center; color: black; font-size: 10px; line-height: 14px; }
 
+.menu-btn {
+    margin-right: 5px;
+    color: #fff;
+    background: #333;
+    border: 1px solid #777;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+.menu-btn:last-child {
+    margin-right: 0;
+}

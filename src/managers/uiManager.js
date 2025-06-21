@@ -3,6 +3,7 @@ import { MBTI_INFO } from '../data/mbti.js';
 import { FAITHS } from '../data/faiths.js';
 import { TRAITS } from '../data/traits.js';
 import { SYNERGIES } from '../data/synergies.js';
+import { ARTIFACTS } from '../data/artifacts.js';
 
 export class UIManager {
     constructor() {
@@ -61,7 +62,8 @@ export class UIManager {
         this.onConsumableUse = this.callbacks.onConsumableUse;
         if (this.statUpButtonsContainer) {
             this.statUpButtonsContainer.addEventListener('click', (event) => {
-                if (event.target.classList.contains('stat-up-btn') || event.target.classList.contains('stat-plus')) {
+                if (event.target.classList.contains('stat-up-btn') ||
+                    event.target.classList.contains('stat-plus')) {
                     let stat = event.target.dataset.stat;
                     if (!stat && event.target.id && event.target.id.startsWith('btn-plus-')) {
                         stat = event.target.id.replace('btn-plus-', '');
@@ -76,17 +78,15 @@ export class UIManager {
         if (this.closeMercDetailBtn) {
             this.closeMercDetailBtn.onclick = () => this.hideMercenaryDetail();
         }
-        if (this.inventoryPanel) {
-            const closeBtn = this.inventoryPanel.querySelector('.close-btn');
-            if (closeBtn) closeBtn.onclick = () => this.hidePanel('inventory');
-        }
-        if (this.mercenaryPanel) {
-            const closeBtn = this.mercenaryPanel.querySelector('.close-btn');
-            if (closeBtn) closeBtn.onclick = () => this.hidePanel('mercenary-panel');
-        }
+
+        document.querySelectorAll('.close-btn[data-panel-id]').forEach(btn => {
+            btn.onclick = () => this.hidePanel(btn.dataset.panelId);
+        });
+
+        const closeEquipBtn = document.getElementById('close-equip-target-btn');
+        if (closeEquipBtn) closeEquipBtn.onclick = () => this.hideEquipTargetPanel();
+
         if (this.characterSheetPanel) {
-            const closeBtn = this.characterSheetPanel.querySelector('.close-btn');
-            if (closeBtn) closeBtn.onclick = () => this.hidePanel('character-sheet-panel');
             this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(btn => {
                 btn.onclick = () => {
                     this.characterSheetPanel.querySelectorAll('.stat-tab-btn').forEach(b => b.classList.remove('active'));
@@ -110,7 +110,6 @@ export class UIManager {
         this.init(cb);
     }
 
-    // --- 아래 두 메서드를 새로 추가 ---
     showMercenaryDetail(mercenary) {
         if (!this.mercDetailPanel) return;
 
@@ -279,10 +278,29 @@ export class UIManager {
             this.sheetCharacterName.textContent = `${entity.constructor.name} (Lv.${entity.stats.get('level')})`;
 
         if (this.sheetEquipment) {
-            this.sheetEquipment.querySelectorAll('.equip-slot').forEach(div => {
-                const slot = div.dataset.slot;
-                const baseLabel = div.querySelector('span') ? div.querySelector('span').textContent : slot;
-                div.innerHTML = `<span>${baseLabel}</span> <span>${(entity.equipment && entity.equipment[slot]) ? entity.equipment[slot].name : '없음'}</span>`;
+            this.sheetEquipment.innerHTML = '';
+            const slots = ['main_hand', 'off_hand', 'armor', 'helmet', 'gloves', 'boots', 'accessory1', 'accessory2'];
+            slots.forEach(slot => {
+                const item = entity.equipment ? entity.equipment[slot] : null;
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'equip-slot';
+                slotDiv.dataset.slot = slot;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = slot;
+                slotDiv.appendChild(nameSpan);
+
+                const itemSpan = document.createElement('span');
+                itemSpan.textContent = item ? item.name : '없음';
+                slotDiv.appendChild(itemSpan);
+                
+                if(item) {
+                    this._attachTooltip(slotDiv, this._getItemTooltip(item));
+                } else {
+                    this._attachTooltip(slotDiv, `<strong>${slot}</strong><br>비어있음`);
+                }
+
+                this.sheetEquipment.appendChild(slotDiv);
             });
         }
 
@@ -299,6 +317,7 @@ export class UIManager {
                 } else {
                     slotDiv.textContent = item.name;
                 }
+                this._attachTooltip(slotDiv, this._getItemTooltip(item));
                 this.sheetInventory.appendChild(slotDiv);
             });
         }
@@ -380,7 +399,6 @@ export class UIManager {
             }
         }
 
-        // --- 숙련도 페이지 렌더링 ---
         const page2 = this.characterSheetPanel.querySelector('#stat-page-2');
         if (page2) {
             page2.innerHTML = '<h3>무기 숙련도</h3>';
@@ -684,30 +702,67 @@ export class UIManager {
         ctx.strokeRect(x, y, barWidth, barHeight);
     }
 
+    // 아이템 툴팁 생성 로직 강화
     _getItemTooltip(item) {
+        const artifactData = ARTIFACTS[item.baseId];
         let html = `<strong>${item.name}</strong>`;
-        if (item.damageDice) html += `<br>Damage: ${item.damageDice}`;
-        if (item.stats) {
-            const entries = item.stats instanceof Map ? Array.from(item.stats.entries()) : Object.entries(item.stats);
-            for (const [k, v] of entries) {
-                html += `<br>${k}: ${v}`;
-            }
+        
+        // 타입과 등급
+        html += `<div style="color: #aaa; font-size: 11px;">${item.tier || 'normal'} ${item.type}</div>`;
+
+        // 설명
+        if (artifactData && artifactData.description) {
+            html += `<div style="margin: 4px 0; color: #b0e0e6;">${artifactData.description}</div>`;
         }
 
+        // 핵심 스탯
+        if (item.damageDice) html += `<div>피해: ${item.damageDice}</div>`;
+        if (item.healAmount) html += `<div>회복량: ${item.healAmount}</div>`;
+
+        // 추가 스탯
+        if (item.stats) {
+            const entries = item.stats instanceof Map ? Array.from(item.stats.entries()) : Object.entries(item.stats);
+            if(entries.length > 0) {
+                html += `<div style="margin-top: 4px; border-top: 1px solid #555; padding-top: 4px;">`;
+                for (const [k, v] of entries) {
+                    html += `<div>${k}: ${v > 0 ? '+' : ''}${v}</div>`;
+                }
+                html += `</div>`;
+            }
+        }
+        
+        // 미시세계 스탯
+        if(item.durability || item.weight || item.toughness) {
+             html += `<div style="margin-top: 4px; border-top: 1px solid #555; padding-top: 4px; color: #ccc;">`;
+             if(item.durability) html += `<div>내구도: ${item.durability}</div>`;
+             if(item.weight) html += `<div>무게: ${item.weight}</div>`;
+             if(item.toughness) html += `<div>강인함: ${item.toughness}</div>`;
+             html += `</div>`;
+        }
+        
+        // 쿨다운
+        if (item.cooldown) {
+            html += `<div style="color: #ffcc00;">재사용 대기시간: ${item.cooldown / 60}초</div>`;
+        }
+
+        // 시너지
         if (Array.isArray(item.synergies) && item.synergies.length > 0) {
-            html += `<br><strong>시너지</strong>`;
+            html += `<div style="margin-top: 4px; border-top: 1px solid #555; padding-top: 4px;"><strong>시너지</strong>`;
             for (const key of item.synergies) {
                 const data = SYNERGIES[key];
                 if (!data) continue;
                 const icon = data.icon ? `${data.icon} ` : '';
-                html += `<br>${icon}${data.name}: ${data.description}`;
+                html += `<div style="color: #90ee90;">${icon}${data.name}</div>`;
+                if (data.description) {
+                    html += `<div style="font-size:11px; color:#ccc;">${data.description}</div>`;
+                }
                 if (Array.isArray(data.bonuses)) {
-                    const bonuses = data.bonuses
-                        .map(b => `${b.count}개: ${b.description}`)
-                        .join(', ');
-                    if (bonuses) html += `<br><em>${bonuses}</em>`;
+                    data.bonuses.forEach(b => {
+                        html += `<div style="font-size:11px;">${b.count}개: ${b.description}</div>`;
+                    });
                 }
             }
+            html += `</div>`;
         }
 
         return html;
@@ -769,5 +824,9 @@ export class UIManager {
             this.tooltip.classList.remove('hidden');
         };
         element.onmouseleave = () => this.tooltip.classList.add('hidden');
+        element.onmousemove = (e) => {
+             this.tooltip.style.left = `${e.pageX + 10}px`;
+             this.tooltip.style.top = `${e.pageY + 10}px`;
+        }
     }
 }
