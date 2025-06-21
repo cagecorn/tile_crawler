@@ -673,9 +673,12 @@ export class Game {
         eventManager.subscribe('skill_used', (data) => {
             const { caster, skill, target } = data;
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
-            this.vfxManager.castEffect(caster, skill);
+            this.vfxManager.castEffect(caster, skill); // 기본 시전 이펙트는 유지
 
-            if (skill.tags && (skill.tags.includes('healing') || skill.tags.includes('회복'))) {
+            // --- 스킬별 특화 이펙트 분기 ---
+
+            // 1. 힐 (Heal)
+            if (skill.id === SKILLS.heal.id) {
                 const healTarget = target || caster;
                 const amount = skill.healAmount || 10;
                 const prevHp = healTarget.hp;
@@ -684,44 +687,102 @@ export class Game {
                 if (healed > 0) {
                     eventManager.publish('log', { message: `${healTarget.constructor.name}의 체력이 ${healed} 회복되었습니다.`, color: 'lime' });
                 }
-                this.particleDecoratorManager.playHealingEffect(healTarget);
-                const img = assets['healing-effect'];
-                if (img) {
-                    this.vfxManager.addSpriteEffect(
-                        img,
-                        healTarget.x + healTarget.width / 2,
-                        healTarget.y + healTarget.height / 2,
-                        {
-                            width: healTarget.width,
-                            height: healTarget.height,
-                            blendMode: 'screen'
-                        }
-                    );
+
+                // 기존 힐 스프라이트 이펙트 유지
+                const targetCenter = { x: healTarget.x + healTarget.width / 2, y: healTarget.y + healTarget.height / 2 };
+                const healImg = assets['healing-effect'];
+                if (healImg) {
+                    this.vfxManager.addSpriteEffect(healImg, targetCenter.x, targetCenter.y, {
+                        width: healTarget.width,
+                        height: healTarget.height,
+                        blendMode: 'screen'
+                    });
                 }
+
+                // 부드럽게 피어오르는 녹색 입자와 광원 효과
+                this.vfxManager.addEmitter(targetCenter.x, targetCenter.y + healTarget.height / 2, {
+                    spawnRate: 10,
+                    duration: 30, // 0.5초간 지속
+                    particleOptions: {
+                        color: 'rgba(120, 255, 120, 0.8)',
+                        gravity: -0.05,
+                        lifespan: 90,
+                        speed: 1,
+                    }
+                });
+                this.vfxManager.addGlow(targetCenter.x, targetCenter.y, {
+                    radius: healTarget.width,
+                    colorInner: 'rgba(100, 255, 100, 0.5)',
+                    decay: 0.04
+                });
             }
 
+            // 2. 수호의 찬가 & 용기의 찬가 (그룹 버프)
+            else if (skill.id === SKILLS.guardian_hymn.id || skill.id === SKILLS.courage_hymn.id) {
+                const isGuardian = skill.id === SKILLS.guardian_hymn.id;
+                const effectId = isGuardian ? 'shield' : 'bonus_damage';
+                const particleColor = isGuardian ? 'rgba(50, 150, 255, 0.8)' : 'rgba(255, 100, 50, 0.8)';
+                const imgKey = isGuardian ? 'guardian-hymn-effect' : 'courage-hymn-effect';
 
-            if (skill.id === SKILLS.guardian_hymn.id || skill.id === SKILLS.courage_hymn.id) {
-                const effectId = skill.id === SKILLS.guardian_hymn.id ? 'shield' : 'bonus_damage';
-                const imgKey = skill.id === SKILLS.guardian_hymn.id ? 'guardian-hymn-effect' : 'courage-hymn-effect';
                 const group = this.metaAIManager.groups[caster.groupId];
                 const allies = group ? group.members : [caster];
+
                 allies.forEach(ally => {
                     this.effectManager.addEffect(ally, effectId);
+                    const allyCenter = { x: ally.x + ally.width / 2, y: ally.y + ally.height / 2 };
+
+                    for (let i = 0; i < 4; i++) {
+                        const angle = i * Math.PI / 2;
+                        const sx = allyCenter.x + Math.cos(angle) * 100;
+                        const sy = allyCenter.y + Math.sin(angle) * 100;
+                        this.vfxManager.addHomingBurst(sx, sy, allyCenter, {
+                            count: 5,
+                            color: particleColor,
+                            particleOptions: { homingStrength: 0.08, lifespan: 40, gravity: 0 }
+                        });
+                    }
+
+                    // 기존 버프 스프라이트 효과도 함께 사용
                     const img = assets[imgKey];
                     if (img) {
-                        this.vfxManager.addSpriteEffect(
-                            img,
-                            ally.x + ally.width / 2,
-                            ally.y + ally.height / 2,
-                            { width: ally.width, height: ally.height, blendMode: 'screen', duration: 30 }
-                        );
+                        this.vfxManager.addSpriteEffect(img, allyCenter.x, allyCenter.y, {
+                            width: ally.width,
+                            height: ally.height,
+                            blendMode: 'screen',
+                            duration: 30
+                        });
                     }
                 });
             }
 
+            // 3. 정화 (Purify)
+            else if (skill.id === SKILLS.purify.id) {
+                const purifyTarget = target || caster;
+                const targetCenter = { x: purifyTarget.x + purifyTarget.width / 2, y: purifyTarget.y + purifyTarget.height / 2 };
 
-            if (skill.tags.includes('attack')) {
+                this.vfxManager.addSpriteEffect(assets['purify-effect'], targetCenter.x, targetCenter.y, {
+                    width: purifyTarget.width,
+                    height: purifyTarget.height,
+                    blendMode: 'screen'
+                });
+                this.vfxManager.addParticleBurst(targetCenter.x, targetCenter.y, {
+                    color: 'rgba(50, 50, 50, 0.7)',
+                    count: 15,
+                    speed: 2,
+                    gravity: 0.01,
+                    lifespan: 60
+                });
+                this.vfxManager.addParticleBurst(targetCenter.x, targetCenter.y, {
+                    color: 'rgba(200, 200, 255, 1)',
+                    count: 10,
+                    speed: 1,
+                    gravity: -0.01,
+                    lifespan: 70
+                });
+            }
+
+            // 4. 그 외 공격 스킬 (기존 로직 유지)
+            else if (skill.tags.includes('attack')) {
                 const range = skill.range || Infinity;
                 const nearestEnemy = this.findNearestEnemy(caster, monsterManager.monsters, range);
                 if (nearestEnemy) {
