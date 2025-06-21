@@ -76,6 +76,11 @@ export class MetaAIManager {
                 }
                 break;
             case 'skill':
+                const isSilenced = entity.effects?.some(e => e.id === 'silence');
+                if (isSilenced) {
+                    eventManager.publish('log', { message: `[침묵] 상태라 스킬을 사용할 수 없습니다.`, color: 'grey' });
+                    break;
+                }
                 const skill = SKILLS[action.skillId];
                 if (
                     skill &&

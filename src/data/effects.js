@@ -205,5 +205,53 @@ export const EFFECTS = {
         stats: { defense: 15, magicResist: -15 }, // 방어력 증가, 마법저항력 감소
         tags: ['status_ailment', 'cc', 'petrify'],
         overlayColor: 'rgba(150, 150, 150, 0.7)',
+    },
+
+    // --- 3단계 상태이상 ---
+    silence: {
+        name: '침묵',
+        type: 'debuff', // 스킬 사용만 막으므로 cc는 아님
+        duration: 400,
+        tags: ['status_ailment', 'silence'],
+        particle: { type: 'text', text: '...', color: 'grey' }
+    },
+    blind: {
+        name: '실명',
+        type: 'debuff',
+        duration: 500,
+        stats: { visionRange: -300 }, // 시야 대폭 감소
+        tags: ['status_ailment', 'blind'],
+        overlayColor: 'rgba(50, 50, 50, 0.5)',
+        particle: { type: 'aura', color: 'rgba(20, 20, 20, 0.4)' }
+    },
+    fear: {
+        name: '공포',
+        type: 'ai_override', // AI를 덮어쓰는 타입
+        duration: 300,
+        tags: ['status_ailment', 'cc', 'fear', 'ai_override'],
+        particle: { type: 'aura', color: 'rgba(128, 0, 128, 0.4)'}
+    },
+    confusion: {
+        name: '혼란',
+        type: 'ai_override',
+        duration: 500,
+        tags: ['status_ailment', 'cc', 'confusion', 'ai_override'],
+        particle: { type: 'text', text: '???', color: 'orange' }
+    },
+    berserk: {
+        name: '광폭화',
+        type: 'ai_override',
+        duration: 400,
+        stats: { attackPower: 10, attackSpeed: 0.5, movementSpeed: 2 },
+        tags: ['status_ailment', 'berserk', 'ai_override'],
+        overlayColor: 'rgba(255, 0, 0, 0.3)',
+        particle: { type: 'aura', color: 'rgba(200, 0, 0, 0.5)' }
+    },
+    charm: {
+        name: '매혹',
+        type: 'ai_override',
+        duration: 600,
+        tags: ['status_ailment', 'cc', 'charm', 'ai_override'],
+        particle: { type: 'heart', color: 'rgba(255, 105, 180, 0.9)' }
     }
 };
