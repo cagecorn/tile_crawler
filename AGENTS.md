@@ -63,6 +63,12 @@ const context = {
 HealerAI의 decideAction 메서드는 회복 대상을 찾을 때, 힐러 자신의 mbti 속성을 확인합니다.
 if (self.properties.mbti.includes('I')): 자신을 먼저 치유 대상으로 고려합니다.
 else if (self.properties.mbti.includes('E')): 자신을 포함한 모든 아군 중 가장 위급한 대상을 먼저 고려합니다.
+
+### 4.3. MBTI 팝업 이벤트 분리
+AI 로직은 더 이상 직접 MBTI 텍스트 팝업을 생성하지 않습니다. 대신
+`ai_mbti_trait_triggered` 이벤트를 발행하여 게임(`game.js`)이 이를 받아
+`VFXManager.addTextPopup`으로 시각 효과를 표시합니다. 이 방식은 VFX 처리와
+AI 판단 과정을 분리해 테스트와 유지 보수를 용이하게 합니다.
 5. 테스트 및 디버깅
 AI 로직은 두 가지 방식으로 테스트하고 확인할 수 있습니다.
 

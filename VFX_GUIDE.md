@@ -42,3 +42,9 @@
 ## 신규 효과: Bubble Emitter
 - `AquariumManager`의 `bubble` 피처가 호출되면 맵의 임의 위치에 거품 파티클 이미터가 생성됩니다.
 - 해당 이미터는 `spawnRate`를 조절해 지속적으로 파티클을 분출하며, `gravity` 값을 음수로 주어 위로 떠오르는 움직임을 연출합니다.
+
+## MBTI 텍스트 팝업 처리
+AI가 성격(MBTI) 특성을 발동하면 `ai_mbti_trait_triggered` 이벤트가 발생합니다.
+`Game` 클래스는 이를 구독해 `VFXManager.addTextPopup()`을 호출하며, 실제
+시각 효과는 이곳에서 생성됩니다. AI 로직에서는 이벤트만 발행하므로 팝업 표시
+동작을 손쉽게 조정할 수 있습니다.
