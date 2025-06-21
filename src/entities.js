@@ -114,14 +114,21 @@ class Entity {
     render(ctx) {
         // 에어본 효과가 있는지 확인
         const airborneEffect = this.effects.find(e => e.id === 'airborne');
-        let yOffset = 0;
-        let shadowScale = 1;
+        const sleepEffect = this.effects.find(e => e.id === 'sleep');
+        const statusEffect = this.effects.find(e => e.overlayColor);
+
+        let yOffset = 0, shadowScale = 1, rotation = 0;
 
         if (airborneEffect) {
             // 에어본 지속시간에 따라 위아래로 움직이는 yOffset 계산 (sin 곡선 활용)
             const progress = 1 - (airborneEffect.remaining / airborneEffect.duration);
             yOffset = -Math.sin(progress * Math.PI) * (this.height * 0.5); // 키의 절반만큼 떠오름
             shadowScale = 1 - Math.sin(progress * Math.PI) * 0.4; // 공중에 뜨면 그림자 작아짐
+        }
+
+        if (sleepEffect) {
+            rotation = Math.PI / 2; // 90도 회전하여 눕힘
+            yOffset = this.height / 2; // 눕혔을 때 바닥에 맞춤
         }
 
         ctx.save();
@@ -135,18 +142,17 @@ class Entity {
         ctx.fill();
 
         // 2. 유닛 이미지 그리기 (yOffset 적용)
-        const statusEffect = this.effects.find(e => e.overlayColor);
-
+        ctx.translate(0, yOffset);
+        ctx.rotate(rotation);
         ctx.scale(this.direction || 1, 1);
         if (this.image) {
-            ctx.drawImage(this.image, -this.width / 2, -
-                this.height + yOffset, this.width, this.height);
+            ctx.drawImage(this.image, -this.width / 2, -this.height, this.width, this.height);
         }
 
         if (statusEffect) {
             ctx.globalCompositeOperation = 'source-atop';
             ctx.fillStyle = statusEffect.overlayColor;
-            ctx.fillRect(-this.width / 2, -this.height + yOffset, this.width, this.height);
+            ctx.fillRect(-this.width / 2, -this.height, this.width, this.height);
             ctx.globalCompositeOperation = 'source-over';
         }
 

@@ -162,5 +162,48 @@ export const EFFECTS = {
         type: 'cc', // Crowd Control
         duration: 75, // 1.25초 (60fps 기준)
         tags: ['status_ailment', 'cc', 'airborne'],
+    },
+    // --- 2단계 상태이상 ---
+    sleep: {
+        name: '수면',
+        type: 'cc',
+        duration: 1000, // 10턴
+        tags: ['status_ailment', 'cc', 'sleep'],
+        wakeUpOnHit: 3, // 3번 맞으면 깨어남
+        particle: { type: 'text', text: 'Zzz' }
+    },
+    paralysis: {
+        name: '마비',
+        type: 'cc',
+        duration: 200, // 2턴
+        tags: ['status_ailment', 'cc', 'paralysis'],
+        overlayColor: 'rgba(255, 255, 0, 0.4)',
+        particle: { type: 'electric', color: 'yellow' }
+    },
+    burn: {
+        name: '화상',
+        type: 'dot',
+        duration: 300,
+        damagePerTurn: 4,
+        stats: { movementSpeed: 2 }, // 이동속도 증가
+        tags: ['status_ailment', 'burn', 'dot'],
+        overlayColor: 'rgba(255, 100, 0, 0.4)',
+        particle: { type: 'ember', color: 'rgba(255, 90, 40, 0.8)' }
+    },
+    bleed: {
+        name: '출혈',
+        type: 'dot',
+        duration: 400,
+        damagePerTurn: 5,
+        tags: ['status_ailment', 'bleed', 'dot'],
+        particle: { type: 'blood_drip', color: 'rgba(200, 0, 0, 0.7)' }
+    },
+    petrify: {
+        name: '석화',
+        type: 'cc',
+        duration: 500,
+        stats: { defense: 15, magicResist: -15 }, // 방어력 증가, 마법저항력 감소
+        tags: ['status_ailment', 'cc', 'petrify'],
+        overlayColor: 'rgba(150, 150, 150, 0.7)',
     }
 };

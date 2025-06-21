@@ -162,13 +162,23 @@ export class VFXManager {
      * @returns {object} emitter handle
      */
     addEmitter(x, y, options = {}) {
+        const particleOpts = { ...(options.particleOptions || {}) };
+
+        // 텍스트 파티클을 위한 특별 처리
+        if (particleOpts.type === 'text') {
+            particleOpts.text = particleOpts.text || '?';
+            particleOpts.lifespan = 40;
+            particleOpts.gravity = -0.1;
+            particleOpts.speed = 0;
+        }
+
         const emitter = {
             id: Math.random().toString(36).substr(2, 9),
             x,
             y,
             spawnRate: options.spawnRate || 2,
             duration: options.duration !== undefined ? options.duration : 60,
-            particleOptions: options.particleOptions || {},
+            particleOptions: particleOpts, // 수정된 옵션 사용
             followTarget: options.followTarget || null,
             offsetX: options.offsetX || 0,
             offsetY: options.offsetY || 0,
