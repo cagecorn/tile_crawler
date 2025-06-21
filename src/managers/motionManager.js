@@ -88,4 +88,31 @@ export class MotionManager {
             console.log('[MotionManager] 끌어당기기 실패: 주체 주변에 공간이 없습니다.');
         }
     }
+
+    /**
+     * 대상을 공격자로부터 멀어지는 방향으로 밀어냅니다.
+     * @param {Entity} target - 밀려날 대상
+     * @param {Entity} source - 공격자
+     * @param {number} distance - 밀려날 거리
+     * @param {VFXManager} vfxManager - 애니메이션을 위한 VFX 매니저
+     */
+    knockbackTarget(target, source, distance, vfxManager) {
+        const angle = Math.atan2(target.y - source.y, target.x - source.x);
+        const destX = target.x + Math.cos(angle) * distance;
+        const destY = target.y + Math.sin(angle) * distance;
+
+        if (this.mapManager.isWallAt(destX, destY, target.width, target.height)) {
+            console.log('[MotionManager] 넉백 실패: 목적지에 벽이 있음');
+            return;
+        }
+
+        if (vfxManager) {
+            const fromPos = { x: target.x, y: target.y };
+            const toPos = { x: destX, y: destY };
+            vfxManager.addKnockbackAnimation(target, fromPos, toPos);
+        } else {
+            target.x = destX;
+            target.y = destY;
+        }
+    }
 }

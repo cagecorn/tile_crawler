@@ -597,6 +597,15 @@ export class Game {
             this.eventManager.publish('log', { message: `\uD83D\uDCA8 ${defender.constructor.name}를 공중에 띄웠습니다!`, color: 'lightblue' });
         });
 
+        // 넉백 요청 이벤트 리스너 추가
+        eventManager.subscribe('knockback_request', (data) => {
+            const { attacker, defender, distance } = data;
+
+            if (this.motionManager) {
+                this.motionManager.knockbackTarget(defender, attacker, distance, this.vfxManager);
+            }
+        });
+
         // 피해량 계산 완료 이벤트를 받아 실제 피해 적용
         eventManager.subscribe('damage_calculated', (data) => {
             data.defender.takeDamage(data.damage);
