@@ -14,6 +14,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
 
     // 외부에서 전달된 기본 도구 보존
+    managers.eventManager = eventManager;
     managers.factory = factory;
     managers.mapManager = mapManager;
 
