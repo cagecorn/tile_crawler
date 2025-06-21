@@ -16,6 +16,8 @@ export class AquariumManager {
         this.features = [];
         this.equipmentManager = new EquipmentManager(eventManager);
         this.allWeaponIds = ['short_sword', 'long_bow', 'estoc', 'axe', 'mace', 'staff', 'spear', 'scythe', 'whip', 'dagger', 'violin_bow'];
+        // 순환하며 각 방에 몬스터를 배치하기 위한 인덱스
+        this._roomIndex = 0;
     }
 
     _findSpacedPosition(minDist = this.mapManager.tileSize * 4) {
@@ -32,10 +34,33 @@ export class AquariumManager {
         return this.mapManager.getRandomFloorPosition();
     }
 
+    _getRoomBasedPosition(minDist = this.mapManager.tileSize * 6) {
+        const rooms = this.mapManager.rooms || [];
+        if (rooms.length === 0) return this._findSpacedPosition(minDist);
+
+        for (let r = 0; r < rooms.length; r++) {
+            const room = rooms[(this._roomIndex + r) % rooms.length];
+            const pos = {
+                x: (room.x + Math.floor(room.width / 2)) * this.mapManager.tileSize,
+                y: (room.y + Math.floor(room.height / 2)) * this.mapManager.tileSize
+            };
+            const tooClose = this.monsterManager.monsters.some(m => {
+                const dx = m.x - pos.x;
+                const dy = m.y - pos.y;
+                return Math.hypot(dx, dy) < minDist;
+            });
+            if (!tooClose) {
+                this._roomIndex = (this._roomIndex + r + 1) % rooms.length;
+                return pos;
+            }
+        }
+        return this._findSpacedPosition(minDist);
+    }
+
     addTestingFeature(feature) {
         this.features.push(feature);
         if (feature.type === 'monster') {
-            const pos = this._findSpacedPosition(this.mapManager.tileSize * 6);
+            const pos = this._getRoomBasedPosition(this.mapManager.tileSize * 6);
             if (pos) {
                 const vision = feature.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
                 const stats = adjustMonsterStatsForAquarium({
