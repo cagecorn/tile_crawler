@@ -57,8 +57,10 @@ export class DaggerAI extends BaseWeaponAI {
             return { type: 'attack', target: nearest };
         }
 
-        const behindX = nearest.x - nearest.facing.x * (mapManager.tileSize * 0.8);
-        const behindY = nearest.y - nearest.facing.y * (mapManager.tileSize * 0.8);
+        const facing = nearest.facing || { x: 0, y: 0 };
+        const tileSize = mapManager?.tileSize ?? 32;
+        const behindX = nearest.x - facing.x * (tileSize * 0.8);
+        const behindY = nearest.y - facing.y * (tileSize * 0.8);
         const behindTarget = { x: behindX, y: behindY };
 
         return { type: 'move', target: behindTarget };
