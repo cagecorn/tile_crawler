@@ -709,9 +709,23 @@ export class CCGhostAI extends AIArchetype {
             self.mp >= ccSkill.manaCost &&
             (self.skillCooldowns[ccSkill.id] || 0) <= 0
         ) {
-            if (Math.hypot(nearestEnemy.x - self.x, nearestEnemy.y - self.y) < self.attackRange) {
-                // TODO: 여러 명에게 맞출 수 있는지 각도 계산 로직 추가하면 좋음
-                return { type: 'skill', skillId: ccSkill.id, target: nearestEnemy };
+            const distToNearest = Math.hypot(nearestEnemy.x - self.x, nearestEnemy.y - self.y);
+            if (distToNearest < self.attackRange) {
+                const mainAngle = Math.atan2(nearestEnemy.y - self.y, nearestEnemy.x - self.x);
+                const cone = Math.PI / 6; // 30도 범위
+                const othersInCone = context.enemies.filter(e => {
+                    if (e === nearestEnemy) return false;
+                    const dx = e.x - self.x;
+                    const dy = e.y - self.y;
+                    const d = Math.hypot(dx, dy);
+                    if (d > self.attackRange) return false;
+                    const angle = Math.atan2(dy, dx);
+                    const diff = Math.atan2(Math.sin(angle - mainAngle), Math.cos(angle - mainAngle));
+                    return Math.abs(diff) <= cone;
+                });
+                if (othersInCone.length > 0) {
+                    return { type: 'skill', skillId: ccSkill.id, target: nearestEnemy };
+                }
             }
         }
 
