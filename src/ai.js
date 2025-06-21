@@ -213,9 +213,8 @@ export class MeleeAI extends AIArchetype {
 // --- 힐러형 AI ---
 export class HealerAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, mapManager, eventManager } = context;
+        const { player, allies, enemies, mapManager, eventManager } = context;
         const mbti = self.properties?.mbti || '';
-        // --- 기존의 타이머 기반 MBTI 표시 로직을 삭제합니다. ---
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
         if (!healId || !healSkill) return { type: 'idle' };
@@ -233,6 +232,46 @@ export class HealerAI extends AIArchetype {
             a => a.hp < a.maxHp && a.hp / a.maxHp <= healThreshold
         );
         if (candidates.length === 0) {
+            const visibles = this._filterVisibleEnemies(self, enemies);
+            if (visibles.length > 0) {
+                let potential = [...visibles];
+                let targetCandidate = null;
+                if (mbti.includes('T')) {
+                    targetCandidate = potential.reduce((low, cur) => cur.hp < low.hp ? cur : low, potential[0]);
+                    showMBTIPopup(eventManager, 'T', self);
+                } else if (mbti.includes('F')) {
+                    const allyTargets = new Set();
+                    allies.forEach(a => {
+                        if (a.currentTarget) allyTargets.add(a.currentTarget.id);
+                    });
+                    const focused = potential.find(t => allyTargets.has(t.id));
+                    if (focused) {
+                        targetCandidate = focused;
+                        showMBTIPopup(eventManager, 'F', self);
+                    }
+                }
+                const nearest = targetCandidate || potential.reduce(
+                    (closest, cur) =>
+                        Math.hypot(cur.x - self.x, cur.y - self.y) < Math.hypot(closest.x - self.x, closest.y - self.y)
+                            ? cur
+                            : closest,
+                    potential[0]
+                );
+                const dist = Math.hypot(nearest.x - self.x, nearest.y - self.y);
+                const hasLOS = hasLineOfSight(
+                    Math.floor(self.x / mapManager.tileSize),
+                    Math.floor(self.y / mapManager.tileSize),
+                    Math.floor(nearest.x / mapManager.tileSize),
+                    Math.floor(nearest.y / mapManager.tileSize),
+                    mapManager,
+                );
+                self.currentTarget = nearest;
+                if (hasLOS && dist <= self.attackRange) {
+                    return { type: 'attack', target: nearest };
+                }
+                return { type: 'move', target: nearest };
+            }
+
             if (self.isFriendly && !self.isPlayer && player) {
                 const target = this._getWanderPosition(self, player, allies, mapManager);
                 if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
@@ -765,9 +804,8 @@ export class SummonerAI extends RangedAI {
 
 export class BardAI extends AIArchetype {
     decideAction(self, context) {
-        const { player, allies, mapManager, eventManager } = context;
+        const { player, allies, enemies, mapManager, eventManager } = context;
         const mbti = self.properties?.mbti || '';
-        // --- 기존의 타이머 기반 MBTI 표시 로직을 삭제합니다. ---
         const songs = [SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id];
         for (const skillId of songs) {
             const skill = SKILLS[skillId];
@@ -801,6 +839,46 @@ export class BardAI extends AIArchetype {
                 }
                 return { type: 'move', target };
             }
+        }
+
+        const visible = this._filterVisibleEnemies(self, enemies);
+        if (visible.length > 0) {
+            let potential = [...visible];
+            let targetCandidate = null;
+            if (mbti.includes('T')) {
+                targetCandidate = potential.reduce((low, cur) => cur.hp < low.hp ? cur : low, potential[0]);
+                showMBTIPopup(eventManager, 'T', self);
+            } else if (mbti.includes('F')) {
+                const allyTargets = new Set();
+                allies.forEach(a => {
+                    if (a.currentTarget) allyTargets.add(a.currentTarget.id);
+                });
+                const focused = potential.find(t => allyTargets.has(t.id));
+                if (focused) {
+                    targetCandidate = focused;
+                    showMBTIPopup(eventManager, 'F', self);
+                }
+            }
+            const nearest = targetCandidate || potential.reduce(
+                (closest, cur) =>
+                    Math.hypot(cur.x - self.x, cur.y - self.y) < Math.hypot(closest.x - self.x, closest.y - self.y)
+                        ? cur
+                        : closest,
+                potential[0]
+            );
+            const dist = Math.hypot(nearest.x - self.x, nearest.y - self.y);
+            const hasLOS = hasLineOfSight(
+                Math.floor(self.x / mapManager.tileSize),
+                Math.floor(self.y / mapManager.tileSize),
+                Math.floor(nearest.x / mapManager.tileSize),
+                Math.floor(nearest.y / mapManager.tileSize),
+                mapManager,
+            );
+            self.currentTarget = nearest;
+            if (hasLOS && dist <= self.attackRange) {
+                return { type: 'attack', target: nearest };
+            }
+            return { type: 'move', target: nearest };
         }
 
         if (self.isFriendly && !self.isPlayer) {
