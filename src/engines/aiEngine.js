@@ -1,5 +1,6 @@
 import { SKILLS } from '../data/skills.js';
 import { AI_PLAYBOOK } from '../data/aiPlaybook.js';
+import { MBTIEngine } from './mbtiEngine.js';
 
 export const STRATEGY = {
     IDLE: 'idle',
@@ -10,7 +11,7 @@ export const STRATEGY = {
 export class AIEngine {
     constructor(eventManager, mbtiEngine) {
         this.eventManager = eventManager;
-        this.mbtiEngine = mbtiEngine;
+        this.mbtiEngine = mbtiEngine || new MBTIEngine();
         this.groups = {};
         this.activeTactics = {};
         this.tacticsEnabled = false;
@@ -27,7 +28,7 @@ export class AIEngine {
         this.tacticsEnabled = !!enabled;
     }
 
-    createGroup(id, strategy) {
+    createGroup(id, strategy = STRATEGY.AGGRESSIVE) {
         if (!this.groups[id]) {
             this.groups[id] = {
                 id,
@@ -39,6 +40,12 @@ export class AIEngine {
         }
         return this.groups[id];
     }
+
+    setGroupStrategy(id, strategy) {
+        if (this.groups[id]) {
+            this.groups[id].strategy = strategy;
+        }
+    }
     
     addMember(groupId, member) {
         if (this.groups[groupId]) {
@@ -49,6 +56,10 @@ export class AIEngine {
     update(context) {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
+            if (group.strategy === STRATEGY.IDLE) {
+                // Skip any action processing for idle groups
+                continue;
+            }
             const currentContext = {
                 ...context,
                 allies: group.members,
@@ -170,8 +181,17 @@ export class AIEngine {
         const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
         console.log(`[AIEngine] Processing ${membersSorted.length} members`);
         for (const member of membersSorted) {
-            if (member.hp <= 0 || !member.behaviors || member.isPlayer) {
+            if (member.hp <= 0 || member.isPlayer) {
                 console.log(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
+                continue;
+            }
+            if (!member.behaviors || member.behaviors.length === 0) {
+                if (member.ai && typeof member.ai.decideAction === 'function') {
+                    const baseAction = member.ai.decideAction(member, context) || { type: 'idle' };
+                    const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, context);
+                    finalAction.triggeredTraits = triggeredTraits;
+                    this.executeAction(member, finalAction, context);
+                }
                 continue;
             }
             if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
