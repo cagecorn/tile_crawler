@@ -41,6 +41,17 @@ export class AquariumManager {
                     const weapon = this.itemFactory.create(randomWeaponId, 0, 0, 1);
                     if (weapon) {
                         this.equipmentManager.equip(monster, weapon, null);
+
+                        // 근거리 무기(창, 낫 제외)를 들고 있을 때 확률적으로 방패 장착
+                        const tags = weapon.tags || [];
+                        const isMelee = tags.includes('melee') && !tags.includes('ranged');
+                        const excluded = tags.includes('spear') || tags.includes('scythe');
+                        if (isMelee && !excluded && Math.random() < 0.5) {
+                            const shield = this.itemFactory.create('shield_basic', 0, 0, 1);
+                            if (shield) {
+                                this.equipmentManager.equip(monster, shield, null);
+                            }
+                        }
                     }
                 }
                 // --- 여기까지 ---
