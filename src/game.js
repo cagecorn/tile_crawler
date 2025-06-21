@@ -682,6 +682,14 @@ export class Game {
             eventManager.publish('log', { message: `${caster.constructor.name} (이)가 ${skill.name} 스킬 사용!`, color: 'aqua' });
             this.vfxManager.castEffect(caster, skill); // 기본 시전 이펙트는 유지
 
+            const mbti = caster.properties?.mbti || '';
+            if (skill.id === SKILLS.heal.id || skill.id === SKILLS.guardian_hymn.id || skill.id === SKILLS.courage_hymn.id) {
+                if (mbti.includes('S')) this.vfxManager.addTextPopup('S', caster);
+                else if (mbti.includes('N')) this.vfxManager.addTextPopup('N', caster);
+                if (mbti.includes('E')) this.vfxManager.addTextPopup('E', caster);
+                else if (mbti.includes('I')) this.vfxManager.addTextPopup('I', caster);
+            }
+
             // --- 스킬별 특화 이펙트 분기 ---
 
             // 1. 힐 (Heal)

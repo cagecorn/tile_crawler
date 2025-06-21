@@ -1,3 +1,5 @@
+import { PETS } from '../data/pets.js';
+
 export class PetManager {
     constructor(eventManager = null, factory = null, metaAI = null, auraManager = null, vfxManager = null) {
         this.eventManager = eventManager;
@@ -45,8 +47,12 @@ export class PetManager {
             this.metaAI.groups[owner.groupId].addMember(pet);
         }
         item.petInstance = pet;
-        if (item.aura && this.auraManager) {
-            this.auraManager.registerAura(pet, item.aura);
+        if (this.auraManager) {
+            const petData = PETS[petId] || PETS.fox;
+            const aura = item.aura || (petData.auraSkill ? { skillId: petData.auraSkill, range: 256, level: 1 } : null);
+            if (aura) {
+                this.auraManager.registerAura(pet, aura);
+            }
         }
         return pet;
     }

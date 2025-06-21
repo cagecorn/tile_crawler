@@ -172,7 +172,7 @@ export const ITEMS = {
         imageKey: 'pet-fox',
         cooldown: 600,
         aura: {
-            skillId: 'regeneration_aura',
+            skillId: 'natural_aura',
             range: 256,
             level: 1
         }
