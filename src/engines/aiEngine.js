@@ -158,8 +158,12 @@ export class AIEngine {
 
     executeIndividualBehaviors(context) {
         const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
+        console.log(`[AIEngine] Processing ${membersSorted.length} members`);
         for (const member of membersSorted) {
-            if (member.hp <= 0 || !member.behaviors || member.isPlayer) continue;
+            if (member.hp <= 0 || !member.behaviors || member.isPlayer) {
+                console.log(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
+                continue;
+            }
             if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
 
             let baseAction = { type: 'idle' };
@@ -173,6 +177,7 @@ export class AIEngine {
 
             const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, context);
             finalAction.triggeredTraits = triggeredTraits;
+            console.log(`[AIEngine] Member action:`, finalAction);
             this.executeAction(member, finalAction, context);
         }
     }
@@ -203,7 +208,18 @@ export class AIEngine {
                 }
                 break; }
             case 'move':
-                if (movementManager) movementManager.moveEntityTowards(entity, action.target, context);
+                if (movementManager) {
+                    movementManager.moveEntityTowards(entity, action.target, context);
+                } else {
+                    const dx = action.target.x - entity.x;
+                    const dy = action.target.y - entity.y;
+                    const distance = Math.hypot(dx, dy);
+                    if (distance > 5) {
+                        const speed = entity.speed || 2;
+                        entity.x += (dx / distance) * speed;
+                        entity.y += (dy / distance) * speed;
+                    }
+                }
                 break;
         }
     }
