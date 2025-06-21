@@ -82,7 +82,11 @@ export class CharacterFactory {
                     const rangedSkill = Math.random() < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id;
                     merc.skills.push(rangedSkill);
                     const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
-                    if (bow) merc.equipment.weapon = bow;
+                    if (bow) {
+                        merc.equipment.weapon = bow;
+                        if (merc.stats) merc.stats.updateEquipmentStats();
+                        if (typeof merc.updateAI === 'function') merc.updateAI();
+                    }
                     merc.fallbackAI = new RangedAI();
                 } else if (config.jobId === 'warrior') {
                     merc.skills.push(SKILLS.charge_attack.id);
@@ -102,7 +106,11 @@ export class CharacterFactory {
                     merc.skills.push(SKILLS.guardian_hymn.id);
                     merc.skills.push(SKILLS.courage_hymn.id);
                     const vb = this.itemFactory.create('violin_bow', 0, 0, tileSize);
-                    if (vb) merc.equipment.weapon = vb;
+                    if (vb) {
+                        merc.equipment.weapon = vb;
+                        if (merc.stats) merc.stats.updateEquipmentStats();
+                        if (typeof merc.updateAI === 'function') merc.updateAI();
+                    }
                     merc.roleAI = new BardAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
@@ -111,7 +119,11 @@ export class CharacterFactory {
 
                 if (!merc.equipment.weapon) {
                     const sword = this.itemFactory.create('sword', 0, 0, tileSize);
-                    if (sword) merc.equipment.weapon = sword;
+                    if (sword) {
+                        merc.equipment.weapon = sword;
+                        if (merc.stats) merc.stats.updateEquipmentStats();
+                        if (typeof merc.updateAI === 'function') merc.updateAI();
+                    }
                 }
 
                 return merc;
