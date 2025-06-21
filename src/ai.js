@@ -3,6 +3,16 @@
 import { hasLineOfSight } from './utils/geometry.js';
 import { SKILLS } from './data/skills.js';
 
+// Utility to show MBTI text popups above a unit
+function showMBTIPopup(eventManager, char, self) {
+    if (!eventManager || !char) return;
+    eventManager.publish('vfx_request', {
+        type: 'text_popup',
+        text: char,
+        target: self,
+    });
+}
+
 // --- AI 유형(Archetype)의 기반이 될 부모 클래스 ---
 class AIArchetype {
     // action은 { type: 'move', target: {x, y} } 또는 { type: 'attack', target: entity } 같은 객체
@@ -99,7 +109,7 @@ export class MeleeAI extends AIArchetype {
         if (mbti.includes('T')) {
             potentialTargets.sort((a, b) => a.hp - b.hp);
             if (potentialTargets.length > 0) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'T', target: self });
+                showMBTIPopup(eventManager, 'T', self);
             }
         } else if (mbti.includes('F')) {
             const allyTargets = new Set();
@@ -109,7 +119,7 @@ export class MeleeAI extends AIArchetype {
             const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
             if (focusedTarget) {
                 potentialTargets = [focusedTarget];
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'F', target: self });
+                showMBTIPopup(eventManager, 'F', self);
             }
         }
 
@@ -146,7 +156,7 @@ export class MeleeAI extends AIArchetype {
                 ? self.skills.map(id => SKILLS[id]).find(s => s && s.tags && s.tags.includes('charge'))
                 : null;
             if (mbti.includes('P')) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'P', target: self });
+                showMBTIPopup(eventManager, 'P', self);
             }
 
             if (
@@ -170,9 +180,9 @@ export class MeleeAI extends AIArchetype {
                     (self.skillCooldowns[skillId] || 0) <= 0
                 ) {
                     if (mbti.includes('S')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+                        showMBTIPopup(eventManager, 'S', self);
                     } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+                        showMBTIPopup(eventManager, 'N', self);
                     }
                     return { type: 'skill', target: nearestTarget, skillId };
                 }
@@ -208,13 +218,7 @@ export class HealerAI extends AIArchetype {
         // --- 기존의 타이머 기반 MBTI 표시 로직을 삭제합니다. ---
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
-
-        const skillReady =
-            healId &&
-            Array.isArray(self.skills) &&
-            self.skills.includes(healId) &&
-            self.mp >= healSkill.manaCost &&
-            (self.skillCooldowns[healId] || 0) <= 0;
+        if (!healId || !healSkill) return { type: 'idle' };
         // --- S/N 성향에 따라 힐 우선순위를 조정 ---
         // 실제 힐을 사용할 때 MBTI 알파벳을 표시하기 위해 먼저 우선순위만 결정한다.
         let healThreshold = 0.7;
@@ -252,6 +256,13 @@ export class HealerAI extends AIArchetype {
             target = candidates[0];
         }
 
+        const skillReady =
+            healId &&
+            Array.isArray(self.skills) &&
+            self.skills.includes(healId) &&
+            self.mp >= healSkill.manaCost &&
+            (self.skillCooldowns[healId] || 0) <= 0;
+
         const distance = Math.hypot(target.x - self.x, target.y - self.y);
         const hasLOS = hasLineOfSight(
             Math.floor(self.x / mapManager.tileSize),
@@ -263,16 +274,16 @@ export class HealerAI extends AIArchetype {
 
         if (distance <= self.attackRange && hasLOS && skillReady) {
             if (mbti.includes('S')) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+                showMBTIPopup(eventManager, 'S', self);
             } else if (mbti.includes('N')) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+                showMBTIPopup(eventManager, 'N', self);
             }
 
             // E/I 성향을 실제 힐 순간에 표시
             if (mbti.includes('E')) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+                showMBTIPopup(eventManager, 'E', self);
             } else if (mbti.includes('I')) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
+                showMBTIPopup(eventManager, 'I', self);
             }
 
             return { type: 'skill', target, skillId: healId };
@@ -366,7 +377,7 @@ export class RangedAI extends AIArchetype {
         if (mbti.includes('T')) {
             potentialTargets.sort((a, b) => a.hp - b.hp);
             if (potentialTargets.length > 0) {
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'T', target: self });
+                showMBTIPopup(eventManager, 'T', self);
             }
         } else if (mbti.includes('F')) {
             const allyTargets = new Set();
@@ -376,7 +387,7 @@ export class RangedAI extends AIArchetype {
             const focusedTarget = potentialTargets.find(t => allyTargets.has(t.id));
             if (focusedTarget) {
                 potentialTargets = [focusedTarget];
-                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'F', target: self });
+                showMBTIPopup(eventManager, 'F', self);
             }
         }
 
@@ -411,9 +422,9 @@ export class RangedAI extends AIArchetype {
                 if (minDistance <= self.attackRange && minDistance > self.attackRange * 0.5) {
                     // S/N 성향에 따른 스킬 사용 시점 표시
                     if (mbti.includes('S')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+                        showMBTIPopup(eventManager, 'S', self);
                     } else if (mbti.includes('N') && self.hp / self.maxHp < 0.6) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+                        showMBTIPopup(eventManager, 'N', self);
                     }
 
                     const skillId = self.skills && self.skills[0];
@@ -431,11 +442,11 @@ export class RangedAI extends AIArchetype {
                 if (minDistance <= self.attackRange * 0.5) {
                     // P 성향은 후퇴하지 않고 돌격
                     if (mbti.includes('P')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'P', target: self });
+                        showMBTIPopup(eventManager, 'P', self);
                         return { type: 'move', target: nearestTarget };
                     }
                     if (mbti.includes('J')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'J', target: self });
+                        showMBTIPopup(eventManager, 'J', self);
                     }
                     const dx = nearestTarget.x - self.x;
                     const dy = nearestTarget.y - self.y;
@@ -768,9 +779,9 @@ export class BardAI extends AIArchetype {
                 if (distance <= self.attackRange) {
                     // E/I 성향을 실제 노래 시점에 표시
                     if (mbti.includes('E')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+                        showMBTIPopup(eventManager, 'E', self);
                     } else if (mbti.includes('I')) {
-                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
+                        showMBTIPopup(eventManager, 'I', self);
                     }
                     return { type: 'skill', target, skillId };
                 }
