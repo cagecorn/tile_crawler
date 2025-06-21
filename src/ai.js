@@ -4,12 +4,18 @@ import { hasLineOfSight } from './utils/geometry.js';
 import { SKILLS } from './data/skills.js';
 import { CombatBehavior } from './ai/behaviors/combat.js';
 import { WanderBehavior } from './ai/behaviors/wander.js';
+import { HealBehavior } from './ai/behaviors/heal.js';
 
 // 기존 전투 AI들은 Behavior 모듈로 이동했습니다.
 // CompositeAI는 PurifierAI와 같은 여러 행동 조합을 위해 남겨둡니다.
 export class CompositeAI {
     constructor(...ais) {
-        this.ais = ais.map(AIClass => new AIClass());
+        this.ais = ais.map(AIClass => {
+            if (typeof AIClass === 'function') {
+                return new AIClass();
+            }
+            return AIClass;
+        });
     }
 
     decideAction(self, context) {
@@ -104,6 +110,56 @@ export class PurifierAI extends AIArchetype {
         }
 
         return { type: 'move', target };
+    }
+}
+
+export class HealerAI extends AIArchetype {
+    decideAction(self, context) {
+        const { allies, mapManager } = context;
+        const healSkill = SKILLS.heal;
+        if (!self.skills.includes(healSkill.id) || self.mp < healSkill.manaCost || (self.skillCooldowns[healSkill.id] || 0) > 0) {
+            return { type: 'idle' };
+        }
+
+        const mbti = self.properties?.mbti || '';
+        let healThreshold = mbti.includes('S') ? 0.9 : mbti.includes('N') ? 0.5 : 0.7;
+        const candidates = allies.filter(a => a.hp < a.maxHp && a.hp / a.maxHp <= healThreshold);
+        if (candidates.length === 0) return { type: 'idle' };
+
+        const target = mbti.includes('I') ? (candidates.find(c => c === self) || candidates[0])
+                        : candidates.reduce((low, cur) => (cur.hp / cur.maxHp < low.hp / low.maxHp ? cur : low), candidates[0]);
+        if (!target) return { type: 'idle' };
+
+        const distance = Math.hypot(target.x - self.x, target.y - self.y);
+        const hasLOS = hasLineOfSight(
+            Math.floor(self.x / mapManager.tileSize),
+            Math.floor(self.y / mapManager.tileSize),
+            Math.floor(target.x / mapManager.tileSize),
+            Math.floor(target.y / mapManager.tileSize),
+            mapManager,
+        );
+
+        if (distance < self.attackRange && hasLOS) {
+            return { type: 'skill', target, skillId: healSkill.id };
+        }
+        return { type: 'move', target };
+    }
+}
+
+export class SummonerAI extends AIArchetype {
+    decideAction(self, context) {
+        const summonId = SKILLS.summon_skeleton?.id;
+        if (!summonId) return { type: 'idle' };
+        const skill = SKILLS[summonId];
+        if (!self.skills.includes(summonId) || self.mp < skill.manaCost || (self.skillCooldowns[summonId] || 0) > 0) {
+            return { type: 'idle' };
+        }
+
+        const max = self.properties?.maxMinions ?? 2;
+        const current = context.allies.filter(a => a.properties?.summonedBy === self.id);
+        if (current.length >= max) return { type: 'idle' };
+
+        return { type: 'skill', skillId: summonId, target: self };
     }
 }
 

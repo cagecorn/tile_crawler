@@ -47,7 +47,7 @@ export class CharacterFactory {
             properties.faith = this._rollRandomKey(FAITHS);
         } else {
             // 플레이어는 신앙을 갖지 않습니다.
-            properties.faith = 'NONE';
+            properties.faith = null;
         }
 
         // 2-2. 결정된 속성에 따른 보너스 스탯을 'stats' 객체에 합칩니다.
@@ -104,6 +104,14 @@ export class CharacterFactory {
             } else if (config.jobId === 'archer') {
                 const bow = this.itemFactory.create('long_bow', 0, 0, config.tileSize);
                 if (bow) entity.equipment.weapon = bow;
+                const r = Math.random();
+                entity.skills.push(r < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id);
+            } else if (config.jobId === 'wizard') {
+                const r = Math.random();
+                entity.skills.push(r < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id);
+            } else {
+                const r = Math.random();
+                entity.skills.push(r < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id);
             }
 
             if (!entity.equipment.weapon && type !== 'bard') {
