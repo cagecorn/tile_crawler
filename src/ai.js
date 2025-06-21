@@ -47,6 +47,11 @@ class AIArchetype {
 
         return self.wanderTarget || player;
     }
+
+    _filterVisibleEnemies(self, enemies) {
+        return (enemies || []).filter(e =>
+            Math.hypot(e.x - self.x, e.y - self.y) < self.visionRange);
+    }
 }
 
 export class CompositeAI extends AIArchetype {
@@ -68,7 +73,18 @@ export class CompositeAI extends AIArchetype {
 export class MeleeAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, enemies, mapManager, eventManager } = context;
-        const targetList = enemies;
+        const visibleEnemies = this._filterVisibleEnemies(self, enemies);
+        const targetList = visibleEnemies;
+
+        if (targetList.length === 0) {
+            if (self.isFriendly && !self.isPlayer) {
+                const target = this._getWanderPosition(self, player, allies, mapManager);
+                if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                    return { type: 'move', target };
+                }
+            }
+            return { type: 'idle' };
+        }
 
         // 1. 가장 가까운 적 찾기
         let nearestTarget = null;
@@ -107,7 +123,7 @@ export class MeleeAI extends AIArchetype {
         self.currentTarget = nearestTarget;
 
         // 2. 행동 결정
-        if (nearestTarget && minDistance < self.visionRange) {
+        if (nearestTarget) {
             const hasLOS = hasLineOfSight(
                 Math.floor(self.x / mapManager.tileSize),
                 Math.floor(self.y / mapManager.tileSize),
@@ -326,7 +342,18 @@ export class PurifierAI extends AIArchetype {
 export class RangedAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, enemies, mapManager, eventManager } = context;
-        const targetList = enemies;
+        const visibleEnemies = this._filterVisibleEnemies(self, enemies);
+        const targetList = visibleEnemies;
+
+        if (targetList.length === 0) {
+            if (self.isFriendly && !self.isPlayer) {
+                const target = this._getWanderPosition(self, player, allies, mapManager);
+                if (Math.hypot(target.x - self.x, target.y - self.y) > self.tileSize * 0.3) {
+                    return { type: 'move', target };
+                }
+            }
+            return { type: 'idle' };
+        }
 
         // T/F 성향에 따른 타겟팅 우선순위 결정
         const mbti = self.properties?.mbti || '';
@@ -360,7 +387,7 @@ export class RangedAI extends AIArchetype {
             }
         }
 
-        if (nearestTarget && minDistance < self.visionRange) {
+        if (nearestTarget) {
             const hasLOS = hasLineOfSight(
                 Math.floor(self.x / mapManager.tileSize),
                 Math.floor(self.y / mapManager.tileSize),
@@ -432,6 +459,11 @@ export class WizardAI extends RangedAI {
 export class TankerGhostAI extends AIArchetype {
     decideAction(self, context) {
         const { player, possessedRanged } = context;
+
+        if (this._filterVisibleEnemies(self, [player]).length === 0) {
+            return { type: 'idle' };
+        }
+
         const nearestEnemy = player; // 플레이어를 주 타겟으로 삼음
 
         // 1. 보호할 원딜 아군 찾기
@@ -479,6 +511,9 @@ export class TankerGhostAI extends AIArchetype {
 export class RangedGhostAI extends AIArchetype {
     decideAction(self, context) {
         const { player, possessedTankers, possessedSupporters } = context;
+        if (this._filterVisibleEnemies(self, [player]).length === 0) {
+            return { type: 'idle' };
+        }
         const nearestEnemy = player;
 
         // 1. 의지할 탱커 아군 찾기
@@ -544,6 +579,9 @@ export class RangedGhostAI extends AIArchetype {
 export class SupporterGhostAI extends AIArchetype {
     decideAction(self, context) {
         const { player, possessedRanged, possessedTankers } = context;
+        if (this._filterVisibleEnemies(self, [player]).length === 0) {
+            return { type: 'idle' };
+        }
         const nearestEnemy = player;
 
         // 1. 지원할 원딜 찾기
@@ -616,6 +654,9 @@ export class SupporterGhostAI extends AIArchetype {
 export class CCGhostAI extends AIArchetype {
     decideAction(self, context) {
         const { player, possessedTankers } = context;
+        if (this._filterVisibleEnemies(self, [player]).length === 0) {
+            return { type: 'idle' };
+        }
         let nearestEnemy = player;
 
         // 1. 협력할 탱커 찾기
