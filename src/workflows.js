@@ -16,7 +16,9 @@ export function monsterDeathWorkflow(context) {
             attacker.stats.addExp(exp);
         }
 
-        eventManager.publish('exp_gained', { player: attacker, exp });
+        // Indicate the exp has already been applied so global listeners don't
+        // apply it again.
+        eventManager.publish('exp_gained', { player: attacker, exp, applied: true });
     }
     
     // 3. (미래를 위한 구멍) "아이템 드랍!" 이벤트를 방송한다.

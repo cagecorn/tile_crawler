@@ -70,12 +70,10 @@ export class PurifierAI extends AIArchetype {
             (a.effects || []).some(e => e.tags?.includes('status_ailment'))
         );
         if (candidates.length === 0) {
-            if (self.isFriendly && !self.isPlayer && player) {
-                const t = this._getWanderPosition(self, player, allies, mapManager);
-                if (Math.hypot(t.x - self.x, t.y - self.y) > self.tileSize * 0.3) {
-                    return { type: 'move', target: t };
-                }
-            }
+            // When no ally needs purification, stay idle so that other
+            // behaviors like wandering can take over. Previously the purifier
+            // tried to follow the player directly here, which caused healers to
+            // stick too closely to the player instead of roaming nearby.
             return { type: 'idle' };
         }
 
