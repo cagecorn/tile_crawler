@@ -114,7 +114,7 @@ export class CharacterFactory {
                 return merc;
             case 'monster':
                 const monster = new Monster(finalConfig);
-                monster.behaviors = [new CombatBehavior()];
+                monster.behaviors = [new CombatBehavior(), new WanderBehavior()];
                 return monster;
             case 'pet':
                 const petData = PETS[config.petId] || PETS.fox;
