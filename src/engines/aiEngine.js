@@ -13,6 +13,7 @@ export class AIEngine {
         this.mbtiEngine = mbtiEngine;
         this.groups = {};
         this.activeTactics = {};
+        this.tacticsEnabled = false;
 
         eventManager.subscribe('entity_removed', (data) => {
             for (const groupId in this.groups) {
@@ -20,6 +21,10 @@ export class AIEngine {
             }
         });
         console.log('[AIEngine] Initialized');
+    }
+
+    setTacticsEnabled(enabled) {
+        this.tacticsEnabled = !!enabled;
     }
 
     createGroup(id, strategy) {
@@ -49,6 +54,11 @@ export class AIEngine {
                 allies: group.members,
                 enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
             };
+
+            if (!this.tacticsEnabled) {
+                this.executeIndividualBehaviors(currentContext);
+                continue;
+            }
 
             let activeTactic = this.activeTactics[groupId];
 
