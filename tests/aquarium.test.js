@@ -5,6 +5,8 @@ import { EventManager } from '../src/managers/eventManager.js';
 import { MonsterManager } from '../src/managers/monsterManager.js';
 import { ItemManager } from '../src/managers/itemManager.js';
 import { VFXManager } from '../src/managers/vfxManager.js';
+import { adjustMonsterStatsForAquarium } from '../src/utils/aquariumUtils.js';
+import { StatManager } from '../src/stats.js';
 import { describe, test, assert } from './helpers.js';
 
 const assets = { monster:{} };
@@ -39,5 +41,14 @@ describe('Aquarium', () => {
         const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx, null);
         aquariumManager.addTestingFeature({ type: 'bubble' });
         assert.strictEqual(vfx.emitters.length, 1);
+    });
+
+    test('Monster stats adjusted for aquarium', () => {
+        const base = { strength: 5, endurance: 3 };
+        const adjusted = adjustMonsterStatsForAquarium(base);
+        const dummy = { hp: 0, mp: 0 };
+        const stats = new StatManager(dummy, adjusted);
+        assert.strictEqual(stats.get('maxHp'), (10 + base.endurance * 5) * 2);
+        assert.ok(Math.abs(stats.get('attackPower')) < 0.001);
     });
 });

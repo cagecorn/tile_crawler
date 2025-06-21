@@ -615,7 +615,15 @@ export class Game {
             const { attacker, defender, distance } = data;
 
             if (this.motionManager) {
-                this.motionManager.knockbackTarget(defender, attacker, distance, this.vfxManager);
+                const result = this.motionManager.knockbackTarget(defender, attacker, distance);
+                if (result) {
+                    eventManager.publish('vfx_request', {
+                        type: 'knockback_animation',
+                        target: defender,
+                        fromPos: result.fromPos,
+                        toPos: result.toPos,
+                    });
+                }
             }
         });
 
@@ -914,6 +922,8 @@ export class Game {
                 }
             } else if (data.type === 'text_popup') {
                 this.vfxManager.addTextPopup(data.text, data.target, data.options || {});
+            } else if (data.type === 'knockback_animation') {
+                this.vfxManager.addKnockbackAnimation(data.target, data.fromPos, data.toPos);
             }
         });
 

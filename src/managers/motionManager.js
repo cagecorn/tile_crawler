@@ -91,28 +91,28 @@ export class MotionManager {
 
     /**
      * 대상을 공격자로부터 멀어지는 방향으로 밀어냅니다.
+     * 이동 결과를 반환하여 시각 효과는 외부에서 처리하도록 합니다.
      * @param {Entity} target - 밀려날 대상
      * @param {Entity} source - 공격자
      * @param {number} distance - 밀려날 거리
-     * @param {VFXManager} vfxManager - 애니메이션을 위한 VFX 매니저
+     * @returns {{fromPos:{x:number,y:number}, toPos:{x:number,y:number}}|null}
      */
-    knockbackTarget(target, source, distance, vfxManager) {
+    knockbackTarget(target, source, distance) {
         const angle = Math.atan2(target.y - source.y, target.x - source.x);
         const destX = target.x + Math.cos(angle) * distance;
         const destY = target.y + Math.sin(angle) * distance;
 
         if (this.mapManager.isWallAt(destX, destY, target.width, target.height)) {
             console.log('[MotionManager] 넉백 실패: 목적지에 벽이 있음');
-            return;
+            return null;
         }
 
-        if (vfxManager) {
-            const fromPos = { x: target.x, y: target.y };
-            const toPos = { x: destX, y: destY };
-            vfxManager.addKnockbackAnimation(target, fromPos, toPos);
-        } else {
-            target.x = destX;
-            target.y = destY;
-        }
+        const fromPos = { x: target.x, y: target.y };
+        const toPos = { x: destX, y: destY };
+
+        target.x = destX;
+        target.y = destY;
+
+        return { fromPos, toPos };
     }
 }
