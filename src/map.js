@@ -344,9 +344,13 @@ export class MapManager {
     }
 
     isWallAt(worldX, worldY, entityWidth = 0, entityHeight = 0) {
+        const w = Math.max(1, entityWidth);
+        const h = Math.max(1, entityHeight);
         const checkPoints = [
-            {x: worldX, y: worldY}, {x: worldX + entityWidth, y: worldY},
-            {x: worldX, y: worldY + entityHeight}, {x: worldX + entityWidth, y: worldY + entityHeight},
+            { x: worldX, y: worldY },
+            { x: worldX + w - 1, y: worldY },
+            { x: worldX, y: worldY + h - 1 },
+            { x: worldX + w - 1, y: worldY + h - 1 },
         ];
         for (const point of checkPoints) {
             const mapX = Math.floor(point.x / this.tileSize);
