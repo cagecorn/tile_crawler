@@ -48,7 +48,11 @@ export class MonsterManager {
     }
 
     update() {
-        // placeholder for future logic
+        for (const monster of this.monsters) {
+            if (typeof monster.update === 'function') {
+                monster.update();
+            }
+        }
     }
 
     getMonsterAt(x, y) {
