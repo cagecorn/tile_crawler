@@ -12,11 +12,11 @@ export class ItemAIManager {
 
     update(context) {
         const { player, mercenaryManager, monsterManager } = context;
-        const entities = [
+        const entities = Array.from(new Set([
             player,
             ...(mercenaryManager?.mercenaries || []),
             ...(monsterManager?.monsters || [])
-        ];
+        ]));
 
         let allEnemies = [];
         if (context.metaAIManager) {
@@ -94,22 +94,24 @@ export class ItemAIManager {
     _handleArtifacts(entity) {
         const inv = entity.consumables || entity.inventory;
         if (!Array.isArray(inv)) return;
-        const item = inv.find(i => i.type === 'artifact' || i.tags?.includes('artifact'));
-        if (!item) return;
-        if (item.cooldownRemaining > 0) return;
-        if (this.vfxManager && item.image) {
-            this.vfxManager.addItemUseEffect(entity, item.image, { scale: 0.33 });
+        for (const item of inv) {
+            if ((item.type === 'artifact' || item.tags?.includes('artifact')) && item.cooldownRemaining <= 0) {
+                if (this.vfxManager && item.image) {
+                    this.vfxManager.addItemUseEffect(entity, item.image, { scale: 0.33 });
+                }
+                if (item.healAmount) {
+                    entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
+                }
+                if (item.effectId && this.effectManager) {
+                    this.effectManager.addEffect(entity, item.effectId);
+                }
+                if (this.eventManager) {
+                    this.eventManager.publish('log', { message: `${entity.constructor.name} activates ${item.name}` });
+                }
+                item.cooldownRemaining = item.cooldown || 60;
+                break;
+            }
         }
-        if (item.healAmount) {
-            entity.hp = Math.min(entity.maxHp, entity.hp + item.healAmount);
-        }
-        if (item.effectId && this.effectManager) {
-            this.effectManager.addEffect(entity, item.effectId);
-        }
-        if (this.eventManager) {
-            this.eventManager.publish('log', { message: `${entity.constructor.name} activates ${item.name}` });
-        }
-        item.cooldownRemaining = item.cooldown || 60;
     }
 
     _handleBuffItems(self, allEntities) {

@@ -1,8 +1,10 @@
 export class PetManager {
-    constructor(eventManager = null, factory = null, metaAI = null) {
+    constructor(eventManager = null, factory = null, metaAI = null, auraManager = null, vfxManager = null) {
         this.eventManager = eventManager;
         this.factory = factory;
         this.metaAI = metaAI;
+        this.auraManager = auraManager;
+        this.vfxManager = vfxManager;
         this.pets = [];
         if (this.eventManager) {
             this.eventManager.subscribe('entity_death', ({ victim }) => {
@@ -13,6 +15,9 @@ export class PetManager {
                     if (pet.linkItem) {
                         pet.linkItem.cooldownRemaining = pet.linkItem.cooldown || 600;
                         delete pet.linkItem.petInstance;
+                    }
+                    if (this.auraManager) {
+                        this.auraManager.unregisterAura(pet);
                     }
                 }
             });
@@ -40,6 +45,9 @@ export class PetManager {
             this.metaAI.groups[owner.groupId].addMember(pet);
         }
         item.petInstance = pet;
+        if (item.aura && this.auraManager) {
+            this.auraManager.registerAura(pet, item.aura);
+        }
         return pet;
     }
 

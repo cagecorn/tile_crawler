@@ -129,6 +129,7 @@ export class Game {
             this.vfxManager
         );
         this.itemAIManager.setEffectManager(this.effectManager);
+        this.auraManager = new Managers.AuraManager(this.effectManager, this.eventManager, this.vfxManager);
         this.microItemAIManager = new Managers.MicroItemAIManager();
         this.microEngine = new MicroEngine(this.eventManager);
         this.microCombatManager = new MicroCombatManager(this.eventManager);
@@ -158,7 +159,7 @@ export class Game {
         this.uiManager.particleDecoratorManager = this.particleDecoratorManager;
         this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
-        this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager);
+        this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager, this.auraManager, this.vfxManager);
         this.managers.PetManager = this.petManager;
         this.skillManager.setManagers(this.effectManager, this.factory, this.metaAIManager, this.monsterManager);
         this.aquariumManager = new AquariumManager(
@@ -900,6 +901,9 @@ export class Game {
         turnManager.update(allEntities, { eventManager, player: gameState.player, parasiteManager: this.parasiteManager }); // 턴 매니저 업데이트
         itemManager.update();
         this.petManager.update();
+        if (this.auraManager) {
+            this.auraManager.update(allEntities);
+        }
         eventManager.publish('debug', { tag: 'Frame', message: '--- Frame Update Start ---' });
         const player = gameState.player;
         if (player.attackCooldown > 0) player.attackCooldown--;

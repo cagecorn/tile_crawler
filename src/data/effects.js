@@ -123,5 +123,12 @@ export const EFFECTS = {
         duration: 60,
         stats: {},
         tags: ['buff', 'parry_ready']
+    },
+    regeneration_aura: {
+        name: '재생 오라',
+        type: 'buff',
+        duration: 60,
+        stats: { hpRegen: 0.1 },
+        tags: ['aura', 'regen', 'regeneration_aura'],
     }
 };
