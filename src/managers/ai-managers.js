@@ -64,15 +64,12 @@ export class MetaAIManager {
         switch (action.type) {
             case 'attack':
                 if (entity.attackCooldown === 0) {
-                    // 공격 이벤트를 발행
-                    eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
                     const weaponTags = entity.equipment?.weapon?.tags || [];
                     const isRanged = weaponTags.includes('ranged') || weaponTags.includes('bow');
+                    eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
                     if (isRanged && context.projectileManager) {
                         const projSkill = { projectile: 'arrow', damage: entity.attackPower };
                         context.projectileManager.create(entity, action.target, projSkill);
-                    } else {
-                        eventManager.publish('entity_attack', { attacker: entity, defender: action.target });
                     }
                     const baseCd = 60;
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
@@ -179,26 +176,29 @@ export class MetaAIManager {
                 // 2단계: 행동 결정
                 let action = { type: 'idle' };
 
+                // 2.1: 역할(Role) AI가 먼저 행동을 결정 (힐, 소환 등)
                 if (member.roleAI) {
                     action = member.roleAI.decideAction(member, currentContext);
-                } else if (member.ai && !member.fallbackAI) {
-                    // backward compatibility: original ai property acts as role AI
-                    action = member.ai.decideAction(member, currentContext);
                 }
 
+                // 2.2: 역할 AI가 특별한 행동을 하지 않으면, 무기(Weapon) AI가 전투 행동을 결정
                 if (action.type === 'idle') {
                     const weapon = member.equipment?.weapon;
                     const combatAI = context.microItemAIManager?.getWeaponAI(weapon);
                     if (combatAI) {
                         action = combatAI.decideAction(member, weapon, currentContext);
-                    } else if (member.fallbackAI) {
-                        action = member.fallbackAI.decideAction(member, currentContext);
-                    } else if (member.ai) {
-                        // use legacy ai as fallback if present
-                        action = member.ai.decideAction(member, currentContext);
                     }
                 }
 
+                // 2.3: 무기 AI도 할 일이 없으면, 최후의 보루(Fallback) AI가 기본 행동 결정
+                if (action.type === 'idle') {
+                    if (member.fallbackAI) {
+                        action = member.fallbackAI.decideAction(member, currentContext);
+                    } else if (member.ai && !member.roleAI) { // 이전 버전 호환성
+                        action = member.ai.decideAction(member, currentContext);
+                    }
+                }
+                
                 this.executeAction(member, action, currentContext);
             }
         }
