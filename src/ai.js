@@ -196,14 +196,13 @@ export class HealerAI extends AIArchetype {
             self.skills.includes(healId) &&
             self.mp >= healSkill.manaCost &&
             (self.skillCooldowns[healId] || 0) <= 0;
-        // --- S/N 성향에 따라 알파벳을 표시하도록 수정 ---
+        // --- S/N 성향에 따라 힐 우선순위를 조정 ---
+        // 실제 힐을 사용할 때 MBTI 알파벳을 표시하기 위해 먼저 우선순위만 결정한다.
         let healThreshold = 0.7;
         if (mbti.includes('S')) {
             healThreshold = 0.9;
-            eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
         } else if (mbti.includes('N')) {
             healThreshold = 0.5;
-            eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
         }
 
         // 체력이 일정 비율 이하로 떨어진 아군만 후보로 선정
@@ -220,16 +219,16 @@ export class HealerAI extends AIArchetype {
             return { type: 'idle' };
         }
 
-        // --- E/I 성향에 따라 알파벳을 표시하도록 수정 ---
+        // --- E/I 성향에 따라 힐 대상 선택 ---
         let target = null;
         if (mbti.includes('I')) {
             target = candidates.find(c => c === self) || candidates[0];
-            if (target) eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
         } else if (mbti.includes('E')) {
-            target = candidates.reduce((lowest, cur) =>
-                cur.hp / cur.maxHp < lowest.hp / lowest.maxHp ? cur : lowest,
-            candidates[0]);
-            if (target) eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+            target = candidates.reduce(
+                (lowest, cur) =>
+                    cur.hp / cur.maxHp < lowest.hp / lowest.maxHp ? cur : lowest,
+                candidates[0],
+            );
         } else {
             target = candidates[0];
         }
@@ -244,6 +243,19 @@ export class HealerAI extends AIArchetype {
         );
 
         if (distance <= self.attackRange && hasLOS && skillReady) {
+            if (mbti.includes('S')) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'S', target: self });
+            } else if (mbti.includes('N')) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'N', target: self });
+            }
+
+            // E/I 성향을 실제 힐 순간에 표시
+            if (mbti.includes('E')) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+            } else if (mbti.includes('I')) {
+                eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
+            }
+
             return { type: 'skill', target, skillId: healId };
         }
 
@@ -457,20 +469,24 @@ export class BardAI extends AIArchetype {
             ) {
                 let target = player; // 기본 대상은 플레이어
 
-                // --- E/I 성향에 따라 알파벳을 표시하도록 수정 ---
+                // --- E/I 성향에 따라 노래 대상 선택 ---
                 if (mbti.includes('E')) {
-                    eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
                     const woundedAlly = allies
                         .filter(a => a !== self)
-                        .sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+                        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
                     if (woundedAlly) target = woundedAlly;
                 } else if (mbti.includes('I')) {
-                    eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
                     target = self;
                 }
 
                 const distance = Math.hypot(target.x - self.x, target.y - self.y);
                 if (distance <= self.attackRange) {
+                    // E/I 성향을 실제 노래 시점에 표시
+                    if (mbti.includes('E')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
+                    } else if (mbti.includes('I')) {
+                        eventManager?.publish('vfx_request', { type: 'text_popup', text: 'I', target: self });
+                    }
                     return { type: 'skill', target, skillId };
                 }
                 return { type: 'move', target };
