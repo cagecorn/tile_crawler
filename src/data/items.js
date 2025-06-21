@@ -204,4 +204,24 @@ export const ITEMS = {
         imageKey: 'potion',
         effectId: 'strength_buff'
     },
+
+    // --- 룬 아이템 ---
+    fire_rune: {
+        name: '화염의 룬',
+        type: 'rune',
+        tags: ['rune', 'fire', 'fire_rune'],
+        imageKey: 'fire-ball',
+        elementType: 'fire',
+        weaponDamage: 5,
+        armorResist: 0.1,
+    },
+    ice_rune: {
+        name: '냉기의 룬',
+        type: 'rune',
+        tags: ['rune', 'ice', 'ice_rune'],
+        imageKey: 'ice-ball',
+        elementType: 'ice',
+        weaponDamage: 4,
+        armorResist: 0.1,
+    },
 };
