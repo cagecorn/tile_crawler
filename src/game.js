@@ -33,6 +33,7 @@ import { disarmWorkflow, armorBreakWorkflow } from './workflows.js';
 import { PossessionAIManager } from './managers/possessionAIManager.js';
 import { Ghost } from './entities.js';
 import { TankerGhostAI, RangedGhostAI, SupporterGhostAI, CCGhostAI } from './ai.js';
+import { EMBLEMS } from './data/emblems.js';
 
 export class Game {
     constructor() {
@@ -170,16 +171,19 @@ export class Game {
         this.uiManager.vfxManager = this.vfxManager;
         this.metaAIManager = new MetaAIManager(this.eventManager);
         this.possessionAIManager = new PossessionAIManager(this.eventManager);
-        const ghostTypes = [
-            { type: 'tanker', ai: new TankerGhostAI() },
-            { type: 'ranged', ai: new RangedGhostAI() },
-            { type: 'supporter', ai: new SupporterGhostAI() },
-            { type: 'cc', ai: new CCGhostAI() }
-        ];
+        this.itemFactory.emblems = EMBLEMS;
+
+        const ghostAIs = {
+            tanker: new TankerGhostAI(),
+            ranged: new RangedGhostAI(),
+            supporter: new SupporterGhostAI(),
+            cc: new CCGhostAI()
+        };
+        const ghostTypes = Object.keys(ghostAIs);
         const numGhosts = Math.floor(Math.random() * 3) + 1;
         for (let i = 0; i < numGhosts; i++) {
-            const randomGhost = ghostTypes[Math.floor(Math.random() * ghostTypes.length)];
-            this.possessionAIManager.addGhost(new Ghost(randomGhost.type, randomGhost.ai));
+            const randomType = ghostTypes[Math.floor(Math.random() * ghostTypes.length)];
+            this.possessionAIManager.addGhost(new Ghost(randomType, ghostAIs[randomType]));
         }
         this.petManager = new Managers.PetManager(this.eventManager, this.factory, this.metaAIManager, this.auraManager, this.vfxManager);
         this.managers.PetManager = this.petManager;
