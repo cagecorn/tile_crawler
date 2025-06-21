@@ -186,13 +186,7 @@ export class HealerAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, mapManager, eventManager } = context;
         const mbti = self.properties?.mbti || '';
-        if (eventManager) {
-            self._mbtiIconCooldown = (self._mbtiIconCooldown || 0) - 1;
-            if (self._mbtiIconCooldown <= 0 && mbti) {
-                eventManager.publish('vfx_request', { type: 'text_popup', text: mbti, target: self, options: { duration: 30 } });
-                self._mbtiIconCooldown = 120;
-            }
-        }
+        // --- 기존의 타이머 기반 MBTI 표시 로직을 삭제합니다. ---
         const healId = SKILLS.heal?.id;
         const healSkill = SKILLS[healId];
 
@@ -202,7 +196,7 @@ export class HealerAI extends AIArchetype {
             self.skills.includes(healId) &&
             self.mp >= healSkill.manaCost &&
             (self.skillCooldowns[healId] || 0) <= 0;
-        // 성향에 따라 치유 시점 결정
+        // --- S/N 성향에 따라 알파벳을 표시하도록 수정 ---
         let healThreshold = 0.7;
         if (mbti.includes('S')) {
             healThreshold = 0.9;
@@ -226,7 +220,7 @@ export class HealerAI extends AIArchetype {
             return { type: 'idle' };
         }
 
-        // MBTI 성향에 따른 대상 선택
+        // --- E/I 성향에 따라 알파벳을 표시하도록 수정 ---
         let target = null;
         if (mbti.includes('I')) {
             target = candidates.find(c => c === self) || candidates[0];
@@ -256,6 +250,8 @@ export class HealerAI extends AIArchetype {
         return { type: 'move', target };
     }
 }
+
+// ... PurifierAI, RangedAI, WizardAI, SummonerAI 클래스는 변경 없습니다 ...
 
 // --- 정화 전용 AI ---
 export class PurifierAI extends AIArchetype {
@@ -449,13 +445,7 @@ export class BardAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, mapManager, eventManager } = context;
         const mbti = self.properties?.mbti || '';
-        if (eventManager) {
-            self._mbtiIconCooldown = (self._mbtiIconCooldown || 0) - 1;
-            if (self._mbtiIconCooldown <= 0 && mbti) {
-                eventManager.publish('vfx_request', { type: 'text_popup', text: mbti, target: self, options: { duration: 30 } });
-                self._mbtiIconCooldown = 120;
-            }
-        }
+        // --- 기존의 타이머 기반 MBTI 표시 로직을 삭제합니다. ---
         const songs = [SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id];
         for (const skillId of songs) {
             const skill = SKILLS[skillId];
@@ -467,7 +457,7 @@ export class BardAI extends AIArchetype {
             ) {
                 let target = player; // 기본 대상은 플레이어
 
-                // E/I 성향에 따라 대상 선택
+                // --- E/I 성향에 따라 알파벳을 표시하도록 수정 ---
                 if (mbti.includes('E')) {
                     eventManager?.publish('vfx_request', { type: 'text_popup', text: 'E', target: self });
                     const woundedAlly = allies
