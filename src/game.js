@@ -15,6 +15,8 @@ export class Game {
 
         this.loader.onReady(assets => {
             this.engine = new Engine(assets);
+            // ✨ start()를 호출하기 전에 initialize()를 먼저 호출합니다.
+            this.engine.initialize();
             this.engine.start();
         });
     }

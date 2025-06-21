@@ -84,8 +84,12 @@ export class UIManager {
         };
     }
 
-    init(callbacks) {
+    init(gameState, callbacks) {
         if (this._isInitialized) return;
+
+        // ✨ gameState를 즉시 저장하여 모든 UI 기능이 정상 작동하도록 합니다.
+        this.gameState = gameState;
+
         this.callbacks = callbacks || {};
         this._statUpCallback = this.callbacks.onStatUp;
 
