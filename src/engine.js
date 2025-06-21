@@ -33,7 +33,7 @@ export class Engine {
         if (this.gameState.isPaused || this.gameState.isGameOver) return;
         
         const { player } = this.gameState;
-        const { monsterManager, mercenaryManager, petManager, itemManager, metaAIManager, fogManager } = this.managers;
+        const { monsterManager, mercenaryManager, petManager, itemManager, aiEngine, fogManager } = this.managers;
 
         // --- KnockbackEngine 업데이트 루프 추가 ---
         this.managers.knockbackEngine.update();
@@ -54,7 +54,7 @@ export class Engine {
 
         const context = {
             player,
-            playerGroup: metaAIManager.groups['player_party'],
+            playerGroup: aiEngine.groups['player_party'],
             monsterManager,
             mercenaryManager,
             petManager,
@@ -67,7 +67,7 @@ export class Engine {
             speechBubbleManager: this.managers.speechBubbleManager,
             movementManager: this.managers.movementManager,
             motionManager: this.managers.motionManager,
-            metaAIManager,
+            aiEngine,
             onPlayerAttack: (damage) => {
                 player.takeDamage(damage);
                 if (player.hp <= 0) {
@@ -86,14 +86,12 @@ export class Engine {
             }
         };
 
+        aiEngine.update(context);
+
         Object.entries(this.managers).forEach(([name, manager]) => {
-            if (typeof manager.update === 'function') {
+            if (typeof manager.update === 'function' && manager !== aiEngine) {
                 if (name === 'fogManager' || manager === this.managers.knockbackEngine) return; // 시야 매니저와 넉백 엔진은 별도 처리
-                if (['metaAIManager', 'itemAIManager', 'possessionAIManager'].includes(name)) {
-                    manager.update(context);
-                } else {
-                    manager.update(allEntities);
-                }
+                manager.update(allEntities);
             }
         });
 
