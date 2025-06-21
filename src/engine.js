@@ -87,12 +87,22 @@ export class Engine {
             }
         };
 
-        aiEngine.update(context);
+        try {
+            aiEngine.update(context);
+        } catch (err) {
+            console.error('AI update error', err);
+            this.eventManager.publish('debug', { tag: 'ERROR', message: `AI update failed: ${err.message}` });
+        }
 
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
                 if (name === 'fogManager' || manager === this.managers.knockbackEngine) return; // 시야 매니저와 넉백 엔진은 별도 처리
-                manager.update(allEntities);
+                try {
+                    manager.update(allEntities);
+                } catch (err) {
+                    console.error(`Manager ${name} update error`, err);
+                    this.eventManager.publish('debug', { tag: 'ERROR', message: `${name} update failed: ${err.message}` });
+                }
             }
         });
 
