@@ -7,6 +7,7 @@ export class MicroCombatManager {
     }
 
     resolveAttack(attacker, defender) {
+        if (!attacker || !defender) return;
         const weapon = attacker.equipment?.weapon;
         const armor = defender.equipment?.armor;
         if (!weapon || !armor) return;

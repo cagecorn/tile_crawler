@@ -9,6 +9,7 @@ export function registerGameEventListeners(engine) {
     const { combatCalculator, vfxManager, effectManager, monsterManager, itemManager, uiManager, motionManager, equipmentManager, projectileManager } = managers;
 
     eventManager.subscribe('entity_attack', (data) => {
+        if (!data.attacker || !data.defender) return;
         managers.microCombatManager.resolveAttack(data.attacker, data.defender);
         combatCalculator.handleAttack(data);
         if (!data.skill || !data.skill.projectile) {
