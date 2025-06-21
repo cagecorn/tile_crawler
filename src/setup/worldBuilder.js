@@ -75,12 +75,18 @@ export function buildInitialWorld(managers, assets) {
     }
 
     // 용병 고용 버튼 이벤트 연결
-    document.getElementById('hire-mercenary').onclick = () => hire('warrior');
-    document.getElementById('hire-archer').onclick = () => hire('archer');
-    document.getElementById('hire-healer').onclick = () => hire('healer');
-    document.getElementById('hire-wizard').onclick = () => hire('wizard');
-    document.getElementById('hire-bard').onclick = () => hire('bard');
-    document.getElementById('hire-summoner').onclick = () => hire('summoner');
+    const hireButtons = {
+        'hire-mercenary': 'warrior',
+        'hire-archer': 'archer',
+        'hire-healer': 'healer',
+        'hire-wizard': 'wizard',
+        'hire-bard': 'bard',
+        'hire-summoner': 'summoner',
+    };
+    for (const [id, job] of Object.entries(hireButtons)) {
+        const btn = document.getElementById(id);
+        if (btn) btn.onclick = () => hire(job);
+    }
 
     function hire(jobId) {
         if (gameState.gold >= 50) {
