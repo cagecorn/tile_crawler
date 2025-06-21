@@ -153,7 +153,7 @@ export class Game {
 
         this.itemFactory = new ItemFactory(assets);
         this.pathfindingManager = new PathfindingManager(this.mapManager);
-        this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager);
+        this.motionManager = new Managers.MotionManager(this.mapManager, this.pathfindingManager, this.eventManager);
         this.movementManager = new MovementManager(this.mapManager);
         this.fogManager = new FogManager(this.mapManager.width, this.mapManager.height);
         this.particleDecoratorManager = new Managers.ParticleDecoratorManager();
@@ -814,6 +814,10 @@ export class Game {
         eventManager.subscribe('vfx_request', (data) => {
             if (data.type === 'dash_trail') {
                 this.vfxManager.createDashTrail(data.from.x, data.from.y, data.to.x, data.to.y);
+            } else if (data.type === 'whip_trail') {
+                if (this.vfxManager.createWhipTrail) {
+                    this.vfxManager.createWhipTrail(data.from.x, data.from.y, data.to.x, data.to.y);
+                }
             } else if (data.type === 'text_popup') {
                 this.vfxManager.addTextPopup(data.text, data.target, data.options || {});
             }
@@ -1046,6 +1050,7 @@ export class Game {
             monsterManager,
             mercenaryManager,
             pathfindingManager,
+            motionManager: this.motionManager, // 이 줄이 추가되었습니다!
             movementManager: this.movementManager,
             projectileManager: this.projectileManager,
             itemManager: this.itemManager,

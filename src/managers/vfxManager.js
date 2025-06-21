@@ -136,6 +136,19 @@ export class VFXManager {
         }
     }
 
+    createWhipTrail(fromX, fromY, toX, toY) {
+        const particleCount = 12;
+        for (let i = 0; i < particleCount; i++) {
+            const progress = i / particleCount;
+            const x = fromX + (toX - fromX) * progress;
+            const y = fromY + (toY - fromY) * progress;
+            const particle = new Particle(x, y, 'rgba(255, 100, 100, 0.7)');
+            particle.lifespan = 15;
+            particle.gravity = 0;
+            this.particles.push(particle);
+        }
+    }
+
     /**
      * 아이템이 시체 위치에서 포물선을 그리며 튀어나오는 애니메이션을 추가합니다.
      * 애니메이션이 종료되면 ItemManager에 아이템을 정식으로 추가합니다.
