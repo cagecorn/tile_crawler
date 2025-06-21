@@ -94,6 +94,13 @@ export class Engine {
             this.eventManager.publish('debug', { tag: 'ERROR', message: `AI update failed: ${err.message}` });
         }
 
+        // 각 엔티티의 쿨다운과 회복 등을 갱신한다
+        for (const ent of allEntities) {
+            if (typeof ent.update === 'function') {
+                ent.update();
+            }
+        }
+
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
                 if (name === 'fogManager' || manager === this.managers.knockbackEngine) return; // 시야 매니저와 넉백 엔진은 별도 처리
