@@ -1,6 +1,7 @@
 import * as Managers from '../managers/index.js';
 import { TagManager } from '../managers/tagManager.js';
 import { CombatCalculator } from '../combat.js';
+import { KnockbackEngine } from '../engines/knockbackEngine.js';
 import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
 import { FogManager } from '../managers/fogManager.js';
@@ -18,8 +19,12 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.mapManager = mapManager;
 
     // 기본 관리자
+    managers.vfxManager = new Managers.VFXManager(eventManager, null);
+
+    // --- KnockbackEngine을 생성하고 CombatCalculator에 주입 ---
+    managers.knockbackEngine = new KnockbackEngine(eventManager, mapManager, managers.vfxManager);
     managers.tagManager = new TagManager();
-    managers.combatCalculator = new CombatCalculator(eventManager, managers.tagManager);
+    managers.combatCalculator = new CombatCalculator(eventManager, managers.tagManager, managers.knockbackEngine);
 
     // 월드 관련
     managers.pathfindingManager = new PathfindingManager(mapManager);
@@ -38,7 +43,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.monsterManager.setTraitManager(managers.traitManager);
 
     // 시각 및 효과
-    managers.vfxManager = new Managers.VFXManager(eventManager, managers.itemManager);
+    managers.vfxManager.itemManager = managers.itemManager;
     managers.effectManager = new Managers.EffectManager(eventManager, managers.vfxManager);
     managers.effectIconManager = new Managers.EffectIconManager(eventManager, assets);
 

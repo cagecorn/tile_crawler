@@ -35,6 +35,9 @@ export class Engine {
         const { player } = this.gameState;
         const { monsterManager, mercenaryManager, petManager, itemManager, metaAIManager, fogManager } = this.managers;
 
+        // --- KnockbackEngine 업데이트 루프 추가 ---
+        this.managers.knockbackEngine.update();
+
         // Player movement
         let moveX = 0, moveY = 0;
         if (this.inputHandler.keysPressed['ArrowUp']) moveY -= player.speed;
@@ -50,7 +53,7 @@ export class Engine {
         const allEntities = [player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...petManager.pets];
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function') {
-                if (name === 'fogManager') return; // 시야 매니저는 별도 처리
+                if (name === 'fogManager' || manager === this.managers.knockbackEngine) return; // 시야 매니저와 넉백 엔진은 별도 처리
                 manager.update(allEntities);
             }
         });

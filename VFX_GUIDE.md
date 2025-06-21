@@ -48,3 +48,6 @@ AI가 성격(MBTI) 특성을 발동하면 `ai_mbti_trait_triggered` 이벤트가
 `Game` 클래스는 이를 구독해 `VFXManager.addTextPopup()`을 호출하며, 실제
 시각 효과는 이곳에서 생성됩니다. AI 로직에서는 이벤트만 발행하므로 팝업 표시
 동작을 손쉽게 조정할 수 있습니다.
+
+## Knockback 연출 분리
+`KnockbackEngine`은 대상의 위치 이동을 직접 제어합니다. 넉백이 발생하면 이 엔진이 매 프레임 위치를 보정하고, `VFXManager`는 잔상이나 충격파 같은 시각 효과만 담당합니다. 물리 로직과 VFX가 분리되어 테스트와 유지 보수가 쉬워집니다.

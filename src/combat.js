@@ -3,9 +3,10 @@
 import { WEAPON_SKILLS } from './data/weapon-skills.js';
 
 export class CombatCalculator {
-    constructor(eventManager, tagManager) {
+    constructor(eventManager, tagManager, knockbackEngine) {
         this.eventManager = eventManager;
         this.tagManager = tagManager;
+        this.knockbackEngine = knockbackEngine;
     }
 
     _calculateRuneDamage(weapon, skill) {
@@ -85,7 +86,13 @@ export class CombatCalculator {
             damageMultiplier = 1.5;
             attacker.effects = attacker.effects.filter(e => e.id !== 'charging_shot_effect');
             this.eventManager.publish('log', { message: `[충전된 사격]이 발동됩니다!`, color: 'magenta' });
-            this.eventManager.publish('knockback_request', { attacker, defender, distance: 128 });
+            // KnockbackEngine과의 호환을 위해 이벤트를 발행합니다
+            this.eventManager.publish('knockback_request', {
+                defender,
+                attacker,
+                distance: 128,
+                duration: 15,
+            });
         }
 
         if (skill && skill.id === 'backstab' && this._isBehind(attacker, defender)) {
