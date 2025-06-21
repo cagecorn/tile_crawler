@@ -10,11 +10,16 @@ import { EMBLEMS } from './data/emblems.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { MeleeAI, RangedAI, HealerAI, WizardAI, SummonerAI, BardAI, PurifierAI, CompositeAI } from './ai.js';
+import { CompositeAI, PurifierAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 import { PETS } from './data/pets.js';
 import { WeaponStatManager } from './micro/WeaponStatManager.js';
 import { SYNERGIES } from './data/synergies.js';
+// 새 행동 모듈들
+import { CombatBehavior } from './ai/behaviors/combat.js';
+import { HealBehavior } from './ai/behaviors/heal.js';
+import { BardBehavior } from './ai/behaviors/bard.js';
+import { WanderBehavior } from './ai/behaviors/wander.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -77,65 +82,48 @@ export class CharacterFactory {
                     finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
                 }
                 const merc = new Mercenary(finalConfig);
-                merc.fallbackAI = new MeleeAI();
+                merc.behaviors = [];
 
-                if (config.jobId === 'archer') {
-                    const rangedSkill = Math.random() < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id;
-                    merc.skills.push(rangedSkill);
-                    const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
-                    if (bow) {
-                        merc.equipment.weapon = bow;
-                        if (merc.stats) merc.stats.updateEquipmentStats();
-                        if (typeof merc.updateAI === 'function') merc.updateAI();
-                    }
-                    merc.fallbackAI = new RangedAI();
-                } else if (config.jobId === 'warrior') {
-                    merc.skills.push(SKILLS.charge_attack.id);
-                } else if (config.jobId === 'healer') {
+                if (config.jobId === 'healer') {
                     merc.skills.push(SKILLS.heal.id);
                     merc.skills.push(SKILLS.purify.id);
-                    merc.roleAI = new CompositeAI(new PurifierAI(), new HealerAI());
-                } else if (config.jobId === 'wizard') {
-                    const mageSkill = Math.random() < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id;
-                    merc.skills.push(mageSkill);
-                    merc.roleAI = new WizardAI();
-                } else if (config.jobId === 'summoner') {
-                    merc.skills.push(SKILLS.summon_skeleton.id);
-                    merc.properties.maxMinions = 2;
-                    merc.roleAI = new SummonerAI();
+                    merc.behaviors.push(new HealBehavior());
+                    merc.behaviors.push(new PurifierAI());
                 } else if (config.jobId === 'bard') {
-                    merc.skills.push(SKILLS.guardian_hymn.id);
-                    merc.skills.push(SKILLS.courage_hymn.id);
+                    merc.skills.push(SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id);
                     const vb = this.itemFactory.create('violin_bow', 0, 0, tileSize);
-                    if (vb) {
-                        merc.equipment.weapon = vb;
-                        if (merc.stats) merc.stats.updateEquipmentStats();
-                        if (typeof merc.updateAI === 'function') merc.updateAI();
-                    }
-                    merc.roleAI = new BardAI();
-                } else {
-                    const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
-                    merc.skills.push(skillId);
+                    if (vb) merc.equipment.weapon = vb;
+                    merc.behaviors.push(new BardBehavior());
+                } else if (config.jobId === 'archer') {
+                    const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
+                    if (bow) merc.equipment.weapon = bow;
+                } else if (config.jobId === 'warrior') {
+                    merc.skills.push(SKILLS.charge_attack.id);
                 }
+
+                // 모든 용병은 전투 및 배회 행동을 가짐
+                merc.behaviors.push(new CombatBehavior());
+                merc.behaviors.push(new WanderBehavior());
 
                 if (!merc.equipment.weapon) {
                     const sword = this.itemFactory.create('sword', 0, 0, tileSize);
-                    if (sword) {
-                        merc.equipment.weapon = sword;
-                        if (merc.stats) merc.stats.updateEquipmentStats();
-                        if (typeof merc.updateAI === 'function') merc.updateAI();
-                    }
+                    if (sword) merc.equipment.weapon = sword;
                 }
+                if (merc.stats) merc.stats.updateEquipmentStats();
 
                 return merc;
             case 'monster':
-                return new Monster(finalConfig);
+                const monster = new Monster(finalConfig);
+                monster.behaviors = [new CombatBehavior()];
+                return monster;
             case 'pet':
                 const petData = PETS[config.petId] || PETS.fox;
                 finalConfig.stats = { ...finalConfig.stats, ...(petData.baseStats || {}) };
                 finalConfig.image = finalConfig.image || this.assets[petData.imageKey];
                 finalConfig.auraSkill = petData.auraSkill;
-                return new Pet(finalConfig);
+                const pet = new Pet(finalConfig);
+                pet.behaviors = [new CombatBehavior(), new WanderBehavior()];
+                return pet;
         }
     }
     
