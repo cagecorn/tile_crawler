@@ -221,7 +221,9 @@ export class Game {
         }
 
         // example feature: spawn several monsters for poison debuff testing
-        for (let i = 0; i < 20; i++) {
+        // The aquarium used to spawn 20 basic monsters, which was excessive
+        // for early testing. Reduce the count by half for better breathing room.
+        for (let i = 0; i < 10; i++) {
             this.aquariumManager.addTestingFeature({
                 type: 'monster',
                 image: assets.monster,
