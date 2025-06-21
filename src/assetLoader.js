@@ -9,13 +9,18 @@ export class AssetLoader {
     // 이미지를 로드하는 메서드
     loadImage(key, src) {
         const img = new Image();
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve) => {
             img.onload = () => {
                 this.assets[key] = img;
                 resolve(img);
             };
             img.onerror = () => {
-                reject(`Failed to load image: ${src}`);
+                console.warn(`[AssetLoader] Missing image: ${src}`);
+                const placeholder = new Image();
+                placeholder.src =
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAEklEQVR42mP8/5+hHgAGgwJ/lzzYowAAAABJRU5ErkJggg==';
+                this.assets[key] = placeholder;
+                resolve(placeholder);
             };
         });
         img.src = src;
