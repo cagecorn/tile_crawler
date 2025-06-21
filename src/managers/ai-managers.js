@@ -131,7 +131,8 @@ export class MetaAIManager {
                 }
 
                 if (action.skillId === 'pull' && context.motionManager && action.target) {
-                    context.motionManager.pullTargetTo(action.target, entity);
+                    // vfxManager를 pullTargetTo에 전달합니다.
+                    context.motionManager.pullTargetTo(action.target, entity, context.vfxManager);
                 }
 
                 if (action.skillId === 'charge_shot' && context.effectManager) {
