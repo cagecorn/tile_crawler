@@ -135,9 +135,19 @@ class Entity {
         ctx.fill();
 
         // 2. 유닛 이미지 그리기 (yOffset 적용)
+        const statusEffect = this.effects.find(e => e.overlayColor);
+
         ctx.scale(this.direction || 1, 1);
         if (this.image) {
-            ctx.drawImage(this.image, -this.width / 2, -this.height + yOffset, this.width, this.height);
+            ctx.drawImage(this.image, -this.width / 2, -
+                this.height + yOffset, this.width, this.height);
+        }
+
+        if (statusEffect) {
+            ctx.globalCompositeOperation = 'source-atop';
+            ctx.fillStyle = statusEffect.overlayColor;
+            ctx.fillRect(-this.width / 2, -this.height + yOffset, this.width, this.height);
+            ctx.globalCompositeOperation = 'source-over';
         }
 
         // 3. 장비 그리기 (yOffset 적용)
