@@ -2,21 +2,11 @@ import { TRAITS } from '../data/traits.js';
 import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
 
 export class MonsterManager {
-    constructor(a = null, b = null, c = null, d = null, e = 0) {
-        // allow legacy signature (count,map,assets,ev,factory)
-        if (typeof a === 'number') {
-            this.eventManager = d;
-            this.assets = c;
-            this.factory = e;
-            this.mapManager = b;
-            this._initialCount = a;
-        } else {
-            this.eventManager = a;
-            this.assets = b;
-            this.factory = c;
-            this.mapManager = d;
-            this._initialCount = e || 0;
-        }
+    constructor(eventManager, mapManager, assets, factory) {
+        this.eventManager = eventManager;
+        this.mapManager = mapManager;
+        this.assets = assets;
+        this.factory = factory;
         this.monsters = [];
         this.traitManager = null;
         console.log("[MonsterManager] Initialized");
@@ -25,10 +15,6 @@ export class MonsterManager {
             this.eventManager.subscribe('entity_removed', (data) => {
                 this.monsters = this.monsters.filter(m => m.id !== data.victimId);
             });
-        }
-
-        if (this._initialCount > 0 && this.mapManager && this.assets && this.factory) {
-            this._spawnMonsters(this._initialCount);
         }
     }
 

@@ -88,6 +88,18 @@ export class UIManager {
         if (this._isInitialized) return;
         this.callbacks = callbacks || {};
         this._statUpCallback = this.callbacks.onStatUp;
+
+        // \u2728 이 부분을 추가하여 상단 메뉴 버튼을 활성화합니다.
+        document.querySelectorAll('.menu-btn[data-panel-id]').forEach(btn => {
+            btn.onclick = () => {
+                this.showPanel(btn.dataset.panelId);
+                // \uD50C\uB808\uC774\uC5B4 \uC815\uBCF4\uCC3D\uC740 \uD2B9\uC218\uD558\uAC8C showCharacterSheet\uB97C \uD638\uCD9C\uD569\uB2C8\uB2E4.
+                if (btn.dataset.panelId === 'character-sheet-panel' && this.gameState?.player) {
+                    this.showCharacterSheet(this.gameState.player);
+                }
+            };
+        });
+
         this.onEquipItem = this.callbacks.onEquipItem;
         this.onConsumableUse = this.callbacks.onConsumableUse;
         if (this.statUpButtonsContainer) {
@@ -492,6 +504,7 @@ export class UIManager {
         } else if (panelId === 'character-sheet-panel' && this.characterSheetPanel) {
             this.characterSheetPanel.classList.remove('hidden');
         }
+        if (this.gameState) this.gameState.isPaused = true;
     }
 
     hidePanel(panelId) {
