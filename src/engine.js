@@ -48,10 +48,49 @@ export class Engine {
 
         // Update all managers
         const allEntities = [player, ...mercenaryManager.mercenaries, ...monsterManager.monsters, ...petManager.pets];
+
+        const context = {
+            player,
+            playerGroup: metaAIManager.groups['player_party'],
+            monsterManager,
+            mercenaryManager,
+            petManager,
+            itemManager,
+            mapManager: this.mapManager,
+            eventManager: this.eventManager,
+            assets: this.assets,
+            projectileManager: this.managers.projectileManager,
+            effectManager: this.managers.effectManager,
+            speechBubbleManager: this.managers.speechBubbleManager,
+            movementManager: this.managers.movementManager,
+            motionManager: this.managers.motionManager,
+            metaAIManager,
+            onPlayerAttack: (damage) => {
+                player.takeDamage(damage);
+                if (player.hp <= 0) {
+                    this.eventManager.publish('game_over');
+                }
+            },
+            onMonsterAttacked: (id, damage) => {
+                const monster = monsterManager.monsters.find(m => m.id === id);
+                if (monster) {
+                    monster.takeDamage(damage);
+                    if (monster.hp <= 0) {
+                        this.eventManager.publish('entity_death', { attacker: player, victim: monster });
+                        monsterManager.removeMonster(monster.id);
+                    }
+                }
+            }
+        };
+
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function') {
                 if (name === 'fogManager') return; // 시야 매니저는 별도 처리
-                manager.update(allEntities);
+                if (['metaAIManager', 'itemAIManager', 'possessionAIManager'].includes(name)) {
+                    manager.update(context);
+                } else {
+                    manager.update(allEntities);
+                }
             }
         });
 
