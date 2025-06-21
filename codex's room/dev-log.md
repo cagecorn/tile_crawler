@@ -55,3 +55,8 @@
 ## 세션 12
 - 아티팩트 아이템 시스템 초안 구현. `healing_talisman` 샘플을 추가하고 쿨다운이 돌아가도록 엔티티와 ItemAIManager를 수정.
 - 새 테스트 `artifact.test.js`에서 아티팩트 사용 및 쿨다운 갱신을 검증.
+
+## 세션 13
+- 알파벳 상태 효과 8종을 `effects.js`에 추가.
+- `StatManager`가 상태 효과를 감지해 스탯 보너스를 적용하도록 수정.
+- 새 테스트 `alphabetState.test.js`로 이동 속도 증가를 확인.

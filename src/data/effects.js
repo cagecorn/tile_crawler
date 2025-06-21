@@ -253,5 +253,63 @@ export const EFFECTS = {
         duration: 600,
         tags: ['status_ailment', 'cc', 'charm', 'ai_override'],
         particle: { type: 'heart', color: 'rgba(255, 105, 180, 0.9)' }
+    },
+
+    // --- 알파벳 상태 효과 (Emotion Card 기반) ---
+    state_E: {
+        name: 'E 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'E_state'],
+        stats: { agility: 1 }
+    },
+    state_I: {
+        name: 'I 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'I_state'],
+        stats: { strength: 1 }
+    },
+    state_S: {
+        name: 'S 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'S_state'],
+        stats: { attackSpeed: 0.1 }
+    },
+    state_N: {
+        name: 'N 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'N_state'],
+        stats: { intelligence: 1 }
+    },
+    state_T: {
+        name: 'T 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'T_state'],
+        stats: { attackSpeed: 0.1 }
+    },
+    state_F: {
+        name: 'F 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'F_state'],
+        stats: { hpRegen: 0.05 }
+    },
+    state_P: {
+        name: 'P 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'P_state'],
+        stats: { movement: 1 }
+    },
+    state_J: {
+        name: 'J 상태',
+        type: 'state',
+        duration: 300,
+        tags: ['alphabet_state', 'J_state'],
+        stats: { movement: -1 }
     }
 };
