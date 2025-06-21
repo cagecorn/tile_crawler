@@ -36,6 +36,7 @@ test('pullTargetTo moves target to closest open tile', () => {
     const subject = { x: 2, y: 2, width: 1, height: 1 };
     const target = { x: 4, y: 4, width: 1, height: 1, constructor: { name: 'Dummy' } };
     motion.pullTargetTo(target, subject);
+
     assert.strictEqual(target.x, subject.x);
     // Target should move to the tile closest to its original position, which is below the subject
     assert.strictEqual(target.y, subject.y + mapManager.tileSize);

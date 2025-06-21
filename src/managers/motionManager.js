@@ -7,7 +7,6 @@ export class MotionManager {
         console.log("[MotionManager] Initialized");
     }
 
-    // dash the entity toward the target up to maxTiles tiles
     dashTowards(entity, target, maxTiles = 8, allEnemies = [], eventManager = null, vfxManager = null, strikeImage = null) {
         const tileSize = this.mapManager.tileSize;
         const startPos = { x: entity.x, y: entity.y };
@@ -19,7 +18,7 @@ export class MotionManager {
 
         const path = this.pathfindingManager.findPath(startX, startY, endX, endY, () => false);
         if (path.length === 0) return;
-
+        
         const actualMoveDistance = Math.min(maxTiles, path.length);
         const dest = path[actualMoveDistance - 1];
         const destX = dest.x * tileSize;
@@ -34,39 +33,35 @@ export class MotionManager {
             const step = path[i];
             const worldX = step.x * tileSize + tileSize / 2;
             const worldY = step.y * tileSize + tileSize / 2;
-
+            
             const enemiesInPath = findEntitiesInRadius(worldX, worldY, tileSize, allEnemies, entity);
-            for (const enemy of enemiesInPath) {
-                if (!hitEnemies.has(enemy.id)) {
-                    if (eventManager) {
-                        eventManager.publish('entity_attack', { attacker: entity, defender: enemy, skill: { name: '돌진' } });
+            for(const enemy of enemiesInPath) {
+                if(!hitEnemies.has(enemy.id)) {
+                    if(eventManager) {
+                        eventManager.publish('entity_attack', { attacker: entity, defender: enemy, skill: {name: '돌진'}});
                     }
                     if (vfxManager && strikeImage) {
-                        vfxManager.addSpriteEffect(strikeImage, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, { blendMode: 'screen' });
+                         vfxManager.addSpriteEffect(strikeImage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, { blendMode: 'screen' });
                     }
                     hitEnemies.add(enemy.id);
                 }
             }
         }
-
+        
         if (!this.mapManager.isWallAt(destX, destY, entity.width, entity.height)) {
             entity.x = destX;
             entity.y = destY;
         }
     }
 
-    /**
-     * 목표(target)를 주체(subject)의 바로 앞으로 끌어옵니다.
-     * @param {Entity} target - 끌려올 대상
-     * @param {Entity} subject - 끌어오는 주체
-     */
-    pullTargetTo(target, subject) {
+    pullTargetTo(target, subject, vfxManager) {
         const tileSize = this.mapManager.tileSize;
-        const dirs = [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }];
+        
+        const dirs = [{x:0, y:-1}, {x:0, y:1}, {x:-1, y:0}, {x:1, y:0}];
         let bestPos = null;
         let minDistanceToTarget = Infinity;
 
-        for (const dir of dirs) {
+        for(const dir of dirs) {
             const checkX = subject.x + dir.x * tileSize;
             const checkY = subject.y + dir.y * tileSize;
 
@@ -80,8 +75,16 @@ export class MotionManager {
         }
 
         if (bestPos) {
-            target.x = bestPos.x;
-            target.y = bestPos.y;
+            if (vfxManager) {
+                const fromPos = { x: target.x, y: target.y };
+                console.log(`[MotionManager] 끌어당기기 애니메이션 시작: ${target.constructor.name}를 (${fromPos.x}, ${fromPos.y}) → (${bestPos.x}, ${bestPos.y})로 이동`);
+                vfxManager.addPullAnimation(target, fromPos, bestPos);
+            } else {
+                target.x = bestPos.x;
+                target.y = bestPos.y;
+            }
+        } else {
+            console.log('[MotionManager] 끌어당기기 실패: 주체 주변에 공간이 없습니다.');
         }
     }
 }

@@ -17,6 +17,25 @@ export class VFXManager {
     }
 
     /**
+     * 대상을 끌어당기는 애니메이션과 잔상 효과를 추가합니다.
+     * @param {Entity} targetEntity - 끌려갈 유닛
+     * @param {{x, y}} fromPos - 시작 위치
+     * @param {{x, y}} toPos - 종료 위치
+     * @param {number} [duration=15] - 애니메이션 지속 시간 (프레임)
+     */
+    addPullAnimation(targetEntity, fromPos, toPos, duration = 15) {
+        const effect = {
+            type: 'pull_animation',
+            targetEntity,
+            fromPos,
+            toPos,
+            duration,
+            life: duration,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
      * 화면에 퍼져나가는 충격파 효과를 추가합니다.
      * @param {number} x 중심 x
      * @param {number} y 중심 y
@@ -494,6 +513,39 @@ export class VFXManager {
                         effect.item.y = endY;
                         this.itemManager.addItem(effect.item);
                     }
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
+            // 끌어당기기 애니메이션 처리
+            if (effect.type === 'pull_animation') {
+                effect.life--;
+                const progress = 1 - effect.life / effect.duration;
+                const newX = effect.fromPos.x + (effect.toPos.x - effect.fromPos.x) * progress;
+                const newY = effect.fromPos.y + (effect.toPos.y - effect.fromPos.y) * progress;
+                effect.targetEntity.x = newX;
+                effect.targetEntity.y = newY;
+
+                if (effect.life % 2 === 0 && effect.targetEntity.image) {
+                    const afterimage = {
+                        type: 'sprite',
+                        image: effect.targetEntity.image,
+                        x: newX + effect.targetEntity.width / 2,
+                        y: newY + effect.targetEntity.height / 2,
+                        width: effect.targetEntity.width,
+                        height: effect.targetEntity.height,
+                        duration: 10,
+                        alpha: 0.5,
+                        fade: 0.05,
+                        blendMode: 'lighter',
+                    };
+                    this.effects.push(afterimage);
+                }
+
+                if (effect.life <= 0) {
+                    effect.targetEntity.x = effect.toPos.x;
+                    effect.targetEntity.y = effect.toPos.y;
                     this.effects.splice(i, 1);
                 }
                 continue;
