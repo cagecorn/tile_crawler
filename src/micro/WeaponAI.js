@@ -42,28 +42,21 @@ export class SwordAI extends BaseWeaponAI {
 
 export class DaggerAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        const { enemies, mapManager } = context;
+        const { enemies } = context;
         if (!enemies || enemies.length === 0) return { type: 'idle' };
 
-        const nearest = enemies.reduce((prev, curr) => {
-            const prevDist = Math.hypot(prev.x - wielder.x, prev.y - wielder.y);
-            const currDist = Math.hypot(curr.x - wielder.x, curr.y - wielder.y);
-            return prevDist < currDist ? prev : curr;
-        });
-
+        const nearest = enemies.sort((a,b)=>Math.hypot(a.x-wielder.x,a.y-wielder.y)-Math.hypot(b.x-wielder.x,b.y-wielder.y))[0];
         const distance = Math.hypot(nearest.x - wielder.x, nearest.y - wielder.y);
 
         if (distance <= wielder.attackRange) {
             return { type: 'attack', target: nearest };
         }
 
-        const facing = nearest.facing || { x: 0, y: 0 };
-        const tileSize = mapManager?.tileSize ?? 32;
-        const behindX = nearest.x - facing.x * (tileSize * 0.8);
-        const behindY = nearest.y - facing.y * (tileSize * 0.8);
-        const behindTarget = { x: behindX, y: behindY };
+        if (nearest.direction === undefined && !nearest.facing) {
+            return { type: 'move', target: { x: nearest.x, y: nearest.y } };
+        }
 
-        return { type: 'move', target: behindTarget };
+        return { type: 'backstab_teleport', target: nearest };
     }
 }
 

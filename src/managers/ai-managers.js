@@ -92,6 +92,21 @@ export class MetaAIManager {
                     entity.attackCooldown = Math.max(1, Math.round(baseCd / (entity.attackSpeed || 1)));
                 }
                 break;
+            case 'backstab_teleport': {
+                const { target } = action;
+                const { mapManager, vfxManager } = context;
+                if (!target || !mapManager || !vfxManager) break;
+
+                const fromPos = { x: entity.x, y: entity.y };
+                const behindX = target.x - (target.direction * (mapManager.tileSize * 0.8));
+                const behindY = target.y;
+                const toPos = { x: behindX, y: behindY };
+
+                vfxManager.addTeleportEffect(entity, fromPos, toPos, () => {
+                    this.executeAction(entity, { type: 'attack', target }, context);
+                });
+                break;
+            }
             case 'weapon_skill': {
                 const skillData = WEAPON_SKILLS[action.skillId];
                 if (!skillData) break;
@@ -109,7 +124,9 @@ export class MetaAIManager {
                         action.target,
                         3,
                         context.enemies,
-                        context.eventManager
+                        context.eventManager,
+                        context.vfxManager,
+                        context.assets['strike-effect']
                     );
                 }
 
