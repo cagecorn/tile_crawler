@@ -7,9 +7,22 @@ export class EffectManager {
         console.log("[EffectManager] Initialized");
     }
 
-    addEffect(target, effectId) {
+    addEffect(target, effectId, caster = null) {
         const effectData = EFFECTS[effectId];
         if (!effectData) return;
+
+        // 상태이상 효과라면 저항 스탯을 확인한다
+        if (effectData.tags && effectData.tags.includes('status_ailment')) {
+            const resistStatName = `${effectId}Resist`;
+            const resistance = target.stats?.get?.(resistStatName) ?? 0;
+            if (Math.random() < resistance) {
+                this.eventManager.publish('log', {
+                    message: `${target.constructor.name}이(가) [${effectData.name}] 효과에 저항했습니다!`,
+                    color: 'dodgerblue'
+                });
+                return;
+            }
+        }
 
         const existingEffect = target.effects.find(e => e.id === effectId);
         if (existingEffect) {
@@ -22,6 +35,7 @@ export class EffectManager {
             ...effectData,
             remaining: effectData.duration,
             emitter: null,
+            caster: caster,
         };
 
         if (this.vfxManager && newEffect.particle) {

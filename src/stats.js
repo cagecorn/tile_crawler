@@ -25,9 +25,29 @@ export class StatManager {
             attackSpeed: config.attackSpeed || 0.5,
             hpRegen: config.hpRegen || 0,
             mpRegen: config.mpRegen || 0,
+
+            // 상태이상 저항 스탯
+            poisonResist: config.poisonResist || 0,
+            freezeResist: config.freezeResist || 0,
+            sleepResist: config.sleepResist || 0,
+            paralysisResist: config.paralysisResist || 0,
+            burnResist: config.burnResist || 0,
+            bleedResist: config.bleedResist || 0,
+            petrifyResist: config.petrifyResist || 0,
+            silenceResist: config.silenceResist || 0,
+            blindResist: config.blindResist || 0,
+            fearResist: config.fearResist || 0,
+            confusionResist: config.confusionResist || 0,
+            charmResist: config.charmResist || 0,
+            movementResist: config.movementResist || 0,
         };
         this._pointsAllocated = {
-            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0, movement: 0, castingSpeed: 0, attackSpeed: 0,
+            strength: 0, agility: 0, endurance: 0, focus: 0, intelligence: 0,
+            movement: 0, castingSpeed: 0, attackSpeed: 0,
+            poisonResist: 0, freezeResist: 0, sleepResist: 0, paralysisResist: 0,
+            burnResist: 0, bleedResist: 0, petrifyResist: 0, silenceResist: 0,
+            blindResist: 0, fearResist: 0, confusionResist: 0, charmResist: 0,
+            movementResist: 0,
         };
 
         // 장비로부터 적용되는 스탯 저장용

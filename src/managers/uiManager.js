@@ -68,6 +68,19 @@ export class UIManager {
             hpRegen: '❤️+ HP 재생',
             mpRegen: '💧+ MP 재생',
             visionRange: '👁️ 시야',
+            poisonResist: '독 저항',
+            freezeResist: '빙결 저항',
+            sleepResist: '수면 저항',
+            paralysisResist: '마비 저항',
+            burnResist: '화상 저항',
+            bleedResist: '출혈 저항',
+            petrifyResist: '석화 저항',
+            silenceResist: '침묵 저항',
+            blindResist: '실명 저항',
+            fearResist: '공포 저항',
+            confusionResist: '혼란 저항',
+            charmResist: '매혹 저항',
+            movementResist: '이동 방해 저항',
         };
     }
 
@@ -440,6 +453,32 @@ export class UIManager {
                 proficiencyList.appendChild(line);
             }
             page2.appendChild(proficiencyList);
+
+            // 상태이상 저항 스탯 표시
+            const resistHeader = document.createElement('h3');
+            resistHeader.style.marginTop = '15px';
+            resistHeader.textContent = '상태이상 저항';
+            page2.appendChild(resistHeader);
+
+            const resistList = document.createElement('div');
+            resistList.className = 'proficiency-list';
+
+            const resistStats = [
+                'poisonResist', 'freezeResist', 'sleepResist', 'paralysisResist',
+                'burnResist', 'bleedResist', 'petrifyResist', 'silenceResist',
+                'blindResist', 'fearResist', 'confusionResist', 'charmResist', 'movementResist'
+            ];
+
+            resistStats.forEach(stat => {
+                const value = entity.stats.get(stat) * 100;
+                if (value === 0) return;
+                const line = document.createElement('div');
+                line.className = 'stat-line';
+                const name = this.statDisplayNames[stat] || stat.replace('Resist', '');
+                line.innerHTML = `<span>${name}:</span> <span>${value.toFixed(0)}%</span>`;
+                resistList.appendChild(line);
+            });
+            page2.appendChild(resistList);
         }
     }
 
