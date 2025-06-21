@@ -35,24 +35,6 @@ export class VFXManager {
         this.effects.push(effect);
     }
 
-    /**
-     * 대상을 뒤로 밀어내는 넉백 애니메이션을 추가합니다.
-     * @param {Entity} targetEntity - 밀려날 유닛
-     * @param {{x:number, y:number}} fromPos - 시작 위치
-     * @param {{x:number, y:number}} toPos - 도착 위치
-     * @param {number} [duration=15] - 애니메이션 지속 시간 (프레임)
-     */
-    addKnockbackAnimation(targetEntity, fromPos, toPos, duration = 15) {
-        const effect = {
-            type: 'knockback_animation',
-            targetEntity,
-            fromPos,
-            toPos,
-            duration,
-            life: duration,
-        };
-        this.effects.push(effect);
-    }
 
     /**
      * 화면에 퍼져나가는 충격파 효과를 추가합니다.
@@ -587,22 +569,6 @@ export class VFXManager {
                 continue;
             }
 
-            if (effect.type === 'knockback_animation') {
-                effect.life--;
-                const progress = 1 - (effect.life / effect.duration);
-
-                const newX = effect.fromPos.x + (effect.toPos.x - effect.fromPos.x) * progress;
-                const newY = effect.fromPos.y + (effect.toPos.y - effect.fromPos.y) * progress;
-                effect.targetEntity.x = newX;
-                effect.targetEntity.y = newY;
-
-                if (effect.life <= 0) {
-                    effect.targetEntity.x = effect.toPos.x;
-                    effect.targetEntity.y = effect.toPos.y;
-                    this.effects.splice(i, 1);
-                }
-                continue;
-            }
 
         if (effect.type === 'item_use') {
             effect.life--;
