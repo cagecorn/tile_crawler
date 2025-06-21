@@ -30,7 +30,7 @@
 
 | 파일 | 간단한 역할 |
 | --- | --- |
-| `../engines/aiEngine.js` | 그룹 전략을 관리하고 각 유닛 행동을 실행하는 `AIEngine` 구현. |
+| `../engines/aiEngine.js` | 그룹 전략을 관리하고 각 유닛 행동을 실행하는 `AIEngine` 구현. `setTacticsEnabled()`로 전술 시스템을 끄거나 켤 수 있습니다. |
 | `aquariumManager.js` | 수족관 맵에서 거품 효과 등 환경 연출을 담당합니다. |
 | `effectManager.js` | 버프/디버프 및 지속 효과 처리를 담당합니다. |
 | `equipmentManager.js` | 장비 장착과 해제 로직을 제공하며 태그 시스템과 연동됩니다. |

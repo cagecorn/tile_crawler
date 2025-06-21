@@ -78,3 +78,7 @@ tests/ai.test.js와 tests/eventManager.integration.test.js 파일에서 AI의 �
 시각적 디버거:
 debug.html 페이지를 사용하여, 특정 조건 없이 맵과 유닛의 행동을 시각적으로 빠르게 확인할 수 있습니다.
 실행: debug.html 파일을 브라우저에서 엽니다.
+
+### 전술 시스템 끄기
+
+`AIEngine` 인스턴스에서 `setTacticsEnabled(false)`를 호출하면 그룹 전술이 적용되지 않으며 각 유닛이 개별 행동만 수행합니다.
