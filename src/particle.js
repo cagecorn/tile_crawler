@@ -4,6 +4,8 @@ export class Particle {
         this.y = y;
         this.color = color;
 
+        this.text = options.text || null;
+
         const angle = options.angle !== undefined ? options.angle : Math.random() * Math.PI * 2;
         const speed = options.speed !== undefined ? options.speed : Math.random() * 3 + 1;
         this.vx = Math.cos(angle) * speed;
@@ -35,9 +37,19 @@ export class Particle {
     }
 
     render(ctx) {
-        ctx.fillStyle = this.color;
         ctx.globalAlpha = this.lifespan / this.initialLifespan;
-        ctx.fillRect(this.x, this.y, this.size, this.size);
+
+        if (this.text) {
+            ctx.fillStyle = this.color;
+            ctx.font = `${this.size * 5}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.text, this.x, this.y);
+        } else {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+        }
+
         ctx.globalAlpha = 1.0;
     }
 }

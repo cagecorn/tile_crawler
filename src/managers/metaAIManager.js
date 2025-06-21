@@ -43,19 +43,30 @@ export class MetaAIManager extends BaseMetaAI {
     }
 
     update(context) {
+        const currentContext = { ...context, metaAIManager: this };
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
             const membersSorted = [...group.members].sort((a,b)=>(b.attackSpeed||1)-(a.attackSpeed||1));
             for (const member of membersSorted) {
                 if (member.hp <= 0 || member.possessedBy) continue;
+
+                const isCCd = member.effects && member.effects.some(e => e.tags && e.tags.includes('cc'));
+
                 if (typeof member.update === 'function') {
-                    member.update({ ...context, metaAIManager: this });
-                } else {
+                    member.update(currentContext);
+                } else if (member.attackCooldown > 0) {
+                    member.attackCooldown--;
+                }
+
+                if (isCCd) continue;
+
+                if (!member.update) {
                     if (member.attackCooldown > 0) member.attackCooldown--;
-                    if (member.ai) {
-                        const action = member.ai.decideAction(member, context);
-                        this.executeAction(member, action, context);
-                    }
+                }
+
+                if (member.ai) {
+                    const action = member.ai.decideAction(member, currentContext);
+                    this.executeAction(member, action, currentContext);
                 }
             }
         }
