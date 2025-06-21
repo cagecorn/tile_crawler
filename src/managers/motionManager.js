@@ -24,8 +24,27 @@ export class MotionManager {
         const destX = dest.x * tileSize;
         const destY = dest.y * tileSize;
 
+        if (destX === startPos.x && destY === startPos.y) return;
+
+        // 잔상과 기본 대쉬 궤적 효과
         if (vfxManager) {
             vfxManager.createDashTrail(startPos.x, startPos.y, destX, destY);
+
+            const steps = Math.max(6, actualMoveDistance * 3);
+            for (let i = 1; i <= steps; i++) {
+                const progress = i / steps;
+                const afterX = startPos.x + (destX - startPos.x) * progress;
+                const afterY = startPos.y + (destY - startPos.y) * progress;
+
+                vfxManager.addSpriteEffect(entity.image, afterX + entity.width / 2, afterY + entity.height / 2, {
+                    width: entity.width,
+                    height: entity.height,
+                    duration: 12,
+                    alpha: 0.35,
+                    fade: 0.04,
+                    blendMode: 'lighter'
+                });
+            }
         }
 
         const hitEnemies = new Set();
