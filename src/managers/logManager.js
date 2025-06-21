@@ -30,6 +30,11 @@ export class CombatLogManager {
         eventManager.subscribe('level_up', (data) => {
             this.add(`%c레벨 업! LV ${data.level} 달성!`);
         });
+
+        // 스킬 사용 로그도 기록하여 전투 로그가 더욱 풍부해지도록 한다.
+        eventManager.subscribe('skill_used', ({ caster, skill }) => {
+            this.add(`${caster.constructor.name} ▶ ${skill.name} 사용`);
+        });
     }
 
     add(message, type = 'combat', details = null) {

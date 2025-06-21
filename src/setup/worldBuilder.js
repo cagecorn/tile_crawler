@@ -51,14 +51,17 @@ export function buildInitialWorld(managers, assets) {
         'emblem_devotion',
         'emblem_conductor',
     ];
+    // Spawn all starter items close to the player so they are easy to spot.
     itemsToCreate.forEach((id, i) => {
-        const itemPos = mapManager.getRandomFloorPosition() || { x: player.x + (i - 5) * 64, y: player.y + 64 };
+        const offsetX = (i - Math.floor(itemsToCreate.length / 2)) * mapManager.tileSize;
+        const itemPos = { x: player.x + offsetX, y: player.y + mapManager.tileSize };
         const item = itemFactory.create(id, itemPos.x, itemPos.y, mapManager.tileSize);
         if (item) itemManager.addItem(item);
     });
 
     // 몬스터 생성
-    for (let i = 0; i < 20; i++) {
+    // Increase monster count for a livelier dungeon
+    for (let i = 0; i < 50; i++) {
         const mPos = mapManager.getRandomFloorPosition();
         if (mPos) {
             const monster = factory.create('monster', {
