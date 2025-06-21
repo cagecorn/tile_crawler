@@ -34,6 +34,7 @@ import { PossessionAIManager } from './managers/possessionAIManager.js';
 import { Ghost } from './entities.js';
 import { TankerGhostAI, RangedGhostAI, SupporterGhostAI, CCGhostAI } from './ai.js';
 import { EMBLEMS } from './data/emblems.js';
+import { adjustMonsterStatsForAquarium } from './utils/aquariumUtils.js';
 
 export class Game {
     constructor() {
@@ -328,13 +329,17 @@ export class Game {
         for (let i = 0; i < 40; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
+                let stats = {};
+                if (this.mapManager.name === 'aquarium') {
+                    stats = adjustMonsterStatsForAquarium(stats);
+                }
                 const monster = this.factory.create('monster', {
                     x: pos.x,
                     y: pos.y,
                     tileSize: this.mapManager.tileSize,
                     groupId: this.monsterGroup.id,
                     image: assets.monster,
-                    baseStats: {}
+                    baseStats: stats
                 });
                 monster.equipmentRenderManager = this.equipmentRenderManager;
                 // 몬스터 초기 장비 및 소지품 설정

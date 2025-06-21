@@ -1,4 +1,5 @@
 import { TRAITS } from '../data/traits.js';
+import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
 
 export class MonsterManager {
     constructor(a = null, b = null, c = null, d = null, e = 0) {
@@ -39,13 +40,17 @@ export class MonsterManager {
         for (let i = 0; i < count; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
+                let stats = {};
+                if (this.mapManager.name === 'aquarium') {
+                    stats = adjustMonsterStatsForAquarium(stats);
+                }
                 const monster = this.factory.create('monster', {
                     x: pos.x,
                     y: pos.y,
                     tileSize: this.mapManager.tileSize,
                     groupId: 'dungeon_monsters',
                     image: this.assets?.monster,
-                    baseStats: {}
+                    baseStats: stats
                 });
                 this.monsters.push(monster);
             }

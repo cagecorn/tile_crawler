@@ -2,6 +2,7 @@
 // Manages patches and features placed on the Aquarium map
 import { TRAITS } from '../data/traits.js';
 import { EquipmentManager } from './equipmentManager.js';
+import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
 export class AquariumManager {
     constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null, traitManager = null) {
         this.eventManager = eventManager;
@@ -37,13 +38,17 @@ export class AquariumManager {
             const pos = this._findSpacedPosition(this.mapManager.tileSize * 6);
             if (pos) {
                 const vision = feature.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
+                const stats = adjustMonsterStatsForAquarium({
+                    ...feature.baseStats,
+                    visionRange: vision,
+                });
                 const monster = this.charFactory.create('monster', {
                     x: pos.x,
                     y: pos.y,
                     tileSize: this.mapManager.tileSize,
                     groupId: 'dungeon_monsters',
                     image: feature.image,
-                    baseStats: { ...feature.baseStats, visionRange: vision }
+                    baseStats: stats,
                 });
                 if (this.traitManager) {
                     this.traitManager.applyTraits(monster, TRAITS);
