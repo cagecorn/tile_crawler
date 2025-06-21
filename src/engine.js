@@ -99,6 +99,10 @@ export class Engine {
             }
         }
 
+        if (typeof player.update === 'function') {
+            player.update();
+        }
+
         const mercs = mercenaryManager?.mercenaries || [];
         const monsters = monsterManager?.monsters || [];
         const pets = petManager?.pets || [];

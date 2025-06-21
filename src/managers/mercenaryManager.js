@@ -51,4 +51,12 @@ export class MercenaryManager {
             if (merc.render) merc.render(ctx);
         }
     }
+
+    update() {
+        for (const merc of this.mercenaries) {
+            if (typeof merc.update === 'function') {
+                merc.update();
+            }
+        }
+    }
 }
