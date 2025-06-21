@@ -343,11 +343,17 @@ export class VFXManager {
     addTextPopup(text, target, options = {}) {
         if (!target) return;
         const duration = options.duration || 30;
+        const baseOffset =
+            options.offsetY !== undefined ? options.offsetY : (target.height || 0);
+        let finalOffset = baseOffset;
+        if (Array.isArray(target.effects) && target.effects.some(e => e.id === 'airborne')) {
+            finalOffset += (target.height || 0) * 0.5;
+        }
         const effect = {
             type: 'text_popup',
             text,
             x: target.x + (target.width || 0) / 2,
-            y: target.y - (options.offsetY || (target.height || 0) * 0.5),
+            y: target.y - finalOffset,
             duration,
             life: duration,
             color: options.color || 'white',

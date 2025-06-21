@@ -17,18 +17,33 @@ export class AquariumManager {
         this.allWeaponIds = ['short_sword', 'long_bow', 'estoc', 'axe', 'mace', 'staff', 'spear', 'scythe', 'whip', 'dagger', 'violin_bow'];
     }
 
+    _findSpacedPosition(minDist = this.mapManager.tileSize * 4) {
+        for (let i = 0; i < 30; i++) {
+            const pos = this.mapManager.getRandomFloorPosition();
+            if (!pos) continue;
+            const tooClose = this.monsterManager.monsters.some(m => {
+                const dx = m.x - pos.x;
+                const dy = m.y - pos.y;
+                return Math.hypot(dx, dy) < minDist;
+            });
+            if (!tooClose) return pos;
+        }
+        return this.mapManager.getRandomFloorPosition();
+    }
+
     addTestingFeature(feature) {
         this.features.push(feature);
         if (feature.type === 'monster') {
-            const pos = this.mapManager.getRandomFloorPosition();
+            const pos = this._findSpacedPosition(this.mapManager.tileSize * 6);
             if (pos) {
+                const vision = feature.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
                 const monster = this.charFactory.create('monster', {
                     x: pos.x,
                     y: pos.y,
                     tileSize: this.mapManager.tileSize,
                     groupId: 'dungeon_monsters',
                     image: feature.image,
-                    baseStats: feature.baseStats || {}
+                    baseStats: { ...feature.baseStats, visionRange: vision }
                 });
                 if (this.traitManager) {
                     this.traitManager.applyTraits(monster, TRAITS);

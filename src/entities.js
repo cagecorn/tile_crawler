@@ -156,10 +156,9 @@ class Entity {
             ctx.globalCompositeOperation = 'source-over';
         }
 
-        // 3. 장비 그리기 (yOffset 적용)
+        // 3. 장비 그리기 (본체와 동일한 변환 적용)
         if (this.equipmentRenderManager) {
             ctx.save();
-            ctx.translate(0, yOffset); // 장비도 유닛을 따라 위로 이동
             this.equipmentRenderManager.drawEquipment(ctx, this);
             ctx.restore();
         }
