@@ -57,6 +57,69 @@ export class AquariumManager {
         return this._findSpacedPosition(minDist);
     }
 
+    spawnMonsterGroup(count = 3, opts = {}) {
+        const center = this._getRoomBasedPosition(this.mapManager.tileSize * 8);
+        if (!center) return;
+
+        const radius = opts.radius || this.mapManager.tileSize * 2;
+        let shieldSpawned = false;
+
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = radius * (0.5 + Math.random());
+            const pos = {
+                x: center.x + Math.round(Math.cos(angle) * dist),
+                y: center.y + Math.round(Math.sin(angle) * dist),
+            };
+
+            const vision = opts.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
+            const stats = adjustMonsterStatsForAquarium({
+                ...(opts.baseStats || {}),
+                visionRange: vision,
+            });
+
+            const monster = this.charFactory.create('monster', {
+                x: pos.x,
+                y: pos.y,
+                tileSize: this.mapManager.tileSize,
+                groupId: 'dungeon_monsters',
+                image: opts.image,
+                baseStats: stats,
+            });
+
+            if (this.traitManager) {
+                this.traitManager.applyTraits(monster, TRAITS);
+            }
+
+            this.monsterManager.monsters.push(monster);
+
+            if (Math.random() < 0.8) {
+                const randomWeaponId = this.allWeaponIds[Math.floor(Math.random() * this.allWeaponIds.length)];
+                const weapon = this.itemFactory.create(randomWeaponId, 0, 0, 1);
+                if (weapon) {
+                    this.equipmentManager.equip(monster, weapon, null);
+
+                    const tags = weapon.tags || [];
+                    const isMelee = tags.includes('melee') && !tags.includes('ranged');
+                    const excluded = tags.includes('spear') || tags.includes('scythe');
+
+                    let equipShield = Math.random() < 0.5;
+                    if (opts.ensureShield && !shieldSpawned && i === count - 1) {
+                        equipShield = true;
+                    }
+
+                    if (isMelee && !excluded && equipShield) {
+                        const shield = this.itemFactory.create('shield_basic', 0, 0, 1);
+                        if (shield) {
+                            this.equipmentManager.equip(monster, shield, null);
+                            shieldSpawned = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     addTestingFeature(feature) {
         this.features.push(feature);
         if (feature.type === 'monster') {

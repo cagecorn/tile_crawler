@@ -221,15 +221,13 @@ export class Game {
             }
         }
 
-        // example feature: spawn several monsters for poison debuff testing
-        // The aquarium used to spawn 20 basic monsters, which was excessive
-        // for early testing. Reduce the count by half for better breathing room.
-        // Further reduce the count to keep the area manageable.
-        for (let i = 0; i < 5; i++) {
-            this.aquariumManager.addTestingFeature({
-                type: 'monster',
+        // Spawn monsters in small groups spread across different rooms
+        const groupCount = 3;
+        for (let g = 0; g < groupCount; g++) {
+            this.aquariumManager.spawnMonsterGroup(3, {
                 image: assets.monster,
-                baseStats: { }
+                baseStats: {},
+                ensureShield: g === 0
             });
         }
         // Add a single epic monster to highlight new boss-level enemies
