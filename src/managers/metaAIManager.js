@@ -1,4 +1,5 @@
 import { MetaAIManager as BaseMetaAI } from './ai-managers.js';
+import { FearAI, ConfusionAI, BerserkAI, CharmAI } from '../ai.js';
 
 export class MetaAIManager extends BaseMetaAI {
     executeAction(entity, action, context) {
@@ -50,14 +51,29 @@ export class MetaAIManager extends BaseMetaAI {
             for (const member of membersSorted) {
                 if (member.hp <= 0 || member.possessedBy) continue;
 
-                const isCCd = member.effects && member.effects.some(e => e.tags && e.tags.includes('cc'));
-
                 if (typeof member.update === 'function') {
                     member.update(currentContext);
                 } else if (member.attackCooldown > 0) {
                     member.attackCooldown--;
                 }
 
+                const overrideEffect = member.effects.find(e => e.type === 'ai_override');
+                if (overrideEffect) {
+                    let overrideAI;
+                    switch (overrideEffect.id) {
+                        case 'fear': overrideAI = new FearAI(); break;
+                        case 'confusion': overrideAI = new ConfusionAI(); break;
+                        case 'berserk': overrideAI = new BerserkAI(); break;
+                        case 'charm': overrideAI = new CharmAI(); break;
+                    }
+                    if (overrideAI) {
+                        const action = overrideAI.decideAction(member, currentContext);
+                        this.executeAction(member, action, currentContext);
+                        continue;
+                    }
+                }
+
+                const isCCd = member.effects && member.effects.some(e => e.tags && e.tags.includes('cc'));
                 if (isCCd) continue;
 
                 if (!member.update) {

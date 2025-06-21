@@ -49,8 +49,9 @@ class AIArchetype {
     }
 
     _filterVisibleEnemies(self, enemies) {
+        const range = self.stats?.get('visionRange') ?? self.visionRange;
         return (enemies || []).filter(e =>
-            Math.hypot(e.x - self.x, e.y - self.y) < self.visionRange);
+            Math.hypot(e.x - self.x, e.y - self.y) < range);
     }
 }
 
@@ -73,7 +74,9 @@ export class CompositeAI extends AIArchetype {
 export class MeleeAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, enemies, mapManager, eventManager } = context;
-        const visibleEnemies = this._filterVisibleEnemies(self, enemies);
+
+        const currentVisionRange = self.stats?.get('visionRange') ?? self.visionRange;
+        const visibleEnemies = enemies.filter(e => Math.hypot(e.x - self.x, e.y - self.y) < currentVisionRange);
         const targetList = visibleEnemies;
 
         if (targetList.length === 0) {
@@ -342,7 +345,9 @@ export class PurifierAI extends AIArchetype {
 export class RangedAI extends AIArchetype {
     decideAction(self, context) {
         const { player, allies, enemies, mapManager, eventManager } = context;
-        const visibleEnemies = this._filterVisibleEnemies(self, enemies);
+
+        const currentVisionRange = self.stats?.get('visionRange') ?? self.visionRange;
+        const visibleEnemies = enemies.filter(e => Math.hypot(e.x - self.x, e.y - self.y) < currentVisionRange);
         const targetList = visibleEnemies;
 
         if (targetList.length === 0) {
@@ -781,5 +786,67 @@ export class BardAI extends AIArchetype {
         }
 
         return { type: 'idle' };
+    }
+}
+
+// --- 상태이상 전용 AI들 ---
+export class FearAI extends AIArchetype {
+    decideAction(self, context) {
+        const nearestEnemy = context.enemies.sort(
+            (a, b) =>
+                Math.hypot(a.x - self.x, a.y - self.y) -
+                Math.hypot(b.x - self.x, b.y - self.y)
+        )[0];
+        if (!nearestEnemy) return { type: 'idle' };
+
+        const fleeTarget = {
+            x: self.x + (self.x - nearestEnemy.x),
+            y: self.y + (self.y - nearestEnemy.y)
+        };
+        return { type: 'move', target: fleeTarget };
+    }
+}
+
+export class ConfusionAI extends AIArchetype {
+    decideAction(self, context) {
+        const nearestAlly = context.allies
+            .filter(a => a !== self)
+            .sort(
+                (a, b) =>
+                    Math.hypot(a.x - self.x, a.y - self.y) -
+                    Math.hypot(b.x - self.x, b.y - self.y)
+            )[0];
+        if (!nearestAlly) return { type: 'idle' };
+
+        if (Math.hypot(nearestAlly.x - self.x, nearestAlly.y - self.y) < self.attackRange) {
+            return { type: 'attack', target: nearestAlly };
+        }
+        return { type: 'move', target: nearestAlly };
+    }
+}
+
+export class BerserkAI extends AIArchetype {
+    decideAction(self, context) {
+        const allUnits = [...context.allies, ...context.enemies].filter(u => u !== self);
+        const nearest = allUnits.sort(
+            (a, b) =>
+                Math.hypot(a.x - self.x, a.y - self.y) -
+                Math.hypot(b.x - self.x, b.y - self.y)
+        )[0];
+        if (!nearest) return { type: 'idle' };
+
+        if (Math.hypot(nearest.x - self.x, nearest.y - self.y) < self.attackRange) {
+            return { type: 'attack', target: nearest };
+        }
+        return { type: 'move', target: nearest };
+    }
+}
+
+export class CharmAI extends AIArchetype {
+    decideAction(self, context) {
+        const charmEffect = self.effects.find(e => e.id === 'charm');
+        const caster = charmEffect?.caster;
+        if (!caster) return { type: 'idle' };
+        return { type: 'move', target: caster };
     }
 }

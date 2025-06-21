@@ -1,5 +1,6 @@
 // src/managers/possessionAIManager.js
 import { SKILLS } from '../data/skills.js';
+import { FearAI, ConfusionAI, BerserkAI, CharmAI } from '../ai.js';
 
 export class PossessionAIManager {
     constructor(eventManager) {
@@ -100,9 +101,27 @@ export class PossessionAIManager {
                 possessedCC: hostilePossessed.filter(e => e.possessedBy?.constructor.name === 'CCGhostAI'),
             };
             for (const entity of hostilePossessed) {
-                if (entity.possessedBy) {
-                    const action = entity.possessedBy.decideAction(entity, hostileContext);
-                    context.metaAIManager.executeAction(entity, action, hostileContext);
+                if (entity.hp > 0) {
+                    const overrideEffect = entity.effects.find(e => e.type === 'ai_override');
+                    if (overrideEffect) {
+                        let overrideAI;
+                        switch (overrideEffect.id) {
+                            case 'fear': overrideAI = new FearAI(); break;
+                            case 'confusion': overrideAI = new ConfusionAI(); break;
+                            case 'berserk': overrideAI = new BerserkAI(); break;
+                            case 'charm': overrideAI = new CharmAI(); break;
+                        }
+                        if (overrideAI) {
+                            const action = overrideAI.decideAction(entity, hostileContext);
+                            context.metaAIManager.executeAction(entity, action, hostileContext);
+                            continue;
+                        }
+                    }
+
+                    if (entity.possessedBy) {
+                        const action = entity.possessedBy.decideAction(entity, hostileContext);
+                        context.metaAIManager.executeAction(entity, action, hostileContext);
+                    }
                 }
             }
         }
@@ -120,9 +139,27 @@ export class PossessionAIManager {
                 possessedCC: friendlyPossessed.filter(e => e.possessedBy?.constructor.name === 'CCGhostAI'),
             };
             for (const entity of friendlyPossessed) {
-                if (entity.possessedBy) {
-                    const action = entity.possessedBy.decideAction(entity, friendlyContext);
-                    context.metaAIManager.executeAction(entity, action, friendlyContext);
+                if (entity.hp > 0) {
+                    const overrideEffect = entity.effects.find(e => e.type === 'ai_override');
+                    if (overrideEffect) {
+                        let overrideAI;
+                        switch (overrideEffect.id) {
+                            case 'fear': overrideAI = new FearAI(); break;
+                            case 'confusion': overrideAI = new ConfusionAI(); break;
+                            case 'berserk': overrideAI = new BerserkAI(); break;
+                            case 'charm': overrideAI = new CharmAI(); break;
+                        }
+                        if (overrideAI) {
+                            const action = overrideAI.decideAction(entity, friendlyContext);
+                            context.metaAIManager.executeAction(entity, action, friendlyContext);
+                            continue;
+                        }
+                    }
+
+                    if (entity.possessedBy) {
+                        const action = entity.possessedBy.decideAction(entity, friendlyContext);
+                        context.metaAIManager.executeAction(entity, action, friendlyContext);
+                    }
                 }
             }
         }
