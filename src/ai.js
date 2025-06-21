@@ -2,6 +2,8 @@
 
 import { hasLineOfSight } from './utils/geometry.js';
 import { SKILLS } from './data/skills.js';
+import { CombatBehavior } from './ai/behaviors/combat.js';
+import { WanderBehavior } from './ai/behaviors/wander.js';
 
 // 기존 전투 AI들은 Behavior 모듈로 이동했습니다.
 // CompositeAI는 PurifierAI와 같은 여러 행동 조합을 위해 남겨둡니다.
@@ -16,6 +18,21 @@ export class CompositeAI {
             if (action && action.type !== 'idle') return action;
         }
         return { type: 'idle' };
+    }
+}
+
+// 기본 근접/원거리 AI는 Behavior 조합 형태로 간단히 제공된다.
+export class MeleeAI extends CompositeAI {
+    constructor() {
+        // 근접 AI는 전투와 배회 행동을 조합한다.
+        super(CombatBehavior, WanderBehavior);
+    }
+}
+
+export class RangedAI extends CompositeAI {
+    constructor() {
+        // 원거리 AI는 전투 행동을 유지하며 거리를 벌리는 로직은 CombatBehavior에 포함된다.
+        super(CombatBehavior, WanderBehavior);
     }
 }
 
