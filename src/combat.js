@@ -95,6 +95,12 @@ export class CombatCalculator {
 
         // 1. 기본 공격력
         details.base = attacker.attackPower;
+        const weapon = attacker.equipment?.weapon;
+        if (weapon?.tags?.includes('magic_weapon')) {
+            const intBonus = attacker.stats?.get('intelligence') || 0;
+            // 마법 무기는 지능의 절반을 추가 피해로 적용한다
+            details.base += Math.floor(intBonus / 2);
+        }
         finalDamage += details.base;
 
         // 2. 스킬 데미지

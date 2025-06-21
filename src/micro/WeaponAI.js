@@ -168,7 +168,8 @@ export class AxeAI extends SwordAI {}
 export class MaceAI extends SwordAI {}
 
 export class StaffAI extends BowAI {
-    // TODO: 지능 기반 데미지 계산 로직과 연계 필요
+    // 지능 수치가 높을수록 기본 공격 피해가 증가합니다.
+    // 실제 피해 계산은 CombatCalculator에서 처리됩니다.
 }
 
 export class ScytheAI extends SpearAI {}
