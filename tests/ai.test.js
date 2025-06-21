@@ -1,9 +1,10 @@
-import { MeleeAI, RangedAI, HealerAI } from '../src/ai.js';
+import { MeleeAI, RangedAI, HealerAI, BardAI } from '../src/ai.js';
 import { describe, test, assert } from './helpers.js';
 
 describe('AI', () => {
 
 const mapStub = { tileSize: 1, isWallAt: () => false };
+const eventManagerStub = { publish: () => {} };
 
 // 공격 범위 내 적을 공격하는지 확인
 
@@ -147,6 +148,68 @@ test('MeleeAI - idle when enemy beyond vision range', () => {
     const context = { player: {}, allies: [], enemies: [enemy], mapManager: mapStub };
     const action = ai.decideAction(self, context);
     assert.strictEqual(action.type, 'idle');
+});
+
+test('HealerAI - attacks when no ally needs healing', () => {
+    const ai = new HealerAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
+        mp: 20, skills: ['heal'], skillCooldowns: {}, properties: { mbti: 'ENFP' },
+        isFriendly: true, isPlayer: false
+    };
+    const ally = { x: 5, y: 0, hp: 10, maxHp: 10 };
+    const enemy = { x: 5, y: 0 };
+    const context = { player: {}, allies: [self, ally], enemies: [enemy], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'attack');
+});
+
+test('BardAI - attacks when songs unavailable', () => {
+    const ai = new BardAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, speed: 5, tileSize: 1,
+        mp: 0, // not enough mana for songs
+        skills: ['guardian_hymn', 'courage_hymn'],
+        skillCooldowns: {},
+        equipment: { weapon: { tags: ['song'] } },
+        properties: { mbti: 'ENFP' },
+        isFriendly: true, isPlayer: false
+    };
+    const enemy = { x: 5, y: 0 };
+    const context = { player: {}, allies: [self], enemies: [enemy], mapManager: mapStub, eventManager: eventManagerStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'attack');
+});
+
+test('HealerAI - T types target weakest enemy', () => {
+    const ai = new HealerAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, tileSize: 1,
+        mp: 20, skills: ['heal'], skillCooldowns: {},
+        properties: { mbti: 'TP' }, isFriendly: true, isPlayer: false
+    };
+    const ally = { x: 10, y: 0, hp: 10, maxHp: 10 };
+    const e1 = { id: 1, x: 5, y: 0, hp: 10 };
+    const e2 = { id: 2, x: 6, y: 0, hp: 5 };
+    const ctx = { player: {}, allies: [self, ally], enemies: [e1, e2], mapManager: mapStub, eventManager: eventManagerStub };
+    const action = ai.decideAction(self, ctx);
+    assert.strictEqual(action.target, e2);
+});
+
+test('BardAI - F types follow ally target', () => {
+    const ai = new BardAI();
+    const self = {
+        x: 0, y: 0, visionRange: 100, attackRange: 10, tileSize: 1,
+        mp: 0, skills: ['guardian_hymn'], skillCooldowns: {},
+        equipment: { weapon: { tags: ['song'] } },
+        properties: { mbti: 'FJ' }, isFriendly: true, isPlayer: false
+    };
+    const enemy1 = { id: 1, x: 5, y: 0 };
+    const enemy2 = { id: 2, x: 6, y: 0 };
+    const ally = { currentTarget: enemy2 };
+    const ctx = { player: {}, allies: [self, ally], enemies: [enemy1, enemy2], mapManager: mapStub, eventManager: eventManagerStub };
+    const action = ai.decideAction(self, ctx);
+    assert.strictEqual(action.target, enemy2);
 });
 
 });
