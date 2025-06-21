@@ -47,6 +47,7 @@ export class MetaAIManager extends BaseMetaAI {
             const group = this.groups[groupId];
             const membersSorted = [...group.members].sort((a,b)=>(b.attackSpeed||1)-(a.attackSpeed||1));
             for (const member of membersSorted) {
+                if (member.hp <= 0 || member.possessedBy) continue;
                 if (typeof member.update === 'function') {
                     member.update({ ...context, metaAIManager: this });
                 } else {
