@@ -2,6 +2,7 @@ import { SKILLS } from '../data/skills.js';
 import { MBTI_INFO } from '../data/mbti.js';
 import { FAITHS } from '../data/faiths.js';
 import { TRAITS } from '../data/traits.js';
+import { SYNERGIES } from '../data/synergies.js';
 
 export class UIManager {
     constructor() {
@@ -692,6 +693,23 @@ export class UIManager {
                 html += `<br>${k}: ${v}`;
             }
         }
+
+        if (Array.isArray(item.synergies) && item.synergies.length > 0) {
+            html += `<br><strong>시너지</strong>`;
+            for (const key of item.synergies) {
+                const data = SYNERGIES[key];
+                if (!data) continue;
+                const icon = data.icon ? `${data.icon} ` : '';
+                html += `<br>${icon}${data.name}: ${data.description}`;
+                if (Array.isArray(data.bonuses)) {
+                    const bonuses = data.bonuses
+                        .map(b => `${b.count}개: ${b.description}`)
+                        .join(', ');
+                    if (bonuses) html += `<br><em>${bonuses}</em>`;
+                }
+            }
+        }
+
         return html;
     }
 
