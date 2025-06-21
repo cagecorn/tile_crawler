@@ -77,7 +77,13 @@ export class ProjectileManager {
                 const weapon = proj.caster.equipment.weapon;
                 if (weapon && weapon.weaponStats?.skills.includes('sonic_arrow')) {
                     const radius = 128;
-                    const aoeTargets = findEntitiesInRadius(result.target.x, result.target.y, radius, allEntities, result.target);
+                    const impactPos = { x: result.target.x + result.target.width/2, y: result.target.y + result.target.height/2 };
+
+                    if (this.vfxManager) {
+                        this.vfxManager.addShockwave(impactPos.x, impactPos.y, { maxRadius: radius });
+                    }
+
+                    const aoeTargets = findEntitiesInRadius(impactPos.x, impactPos.y, radius, allEntities, result.target);
                     for (const aoeTarget of aoeTargets) {
                         if (aoeTarget.isFriendly !== proj.caster.isFriendly) {
                             this.eventManager.publish('log', { message: `[음파 화살]이 ${aoeTarget.constructor.name}에게 피해를 입힙니다!`, color: '#add8e6' });

@@ -828,7 +828,7 @@ export class Game {
 
         eventManager.subscribe('vfx_request', (data) => {
             if (data.type === 'dash_trail') {
-                this.vfxManager.createDashTrail(data.from.x, data.from.y, data.to.x, data.to.y);
+                this.vfxManager.createDashTrail(data.from.x, data.from.y, data.to.x, data.to.y, data.options || {});
             } else if (data.type === 'whip_trail') {
                 if (this.vfxManager.createWhipTrail) {
                     this.vfxManager.createWhipTrail(data.from.x, data.from.y, data.to.x, data.to.y);
@@ -1070,6 +1070,8 @@ export class Game {
             projectileManager: this.projectileManager,
             itemManager: this.itemManager,
             equipmentManager: this.equipmentManager,
+            vfxManager: this.vfxManager,
+            assets: this.loader.assets,
             metaAIManager,
             microItemAIManager,
             speechBubbleManager: this.speechBubbleManager,
@@ -1124,10 +1126,10 @@ export class Game {
 
         // buffManager.renderGroundAuras(contexts.groundFx, ...); // (미래 구멍)
 
-        monsterManager.render(contexts.entity);
-        mercenaryManager.render(contexts.entity);
-        this.petManager.render(contexts.entity);
-        gameState.player.render(contexts.entity);
+        monsterManager.monsters.filter(m => !m.isHidden).forEach(m => m.render(contexts.entity));
+        mercenaryManager.mercenaries.filter(m => !m.isHidden).forEach(m => m.render(contexts.entity));
+        this.petManager.pets.filter(p => !p.isHidden).forEach(p => p.render(contexts.entity));
+        if (!gameState.player.isHidden) gameState.player.render(contexts.entity);
 
         fogManager.render(contexts.vfx, mapManager.tileSize);
         uiManager.renderHpBars(contexts.vfx, gameState.player, monsterManager.monsters, mercenaryManager.mercenaries);

@@ -17,6 +17,55 @@ export class VFXManager {
     }
 
     /**
+     * 화면에 퍼져나가는 충격파 효과를 추가합니다.
+     * @param {number} x 중심 x
+     * @param {number} y 중심 y
+     * @param {object} [options]
+     */
+    addShockwave(x, y, options = {}) {
+        const effect = {
+            type: 'shockwave',
+            x,
+            y,
+            radius: 0,
+            maxRadius: options.maxRadius || 128,
+            life: options.duration || 30,
+            duration: options.duration || 30,
+            color: options.color || 'rgba(200, 200, 255, 0.7)',
+            lineWidth: options.lineWidth || 3,
+        };
+        this.effects.push(effect);
+    }
+
+    /**
+     * 유닛이 사라지고 나타나는 순간이동 효과를 연출합니다.
+     * @param {Entity} entity 대상 유닛
+     * @param {{x, y}} fromPos 시작 위치
+     * @param {{x, y}} toPos 종료 위치
+     * @param {function} onComplete 애니메이션 종료 후 실행될 콜백
+     */
+    addTeleportEffect(entity, fromPos, toPos, onComplete) {
+        this.addParticleBurst(fromPos.x + entity.width / 2, fromPos.y + entity.height / 2, {
+            count: 20,
+            color: '#aaa',
+            speed: 3,
+        });
+        entity.isHidden = true;
+
+        setTimeout(() => {
+            entity.x = toPos.x;
+            entity.y = toPos.y;
+            entity.isHidden = false;
+            this.addParticleBurst(toPos.x + entity.width / 2, toPos.y + entity.height / 2, {
+                count: 20,
+                color: 'white',
+                speed: 2,
+            });
+            if (onComplete) onComplete();
+        }, 150);
+    }
+
+    /**
      * 화살이 날아갈 때 그 궤적을 선으로 그려주는 효과를 추가한다.
      * @param {object} projectile Projectile instance
      * @param {object} [options]
@@ -123,14 +172,16 @@ export class VFXManager {
         }
     }
 
-    createDashTrail(fromX, fromY, toX, toY) {
-        const particleCount = 10;
+    createDashTrail(fromX, fromY, toX, toY, options = {}) {
+        const particleCount = options.count || 10;
+        const color = options.color || 'rgba(255, 255, 255, 0.5)';
+        const lifespan = options.lifespan || 20;
         for (let i = 0; i < particleCount; i++) {
             const progress = i / particleCount;
             const x = fromX + (toX - fromX) * progress;
             const y = fromY + (toY - fromY) * progress;
-            const particle = new Particle(x, y, 'rgba(255, 255, 255, 0.5)');
-            particle.lifespan = 20;
+            const particle = new Particle(x, y, color);
+            particle.lifespan = lifespan;
             particle.gravity = 0;
             this.particles.push(particle);
         }
@@ -399,6 +450,16 @@ export class VFXManager {
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
 
+            if (effect.type === 'shockwave') {
+                effect.life--;
+                const progress = 1 - effect.life / effect.duration;
+                effect.radius = effect.maxRadius * progress;
+                if (effect.life <= 0) {
+                    this.effects.splice(i, 1);
+                }
+                continue;
+            }
+
             if (effect.type === 'death_animation') {
                 effect.life--;
                 if (effect.life <= 0) {
@@ -525,6 +586,15 @@ export class VFXManager {
                     ctx.globalAlpha = progress;
                     ctx.drawImage(entity.image, entity.x, entity.y, entity.width, entity.height);
                 }
+                ctx.restore();
+            } else if (effect.type === 'shockwave') {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = effect.color;
+                ctx.lineWidth = effect.lineWidth * (effect.life / effect.duration);
+                ctx.globalAlpha = effect.life / effect.duration;
+                ctx.stroke();
                 ctx.restore();
             } else if (effect.type === 'item_pop') {
                 const { item, startPos, endPos, life, duration, popHeight } = effect;
