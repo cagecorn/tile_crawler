@@ -75,11 +75,37 @@ export const EFFECTS = {
     // 상태이상
     poison: {
         name: '중독',
-        type: 'dot', // Damage over Time
-        duration: 500, // 5턴 (100프레임당 1턴 기준)
-        damagePerTurn: 2,
-        tags: ['status_ailment', 'poison'],
+        type: 'dot',
+        duration: 500, // 5턴
+        damagePerTurn: 3,
+        tags: ['status_ailment', 'poison', 'dot'],
         iconKey: 'parasite',
+        overlayColor: 'rgba(0, 255, 0, 0.3)',
+        particle: {
+            type: 'bubble',
+            color: 'rgba(100, 200, 100, 0.7)',
+            gravity: -0.02,
+            speed: 0.4,
+        },
+    },
+    freeze: {
+        name: '동결',
+        type: 'dot_cc',
+        duration: 300,
+        damagePerTurn: 1,
+        tags: ['status_ailment', 'freeze', 'dot', 'cc'],
+        stats: {
+            movementSpeed: -2,
+            attackSpeed: -0.5,
+            castingSpeed: -0.5,
+        },
+        overlayColor: 'rgba(100, 150, 255, 0.4)',
+        particle: {
+            type: 'snowflake',
+            color: 'rgba(200, 220, 255, 0.9)',
+            gravity: 0.05,
+            speed: 0.5,
+        },
     },
 
     shield: {

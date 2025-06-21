@@ -119,11 +119,17 @@ export class Game {
                 name !== 'VFXManager' &&
                 name !== 'ItemManager' &&
                 name !== 'AuraManager' &&
-                name !== 'ItemAIManager'
+                name !== 'ItemAIManager' &&
+                name !== 'EffectManager'
         );
         for (const managerName of otherManagerNames) {
             this.managers[managerName] = new Managers[managerName](this.eventManager, assets, this.factory);
         }
+
+        this.managers.EffectManager = new Managers.EffectManager(
+            this.eventManager,
+            this.managers.VFXManager
+        );
 
         this.monsterManager = this.managers.MonsterManager;
         this.mercenaryManager = this.managers.MercenaryManager;

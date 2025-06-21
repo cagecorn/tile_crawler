@@ -163,6 +163,7 @@ export class VFXManager {
      */
     addEmitter(x, y, options = {}) {
         const emitter = {
+            id: Math.random().toString(36).substr(2, 9),
             x,
             y,
             spawnRate: options.spawnRate || 2,
