@@ -27,109 +27,104 @@ export class CharacterFactory {
         this.itemFactory = new ItemFactory(assets);
     }
 
+    /**
+     * ✨ 안정성을 위해 재설계된 create 메서드입니다.
+     */
     create(type, config) {
-        const { x, y, tileSize, groupId } = config;
+        // 1. 최종적으로 엔티티에 전달될 설정 객체를 미리 준비합니다.
+        const finalConfig = { ...config };
 
-        // 1. 모든 유닛의 공통 속성을 여기서 랜덤으로 결정
-        let mbti = this._rollMBTI();
-        if (type === 'mercenary' && config.jobId === 'healer' && !mbti.includes('S')) {
-            mbti = 'ISFP';
-        }
-        const originId = this._rollRandomKey(ORIGINS);
-        let faithId = null;
-        // unit-features-plan.md에 따라 플레이어는 신앙을 갖지 않음
+        // 2. 스탯(stats)과 속성(properties) 객체를 생성하고 단계별로 데이터를 채웁니다.
+        const stats = { ...(config.baseStats || {}) };
+        const properties = {};
+
+        // 2-1. MBTI, 출신, 신앙, 특성 등 랜덤 속성을 먼저 결정합니다.
+        properties.mbti = this._rollMBTI();
+        properties.origin = this._rollRandomKey(ORIGINS);
+        properties.traits = this._rollMultipleRandomKeys(TRAITS, 2);
+
         if (type !== 'player') {
-            faithId = this._rollRandomKey(FAITHS);
+            properties.faith = this._rollRandomKey(FAITHS);
+        } else {
+            // 플레이어는 신앙을 갖지 않습니다.
+            properties.faith = 'NONE';
         }
-        const traits = this._rollMultipleRandomKeys(TRAITS, 2);
-        const stars = this._rollStars();
 
-        // 2. 기본 스탯 설정 (직업, 몬스터 종류, 출신 보너스 등)
-        const baseStats = { ...(config.baseStats || {}) };
-        if (type === 'monster' && baseStats.expValue === undefined) {
-            // 기본 몬스터 경험치를 10으로 상향
-            baseStats.expValue = 10;
+        // 2-2. 결정된 속성에 따른 보너스 스탯을 'stats' 객체에 합칩니다.
+        const originBonus = ORIGINS[properties.origin].stat_bonuses;
+        Object.assign(stats, originBonus);
+
+        if (type === 'mercenary' && config.jobId && JOBS[config.jobId]) {
+            Object.assign(stats, JOBS[config.jobId].stats);
         }
-        const originBonus = ORIGINS[originId].stat_bonuses;
-        for (const stat in originBonus) {
-            baseStats[stat] = (baseStats[stat] || 0) + originBonus[stat];
-        }
-        baseStats.stars = stars;
 
-        // 3. 최종 설정 객체 생성
-        const properties = { mbti, origin: originId, traits };
-        if (faithId) properties.faith = faithId;
+        // 2-3. 최종 스탯과 속성을 finalConfig에 할당합니다.
+        finalConfig.stats = stats;
+        finalConfig.properties = properties;
 
-        const finalConfig = {
-            ...config,
-            x, y, tileSize, groupId,
-            stats: baseStats,
-            properties,
-        };
-
-        // 4. 타입에 맞는 캐릭터 생성 및 반환
+        // 3. 타입에 맞는 캐릭터를 생성합니다.
+        let entity;
         switch (type) {
             case 'player':
-                const player = new Player(finalConfig);
-                player.consumables = [];
-                player.consumableCapacity = 4;
-                player.skills.push(SKILLS.fireball.id);
-                player.skills.push(SKILLS.iceball.id);
-                player.skills.push(SKILLS.teleport.id);
-                return player;
+                entity = new Player(finalConfig);
+                break;
             case 'mercenary':
-                if (config.jobId && JOBS[config.jobId]) {
-                    finalConfig.stats = { ...finalConfig.stats, ...JOBS[config.jobId].stats };
-                }
-                const merc = new Mercenary(finalConfig);
-                merc.behaviors = [];
-
-                if (config.jobId === 'healer') {
-                    merc.skills.push(SKILLS.heal.id);
-                    merc.skills.push(SKILLS.purify.id);
-                    merc.behaviors.push(new HealBehavior());
-                    merc.behaviors.push(new PurifierAI());
-                } else if (config.jobId === 'bard') {
-                    merc.skills.push(SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id);
-                    const vb = this.itemFactory.create('violin_bow', 0, 0, tileSize);
-                    if (vb) merc.equipment.weapon = vb;
-                    merc.behaviors.push(new BardBehavior());
-                } else if (config.jobId === 'archer') {
-                    const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
-                    if (bow) merc.equipment.weapon = bow;
-                } else if (config.jobId === 'warrior') {
-                    merc.skills.push(SKILLS.charge_attack.id);
-                }
-
-                // 모든 용병은 전투 및 배회 행동을 가짐
-                merc.behaviors.push(new CombatBehavior());
-                merc.behaviors.push(new WanderBehavior());
-
-                if (!merc.equipment.weapon) {
-                    const sword = this.itemFactory.create('sword', 0, 0, tileSize);
-                    if (sword) merc.equipment.weapon = sword;
-                }
-                if (merc.stats) merc.stats.updateEquipmentStats();
-
-                return merc;
+                entity = new Mercenary(finalConfig);
+                break;
             case 'monster':
-                const monster = new Monster(finalConfig);
-                monster.behaviors = [new CombatBehavior(), new WanderBehavior()];
-                return monster;
-            case 'pet':
+                entity = new Monster(finalConfig);
+                break;
+            case 'pet': {
                 const petData = PETS[config.petId] || PETS.fox;
                 finalConfig.stats = { ...finalConfig.stats, ...(petData.baseStats || {}) };
                 finalConfig.image = finalConfig.image || this.assets[petData.imageKey];
                 finalConfig.auraSkill = petData.auraSkill;
-                const pet = new Pet(finalConfig);
-                pet.behaviors = [new CombatBehavior(), new WanderBehavior()];
-                return pet;
+                entity = new Pet(finalConfig);
+                break;
+            }
+            default:
+                return null;
         }
+
+        // 4. 생성된 캐릭터에 따라 추가적인 설정(스킬, AI, 장비 등)을 적용합니다.
+        entity.behaviors = [];
+        if (type === 'player') {
+            entity.skills.push(SKILLS.fireball.id, SKILLS.iceball.id, SKILLS.teleport.id);
+        } else if (type === 'mercenary') {
+            if (config.jobId === 'healer') {
+                entity.skills.push(SKILLS.heal.id, SKILLS.purify.id);
+                entity.behaviors.push(new HealBehavior(), new PurifierAI());
+            } else if (config.jobId === 'bard') {
+                entity.skills.push(SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id);
+                const vb = this.itemFactory.create('violin_bow', 0, 0, config.tileSize);
+                if (vb) entity.equipment.weapon = vb;
+                entity.behaviors.push(new BardBehavior());
+            } else if (config.jobId === 'warrior') {
+                entity.skills.push(SKILLS.charge_attack.id);
+            } else if (config.jobId === 'archer') {
+                const bow = this.itemFactory.create('long_bow', 0, 0, config.tileSize);
+                if (bow) entity.equipment.weapon = bow;
+            }
+
+            if (!entity.equipment.weapon && type !== 'bard') {
+                const sword = this.itemFactory.create('sword', 0, 0, config.tileSize);
+                if (sword) entity.equipment.weapon = sword;
+            }
+
+            entity.behaviors.push(new CombatBehavior(), new WanderBehavior());
+        } else if (type === 'monster' || type === 'pet') {
+            entity.behaviors.push(new CombatBehavior(), new WanderBehavior());
+        }
+
+        if (entity.stats?.updateEquipmentStats) {
+            entity.stats.updateEquipmentStats();
+        }
+
+        return entity;
     }
-    
-    // === 아래는 다이스를 굴리는 내부 함수들 (구멍만 파기) ===
+
+    // === 아래는 다이스를 굴리는 내부 함수들 (수정 없음) ===
     _rollMBTI() {
-        // MBTI를 무작위로 선택한다
         const idx = Math.floor(Math.random() * MBTI_TYPES.length);
         return MBTI_TYPES[idx];
     }
@@ -148,7 +143,6 @@ export class CharacterFactory {
         return result;
     }
     _rollStars() {
-        // ... (별 갯수 랜덤 배분 로직) ...
         return { strength: 1, agility: 1, endurance: 1, focus: 1, intelligence: 1 };
     }
 }
