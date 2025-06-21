@@ -64,6 +64,19 @@ export const ITEMS = {
         toughness: 4,
     },
 
+    shield_basic: {
+        name: '기본 방패',
+        type: 'shield',
+        slot: 'off_hand',
+        tags: ['shield', 'off_hand_equipment'],
+        imageKey: 'shield',
+        stats: { defense: 5 },
+        tier: 'normal',
+        durability: 150,
+        weight: 8,
+        toughness: 10,
+    },
+
     // 기본 소모품 및 화폐
     potion: {
         name: '힐링 포션',

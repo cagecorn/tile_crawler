@@ -170,7 +170,7 @@ export class MetaAIManager {
             case 'move':
                 const { movementManager } = context;
                 if (movementManager) {
-                    movementManager.moveEntityTowards(entity, action.target);
+                    movementManager.moveEntityTowards(entity, action.target, context);
                 }
                 break;
         }

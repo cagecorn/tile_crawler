@@ -71,7 +71,11 @@ export class EquipmentManager {
 
     _getSlotForItem(item) {
         if (!item) return null;
-        if ((item.tags && item.tags.includes('weapon')) || item.type === 'weapon') return 'weapon';
+        // 1. 아이템 데이터에 명시된 slot을 최우선으로 사용합니다.
+        if (item.slot) return item.slot;
+
+        // 2. 기존 로직 (하위 호환용)
+        if ((item.tags && item.tags.includes('weapon')) || item.type === 'weapon') return 'main_hand';
         if ((item.tags && item.tags.includes('armor')) || item.type === 'armor') return 'armor';
         return null;
     }
