@@ -14,14 +14,43 @@ import { EFFECTS } from './data/effects.js';
 export class Engine {
     constructor(assets) {
         this.assets = assets;
-        this.layerManager = new LayerManager();
         this.eventManager = new EventManager();
+        this.layerManager = new LayerManager();
         this.inputHandler = new InputHandler(this.eventManager);
         this.mapManager = new AquariumMapManager();
         this.factory = new CharacterFactory(assets);
+        
+        // ✨ 게임 상태와 관리자를 null로 초기화합니다.
+        this.managers = null;
+        this.gameState = null;
+        this.gameLoop = null;
+    }
 
+    /**
+     * ✨ 게임에 필요한 모든 구성 요소를 설정하는 초기화 메서드를 추가합니다.
+     */
+    initialize() {
         this.managers = createManagers(this.eventManager, this.assets, this.factory, this.mapManager);
         this.gameState = buildInitialWorld(this.managers, this.assets);
+
+        // UI 매니저 초기화 시 gameState를 전달하여 UI가 게임 상태를 알 수 있도록 합니다.
+        this.managers.uiManager.init(this.gameState, {
+            onStatUp: (stat) => {
+                if (this.gameState.statPoints > 0) {
+                    this.gameState.statPoints--;
+                    this.gameState.player.stats.allocatePoint(stat);
+                    this.gameState.player.stats.recalculate();
+                }
+            },
+            onEquipItem: (entity, item) => {
+                this.managers.equipmentManager.equip(entity, item, this.gameState.inventory);
+                this.gameState.inventory = this.gameState.inventory.filter(i => i !== item);
+                this.managers.uiManager.renderInventory(this.gameState);
+            },
+            onEnhanceItem: (item) => {
+                this.managers.enhancementManager.enhanceItem(this.gameState.player, item, this.gameState);
+            },
+        });
 
         registerGameEventListeners(this);
 
@@ -29,6 +58,10 @@ export class Engine {
     }
 
     start() {
+        if (!this.gameLoop) {
+            console.error("Engine not initialized before starting. Call initialize() first.");
+            return;
+        }
         this.gameLoop.start();
     }
 
@@ -46,7 +79,6 @@ export class Engine {
         const { player } = this.gameState;
         const { monsterManager, mercenaryManager, petManager, itemManager, aiEngine, fogManager } = this.managers;
 
-        // --- KnockbackEngine 업데이트 루프 추가 ---
         this.managers.knockbackEngine.update();
 
         // Player movement
@@ -59,8 +91,6 @@ export class Engine {
         if (moveX !== 0 || moveY !== 0) {
             const newX = player.x + moveX;
             const newY = player.y + moveY;
-
-            // ✨ 해결책 1: 플레이어 벽 충돌 검사 로직 추가
             if (!this.mapManager.isWallAt(newX, player.y, player.width, player.height)) {
                 player.x = newX;
             }
@@ -69,12 +99,10 @@ export class Engine {
             }
         }
 
-        // ✨ 해결책 2: 모든 유닛 목록을 안전하게 생성
         const mercs = mercenaryManager?.mercenaries || [];
         const monsters = monsterManager?.monsters || [];
         const pets = petManager?.pets || [];
         const allEntities = [player, ...mercs, ...monsters, ...pets];
-
 
         const context = {
             player,
@@ -92,34 +120,12 @@ export class Engine {
             movementManager: this.managers.movementManager,
             motionManager: this.managers.motionManager,
             aiEngine,
-            onPlayerAttack: (damage) => {
-                player.takeDamage(damage);
-                if (player.hp <= 0) {
-                    this.eventManager.publish('game_over');
-                }
-            },
-            onMonsterAttacked: (id, damage) => {
-                const monster = monsterManager.monsters.find(m => m.id === id);
-                if (monster) {
-                    monster.takeDamage(damage);
-                    if (monster.hp <= 0) {
-                        this.eventManager.publish('entity_death', { attacker: player, victim: monster });
-                        monsterManager.removeMonster(monster.id);
-                    }
-                }
-            }
         };
 
-        try {
-            aiEngine.update(context);
-        } catch (err) {
-            console.error('AI update error', err);
-            this.eventManager.publish('debug', { tag: 'ERROR', message: `AI update failed: ${err.message}` });
-        }
-
+        // ✨ AI 엔진을 루프의 가장 마지막에 업데이트하여 다른 시스템의 변경사항을 모두 반영하도록 합니다.
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
-                if (name === 'fogManager' || manager === this.managers.knockbackEngine) return;
+                if (name === 'fogManager' || name === 'knockbackEngine' || name === 'uiManager') return;
                 try {
                     manager.update(allEntities);
                 } catch (err) {
@@ -128,28 +134,39 @@ export class Engine {
                 }
             }
         });
+        
+        try {
+            aiEngine.update(context);
+        } catch (err) {
+            console.error('AI update error', err);
+            this.eventManager.publish('debug', { tag: 'ERROR', message: `AI update failed: ${err.message}` });
+        }
 
-        // Item pickup
-        const itemToPick = itemManager.items.find(item => Math.hypot(player.x - item.x, player.y - item.y) < player.width);
+        // Item pickup handling
+        const itemToPick = itemManager.items.find(
+            item => Math.hypot(player.x - item.x, player.y - item.y) < player.width
+        );
         if (itemToPick) {
             itemManager.removeItem(itemToPick);
             this.gameState.inventory.push(itemToPick);
         }
 
         fogManager.update(player, this.mapManager);
+        this.managers.uiManager.updateUI(this.gameState);
     }
 
     render = () => {
-        if (this.gameState.isGameOver) return;
+        if (!this.gameState || this.gameState.isGameOver) return;
         this.layerManager.clear();
-
+        
         const { camera, zoomLevel, player } = this.gameState;
+        if (!player) return; // 안전장치
+        
         const canvas = this.layerManager.layers.entity;
 
-        // Camera follow
         camera.x = player.x - canvas.width / (2 * zoomLevel);
         camera.y = player.y - canvas.height / (2 * zoomLevel);
-
+        
         Object.values(this.layerManager.contexts).forEach(ctx => {
             ctx.save();
             ctx.scale(zoomLevel, zoomLevel);
@@ -162,21 +179,25 @@ export class Engine {
         this.managers.mercenaryManager.render(this.layerManager.contexts.entity);
         this.managers.petManager.render(this.layerManager.contexts.entity);
         player.render(this.layerManager.contexts.entity);
-
+        
         this.managers.vfxManager.render(this.layerManager.contexts.vfx);
         this.managers.projectileManager.render(this.layerManager.contexts.vfx);
         this.managers.speechBubbleManager.render(this.layerManager.contexts.vfx);
-        this.managers.uiManager.renderHpBars(this.layerManager.contexts.vfx, player, this.managers.monsterManager.monsters, this.managers.mercenaryManager.mercenaries);
+        
+        const allMercs = this.managers.mercenaryManager?.mercenaries || [];
+        const allMonsters = this.managers.monsterManager?.monsters || [];
+        
+        this.managers.uiManager.renderHpBars(this.layerManager.contexts.vfx, player, allMonsters, allMercs);
         this.managers.effectIconManager.render(
             this.layerManager.contexts.vfx,
-            [player, ...this.managers.monsterManager.monsters, ...this.managers.mercenaryManager.mercenaries],
+            [player, ...allMonsters, ...allMercs],
             EFFECTS
         );
         this.managers.fogManager.render(this.layerManager.contexts.weather, this.mapManager.tileSize);
 
         Object.values(this.layerManager.contexts).forEach(ctx => ctx.restore());
-
-        this.managers.uiManager.updateUI(this.gameState);
+        
+        // This call is now in the update loop to ensure data consistency
+        // this.managers.uiManager.updateUI(this.gameState); 
     }
 }
-
