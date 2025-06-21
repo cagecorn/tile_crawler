@@ -47,6 +47,15 @@ export function registerGameEventListeners(engine) {
             itemManager.addItem(corpse);
         }
     });
+
+    // Apply experience when exp_gained fires. monsterDeathWorkflow already
+    // applies the exp directly before firing this event, so it marks the event
+    // with `applied: true` to avoid double counting.
+    eventManager.subscribe('exp_gained', (data) => {
+        if (!data.applied && data.player?.stats) {
+            data.player.stats.addExp(data.exp);
+        }
+    });
     
     eventManager.subscribe('game_over', () => {
         gameState.isGameOver = true;
