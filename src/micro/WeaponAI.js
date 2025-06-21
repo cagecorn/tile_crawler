@@ -1,21 +1,12 @@
 // src/micro/WeaponAI.js
 import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 
-// 모든 무기 AI의 기반이 될 부모 클래스입니다.
 class BaseWeaponAI {
-    /**
-     * @param {Entity} wielder - 무기를 사용하는 유닛
-     * @param {Item} weapon - 행동을 결정하는 무기 자신
-     * @param {object} context - 주변 상황 정보
-     * @returns {object} - 행동 객체 (e.g., { type: 'attack', target: ... })
-     */
     decideAction(wielder, weapon, context) {
-        // 이 메서드는 각 무기 AI 클래스에서 재정의됩니다.
         return { type: 'idle' };
     }
 }
 
-// 검 AI: 일반적인 근접 전투 수행 및 패링 자세 사용
 export class SwordAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
         const { enemies } = context;
@@ -49,15 +40,31 @@ export class SwordAI extends BaseWeaponAI {
     }
 }
 
-// 단검 AI: 적의 배후를 노리는 움직임 추가
 export class DaggerAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
-        // TODO: 적의 뒤로 이동하려는 시도 후 백스탭 스킬 사용
-        return { type: 'idle' };
+        const { enemies, mapManager } = context;
+        if (!enemies || enemies.length === 0) return { type: 'idle' };
+
+        const nearest = enemies.reduce((prev, curr) => {
+            const prevDist = Math.hypot(prev.x - wielder.x, prev.y - wielder.y);
+            const currDist = Math.hypot(curr.x - wielder.x, curr.y - wielder.y);
+            return prevDist < currDist ? prev : curr;
+        });
+
+        const distance = Math.hypot(nearest.x - wielder.x, nearest.y - wielder.y);
+
+        if (distance <= wielder.attackRange) {
+            return { type: 'attack', target: nearest };
+        }
+
+        const behindX = nearest.x - nearest.facing.x * (mapManager.tileSize * 0.8);
+        const behindY = nearest.y - nearest.facing.y * (mapManager.tileSize * 0.8);
+        const behindTarget = { x: behindX, y: behindY };
+
+        return { type: 'move', target: behindTarget };
     }
 }
 
-// 활 AI: 거리를 유지하며 충전 사격 기회 탐색
 export class BowAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
         const { enemies } = context;
@@ -86,7 +93,6 @@ export class BowAI extends BaseWeaponAI {
     }
 }
 
-// 창 AI: 긴 사거리를 이용한 카이팅 및 돌진
 export class SpearAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
         const { enemies, mapManager } = context;
@@ -119,15 +125,14 @@ export class SpearAI extends BaseWeaponAI {
     }
 }
 
-// 바이올린 활 AI: 원거리 공격 및 특수 음파 화살 사용
 export class ViolinBowAI extends BowAI {
     decideAction(wielder, weapon, context) {
-        // TODO: 기본 활 AI 로직 + 음파 화살 스킬 사용
+        // 음파 화살은 패시브 스킬이므로, 기본 활 AI의 행동을 그대로 따릅니다.
+        // 실제 범위 피해 로직은 ProjectileManager에서 처리됩니다.
         return super.decideAction(wielder, weapon, context);
     }
 }
 
-// 에스톡 AI: 히트 앤 런 전술 구사
 export class EstocAI extends BaseWeaponAI {
     decideAction(wielder, weapon, context) {
         const { enemies } = context;
@@ -167,12 +172,10 @@ export class SaberAI extends EstocAI {}
 export class AxeAI extends SwordAI {}
 export class MaceAI extends SwordAI {}
 
-// 지팡이 AI: 원거리 마법 공격
 export class StaffAI extends BowAI {
     // TODO: 지능 기반 데미지 계산 로직과 연계 필요
 }
 
-// 낫, 채찍 AI: 창과 같은 중거리 유지 AI
 export class ScytheAI extends SpearAI {}
 export class WhipAI extends SpearAI {
     decideAction(wielder, weapon, context) {
