@@ -49,6 +49,8 @@ export class CombatCalculator {
             damageMultiplier = 1.5;
             attacker.effects = attacker.effects.filter(e => e.id !== 'charging_shot_effect');
             this.eventManager.publish('log', { message: `[충전된 사격]이 발동됩니다!`, color: 'magenta' });
+            // 넉백 요청 이벤트 발행
+            this.eventManager.publish('knockback_request', { attacker, defender, distance: 128 });
         }
 
         // 1. 기본 공격력 계산 (힘 기반)
