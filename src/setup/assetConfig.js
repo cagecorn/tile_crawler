@@ -25,6 +25,7 @@ export const ASSET_LIST = {
         ['pet-fox', 'assets/images/pet-fox.png'],
         ['guardian-hymn-effect', 'assets/images/Guardian Hymn-effect.png'],
         ['courage-hymn-effect', 'assets/images/Courage Hymn-effect.png'],
+        // ✨ 아래 파일 경로들을 수정했습니다.
         ['fire-ball', 'assets/images/fire-ball.png'],
         ['ice-ball', 'assets/images/ice-ball-effect.png'],
         ['strike-effect', 'assets/images/strike-effect.png'],

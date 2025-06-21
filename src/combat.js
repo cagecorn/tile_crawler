@@ -9,28 +9,27 @@ export class CombatCalculator {
         this.knockbackEngine = knockbackEngine;
     }
 
+    // ✨ 룬 데미지 계산 로직을 더 견고하게 개선했습니다.
     _calculateRuneDamage(weapon, skill) {
-        if (!weapon || !weapon.sockets || weapon.sockets.length === 0) {
+        if (!weapon || !Array.isArray(weapon.sockets) || weapon.sockets.length === 0) {
             return 0;
         }
 
         let totalRuneDamage = 0;
+        const skillElementTags = skill?.tags?.filter(t => ['fire', 'ice', 'poison'].includes(t)) || [];
+
         for (const rune of weapon.sockets) {
-            if (!rune || !rune.weaponDamage) continue;
+            // 소켓이 비어있거나(null), 룬은 있지만 데미지 정보가 없는 경우를 모두 안전하게 건너뜁니다.
+            if (!rune || typeof rune.weaponDamage !== 'number') continue;
 
-            const skillElementTags = skill?.tags.filter(t => ['fire', 'ice', 'poison'].includes(t)) || [];
-
-            // 1. 일반 공격 혹은 비속성 스킬: 1.0배
             if (skillElementTags.length === 0) {
                 totalRuneDamage += rune.weaponDamage;
                 continue;
             }
 
-            // 2. 속성 스킬
             if (skillElementTags.includes(rune.elementType)) {
-                totalRuneDamage += rune.weaponDamage * 1.5; // 속성 일치
+                totalRuneDamage += rune.weaponDamage * 1.5;
             }
-            // 속성 불일치 시 데미지 없음
         }
         return Math.floor(totalRuneDamage);
     }
