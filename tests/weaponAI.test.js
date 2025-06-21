@@ -1,4 +1,4 @@
-import { BowAI, SpearAI, SwordAI, WhipAI } from '../src/micro/WeaponAI.js';
+import { BowAI, SpearAI, SwordAI, WhipAI, DaggerAI } from '../src/micro/WeaponAI.js';
 import { describe, test, assert } from './helpers.js';
 
 const mapStub = { tileSize: 1, isWallAt: () => false };
@@ -54,5 +54,14 @@ describe('WeaponAI', () => {
     assert.strictEqual(action.type, 'weapon_skill');
     assert.strictEqual(action.skillId, 'pull');
     assert.strictEqual(action.target, weak);
+  });
+
+  test('DaggerAI moves directly to enemy when facing data missing', () => {
+    const ai = new DaggerAI();
+    const wielder = { x: 0, y: 0, attackRange: 5 };
+    const enemy = { x: 12, y: 0 }; // no facing property
+    const action = ai.decideAction(wielder, {}, { enemies: [enemy], mapManager: mapStub });
+    assert.strictEqual(action.type, 'move');
+    assert.deepStrictEqual(action.target, { x: enemy.x, y: enemy.y });
   });
 });
