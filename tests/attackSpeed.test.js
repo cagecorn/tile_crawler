@@ -1,4 +1,4 @@
-import { MetaAIManager } from '../src/managers/ai-managers.js';
+import { AIEngine } from '../src/engines/aiEngine.js';
 import { MeleeAI } from '../src/ai.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { describe, test, assert } from './helpers.js';
@@ -7,7 +7,7 @@ describe('AI', () => {
 
 test('공격 속도가 빠른 유닛이 먼저 공격', () => {
     const em = new EventManager();
-    const aiManager = new MetaAIManager(em);
+    const aiManager = new AIEngine(em);
     const mapManager = { tileSize: 1, isWallAt: () => false };
     const pathfindingManager = { findPath: () => [] };
     const player = { x: 0, y: 0 };

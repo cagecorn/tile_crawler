@@ -1,7 +1,7 @@
 import { MapManager } from '../src/map.js';
 import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { EventManager } from '../src/managers/eventManager.js';
-import { MetaAIManager, STRATEGY } from '../src/managers/ai-managers.js';
+import { AIEngine, STRATEGY } from '../src/engines/aiEngine.js';
 import { PathfindingManager } from '../src/managers/pathfindingManager.js';
 import { ItemManager } from '../src/managers/itemManager.js';
 import { EquipmentManager } from '../src/managers/equipmentManager.js';
@@ -48,7 +48,7 @@ test('차지 어택과 포션 사용 시나리오', () => {
     assert.ok(plateArmor.stats.get('maxHp') >= 10, '플레이트 아머 스탯 이상');
     const eventManager = new EventManager();
     const pathfindingManager = new PathfindingManager(mapManager);
-    const aiManager = new MetaAIManager(eventManager);
+    const aiManager = new AIEngine(eventManager);
     const itemManager = new ItemManager(0, mapManager, assets);
     const equipmentManager = new EquipmentManager(eventManager);
     const tagManager = new TagManager();

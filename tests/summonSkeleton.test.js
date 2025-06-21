@@ -1,7 +1,7 @@
 import { CharacterFactory } from '../src/factory.js';
 import { MonsterManager } from '../src/managers/monsterManager.js';
 import { SkillManager } from '../src/managers/skillManager.js';
-import { MetaAIManager } from '../src/managers/ai-managers.js';
+import { AIEngine } from '../src/engines/aiEngine.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { SKILLS } from '../src/data/skills.js';
 import { describe, test, assert } from './helpers.js';
@@ -13,7 +13,7 @@ describe('Summon Skeleton Skill', () => {
     const factory = new CharacterFactory(assets);
     const eventManager = new EventManager();
     const monsterManager = new MonsterManager(eventManager, assets, factory);
-    const metaAI = new MetaAIManager(eventManager);
+    const metaAI = new AIEngine(eventManager);
     const skillMgr = new SkillManager(eventManager);
     skillMgr.setManagers({addEffect(){}}, factory, metaAI, monsterManager);
 
