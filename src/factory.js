@@ -19,6 +19,7 @@ import { SYNERGIES } from './data/synergies.js';
 export class CharacterFactory {
     constructor(assets) {
         this.assets = assets;
+        this.itemFactory = new ItemFactory(assets);
     }
 
     create(type, config) {
@@ -80,7 +81,8 @@ export class CharacterFactory {
                 if (config.jobId === 'archer') {
                     const rangedSkill = Math.random() < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id;
                     merc.skills.push(rangedSkill);
-                    merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow'] };
+                    const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
+                    if (bow) merc.equipment.weapon = bow;
                     merc.fallbackAI = new RangedAI();
                 } else if (config.jobId === 'warrior') {
                     merc.skills.push(SKILLS.charge_attack.id);
@@ -99,11 +101,17 @@ export class CharacterFactory {
                 } else if (config.jobId === 'bard') {
                     merc.skills.push(SKILLS.guardian_hymn.id);
                     merc.skills.push(SKILLS.courage_hymn.id);
-                    merc.equipment.weapon = { tags: ['weapon', 'ranged', 'bow', 'song'] };
+                    const vb = this.itemFactory.create('violin_bow', 0, 0, tileSize);
+                    if (vb) merc.equipment.weapon = vb;
                     merc.roleAI = new BardAI();
                 } else {
                     const skillId = Math.random() < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id;
                     merc.skills.push(skillId);
+                }
+
+                if (!merc.equipment.weapon) {
+                    const sword = this.itemFactory.create('sword', 0, 0, tileSize);
+                    if (sword) merc.equipment.weapon = sword;
                 }
 
                 return merc;
