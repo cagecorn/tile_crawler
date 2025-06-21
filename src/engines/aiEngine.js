@@ -1,10 +1,12 @@
 import { SKILLS } from '../data/skills.js';
+import { AI_PLAYBOOK } from '../data/aiPlaybook.js';
 
 export class AIEngine {
     constructor(eventManager, mbtiEngine) {
         this.eventManager = eventManager;
         this.mbtiEngine = mbtiEngine;
         this.groups = {};
+        this.activeTactics = {};
 
         eventManager.subscribe('entity_removed', (data) => {
             for (const groupId in this.groups) {
@@ -32,7 +34,7 @@ export class AIEngine {
             this.groups[groupId].addMember(member);
         }
     }
-    
+
     update(context) {
         for (const groupId in this.groups) {
             const group = this.groups[groupId];
@@ -42,28 +44,131 @@ export class AIEngine {
                 enemies: Object.values(this.groups).filter(g => g.id !== groupId).flatMap(g => g.members)
             };
 
-            const membersSorted = [...group.members].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
-            
-            for (const member of membersSorted) {
-                if (member.hp <= 0 || !member.behaviors || member.isPlayer) continue;
-                
-                if (typeof member.update === 'function') member.update(currentContext);
-                if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
+            let activeTactic = this.activeTactics[groupId];
 
-                let baseAction = { type: 'idle' };
-                for (const behavior of member.behaviors) {
-                    const action = behavior.decideAction(member, currentContext);
-                    if (action && action.type !== 'idle') {
-                        baseAction = action;
-                        break; 
-                    }
+            if (activeTactic && activeTactic.life > 0) {
+                activeTactic.life--;
+                if (activeTactic.update) {
+                    activeTactic.update(activeTactic, currentContext);
                 }
-
-                const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, currentContext);
-                finalAction.triggeredTraits = triggeredTraits;
-
-                this.executeAction(member, finalAction, currentContext);
+                this.refreshTacticRoles(activeTactic, currentContext);
+            } else {
+                activeTactic = this.chooseBestTactic(currentContext);
+                this.activeTactics[groupId] = activeTactic;
             }
+
+            if (activeTactic) {
+                this.executeTactic(activeTactic, currentContext);
+            } else {
+                this.executeIndividualBehaviors(currentContext);
+            }
+        }
+    }
+
+    chooseBestTactic(context) {
+        if (context.enemies.length === 0) return null;
+
+        const options = [];
+        for (const id in AI_PLAYBOOK) {
+            const t = AI_PLAYBOOK[id];
+            if (t.condition(context)) {
+                options.push({ ...t, id, score: t.score(context) });
+            }
+        }
+
+        if (options.length === 0) return null;
+        options.sort((a, b) => b.score - a.score);
+        const topScore = options[0].score;
+        const bestOptions = options.filter(o => o.score === topScore);
+        const best = bestOptions[Math.floor(Math.random() * bestOptions.length)];
+        this.eventManager.publish('log', { message: `[전술] ${best.name} 개시!`, color: 'gold' });
+        return {
+            ...best,
+            life: best.duration,
+            stage: 'initial',
+            rolesDef: best.roles,
+            roles: this.assignRoles(best.roles, context)
+        };
+    }
+
+    assignRoles(roleDefs, context) {
+        const assignments = {};
+        const available = [...context.allies];
+
+        for (const def of roleDefs) {
+            assignments[def.name] = [];
+            if (def.selector) {
+                const chosen = def.selector(context, assignments);
+                if (chosen) {
+                    assignments[def.name].push(chosen);
+                    const idx = available.indexOf(chosen);
+                    if (idx !== -1) available.splice(idx, 1);
+                }
+            } else {
+                const count = def.count === 'all' ? available.length : def.count;
+                for (let i = 0; i < count; i++) {
+                    if (available.length === 0) break;
+                    assignments[def.name].push(available.shift());
+                }
+            }
+        }
+
+        return assignments;
+    }
+
+    refreshTacticRoles(tactic, context) {
+        if (!tactic || !tactic.roles) return;
+        const roleDefs = tactic.rolesDef || [];
+        for (const def of roleDefs) {
+            const current = tactic.roles[def.name] || [];
+            const alive = current.filter(e => context.allies.includes(e));
+            tactic.roles[def.name] = alive;
+            const needed = def.count === 'all' ? context.allies.length : def.count;
+            if (alive.length < needed) {
+                const pool = context.allies.filter(a =>
+                    !Object.values(tactic.roles).some(list => list.includes(a)));
+                const fillCount = needed === 'all' ? pool.length : needed - alive.length;
+                for (let i = 0; i < fillCount; i++) {
+                    if (pool.length === 0) break;
+                    const ent = def.selector ? def.selector(context, tactic.roles) : pool.shift();
+                    if (ent) tactic.roles[def.name].push(ent);
+                }
+            }
+        }
+    }
+
+    executeTactic(tactic, context) {
+        const assignments = tactic.roles;
+        for (const roleName in assignments) {
+            const roleDef = tactic.rolesDef?.find(r => r.name === roleName);
+            const entities = assignments[roleName];
+            if (!roleDef || !roleDef.action) continue;
+            for (const entity of entities) {
+                const action = roleDef.action(entity, assignments, tactic);
+                this.executeAction(entity, action, context);
+            }
+        }
+    }
+
+    executeIndividualBehaviors(context) {
+        const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
+        for (const member of membersSorted) {
+            if (member.hp <= 0 || !member.behaviors || member.isPlayer) continue;
+            if (typeof member.update === 'function') member.update(context);
+            if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
+
+            let baseAction = { type: 'idle' };
+            for (const behavior of member.behaviors) {
+                const action = behavior.decideAction(member, context);
+                if (action && action.type !== 'idle') {
+                    baseAction = action;
+                    break;
+                }
+            }
+
+            const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, context);
+            finalAction.triggeredTraits = triggeredTraits;
+            this.executeAction(member, finalAction, context);
         }
     }
 
