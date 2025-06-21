@@ -38,8 +38,12 @@ test('간단한 게임 흐름', () => {
     assert.ok(expEvent, '경험치 이벤트 발생');
     assert.ok(merc.stats.get('exp') > 0, '용병 경험치 증가');
 
-    const weapon = itemFactory.create('short_sword', 0, 0, 1);
+    // 기존 장비를 제거한 후 더 강력한 무기를 장착하여 스탯 상승을 확인한다
+    merc.equipment.weapon = null;
+    merc.stats.updateEquipmentStats();
     const beforeAtk = merc.stats.get('attackPower');
+
+    const weapon = itemFactory.create('estoc', 0, 0, 1);
     merc.equipment.weapon = weapon;
     merc.stats.updateEquipmentStats();
     merc.updateAI();
