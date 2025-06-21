@@ -129,8 +129,9 @@ export class MotionManager {
         const fromPos = { x: target.x, y: target.y };
         const toPos = { x: destX, y: destY };
 
-        target.x = destX;
-        target.y = destY;
+        // VFXManager가 애니메이션을 처리하도록 대상의 좌표를 즉시 변경하지 않습니다.
+        // target.x = destX;
+        // target.y = destY;
 
         return { fromPos, toPos };
     }
