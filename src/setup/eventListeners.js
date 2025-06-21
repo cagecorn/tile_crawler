@@ -102,4 +102,12 @@ export function registerGameEventListeners(engine) {
         },
         enhancementManager: managers.enhancementManager,
     });
+
+    // Top menu buttons open their corresponding panels
+    document.querySelectorAll('.menu-btn[data-panel-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            uiManager.showPanel(btn.dataset.panelId);
+            if (gameState) gameState.isPaused = true;
+        });
+    });
 }
