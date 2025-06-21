@@ -140,4 +140,13 @@ test('RangedAI - follows player when no line of sight to enemy', () => {
     assert.deepStrictEqual(action.target, { x: 1, y: 2 });
 });
 
+test('MeleeAI - idle when enemy beyond vision range', () => {
+    const ai = new MeleeAI();
+    const self = { x: 0, y: 0, visionRange: 30, attackRange: 10, speed: 5, tileSize: 1 };
+    const enemy = { x: 100, y: 0 };
+    const context = { player: {}, allies: [], enemies: [enemy], mapManager: mapStub };
+    const action = ai.decideAction(self, context);
+    assert.strictEqual(action.type, 'idle');
+});
+
 });
