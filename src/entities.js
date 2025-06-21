@@ -111,9 +111,19 @@ class Entity {
     }
 
     render(ctx) {
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height);
+        ctx.scale(this.direction || 1, 1);
+
         if (this.image) {
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            ctx.drawImage(this.image, -this.width / 2, -this.height, this.width, this.height);
         }
+
+        if (this.equipmentRenderManager) {
+            this.equipmentRenderManager.drawEquipment(ctx, this);
+        }
+
+        ctx.restore();
     }
 
     getSaveState() {
@@ -173,22 +183,7 @@ export class Player extends Entity {
     }
 
     render(ctx) {
-        // 기본 이미지를 그린다
         super.render(ctx);
-
-        if (this.equipmentRenderManager) {
-            this.equipmentRenderManager.drawWeapon(ctx, this);
-        } else {
-            const weapon = this.equipment.weapon;
-            if (weapon && weapon.image) {
-                const drawX = this.x + this.width * 0.3;
-                const drawY = this.y + this.height * 0.3;
-                const drawW = this.width * 0.8;
-                const drawH = this.height * 0.8;
-                ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
-            }
-        }
-
         // 플레이어는 머리 위 MBTI 표기를 숨긴다
     }
 
@@ -219,21 +214,7 @@ export class Mercenary extends Entity {
     }
 
     render(ctx) {
-        // 1. 기본 이미지를 먼저 그린다
         super.render(ctx);
-
-        if (this.equipmentRenderManager) {
-            this.equipmentRenderManager.drawWeapon(ctx, this);
-        } else {
-            const weapon = this.equipment.weapon;
-            if (weapon && weapon.image) {
-                const drawX = this.x + this.width * 0.3;
-                const drawY = this.y + this.height * 0.3;
-                const drawW = this.width * 0.8;
-                const drawH = this.height * 0.8;
-                ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
-            }
-        }
     }
 
 
@@ -264,18 +245,6 @@ export class Monster extends Entity {
 
     render(ctx) {
         super.render(ctx);
-        if (this.equipmentRenderManager) {
-            this.equipmentRenderManager.drawWeapon(ctx, this);
-        } else {
-            const weapon = this.equipment.weapon;
-            if (weapon && weapon.image) {
-                const drawX = this.x + this.width * 0.3;
-                const drawY = this.y + this.height * 0.3;
-                const drawW = this.width * 0.8;
-                const drawH = this.height * 0.8;
-                ctx.drawImage(weapon.image, drawX, drawY, drawW, drawH);
-            }
-        }
     }
 
     addConsumable(item) {

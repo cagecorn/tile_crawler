@@ -1,85 +1,88 @@
 export class MovementManager {
     constructor(mapManager) {
         this.mapManager = mapManager;
-        this.stuckTimers = new Map(); // 유닛이 얼마나 오래 끼어있는지 추적
+        this.stuckTimers = new Map();
     }
 
-    // 이 매니저의 핵심 함수
-    moveEntityTowards(entity, target) {
+    moveEntityTowards(entity, target, context) {
         const distance = Math.hypot(target.x - entity.x, target.y - entity.y);
-        if (distance < entity.width) { // 목표에 거의 도달했으면 멈춤
+        if (distance < entity.width) {
             this.stuckTimers.delete(entity.id);
             return;
         }
 
-        // 목표까지 남은 거리가 이동 속도 이하라면 바로 도착 처리하여
-        // 소수점 이동으로 인한 떨림을 방지한다
         if (distance <= entity.speed) {
-            entity.x = target.x;
-            entity.y = target.y;
+            if (!this._isOccupied(target.x, target.y, entity, context)) {
+                entity.x = target.x;
+                entity.y = target.y;
+            }
             this.stuckTimers.delete(entity.id);
             return;
         }
 
-        // 1. 관성: 거리가 멀수록 속도 증가
         const speedBonus = Math.min(5, Math.floor(distance / this.mapManager.tileSize / 2));
         const currentSpeed = entity.speed + speedBonus;
-
         let vx = ((target.x - entity.x) / distance) * currentSpeed;
         let vy = ((target.y - entity.y) / distance) * currentSpeed;
 
         let newX = entity.x + vx;
         let newY = entity.y + vy;
 
-        // 2. 미끄러지기: 직접 가는 길이 막혔는지 확인
-        if (this._isOccupied(newX, newY, entity)) {
-            // X축으로만 이동 시도
-            if (!this._isOccupied(newX, entity.y, entity)) {
+        if (this._isOccupied(newX, newY, entity, context)) {
+            if (!this._isOccupied(newX, entity.y, entity, context)) {
                 entity.x = newX;
                 this.stuckTimers.delete(entity.id);
                 return;
             }
-            // Y축으로만 이동 시도
-            if (!this._isOccupied(entity.x, newY, entity)) {
+            if (!this._isOccupied(entity.x, newY, entity, context)) {
                 entity.y = newY;
                 this.stuckTimers.delete(entity.id);
                 return;
             }
-
-            // 3. 순간이동: 양쪽 다 막혔다면 '끼임' 상태로 간주
             const stuckTime = (this.stuckTimers.get(entity.id) || 0) + 1;
             this.stuckTimers.set(entity.id, stuckTime);
-
-            if (stuckTime > 180) { // 3초 이상 끼어있으면
-                // --- BUG FIX START ---
-                // 유닛의 크기를 타일 단위로 계산하여 올바른 인자로 함수를 호출합니다.
+            if (stuckTime > 180) {
                 const sizeInTiles = {
                     w: Math.ceil(entity.width / this.mapManager.tileSize),
                     h: Math.ceil(entity.height / this.mapManager.tileSize)
                 };
                 const safePos = this.mapManager.getRandomFloorPosition(sizeInTiles);
-                // --- BUG FIX END ---
-                
                 if (safePos) {
                     entity.x = safePos.x;
                     entity.y = safePos.y;
                 }
                 this.stuckTimers.delete(entity.id);
             }
-
         } else {
-            // 길이 안 막혔으면 그냥 이동
             entity.x = newX;
             entity.y = newY;
             this.stuckTimers.delete(entity.id);
         }
     }
 
-    // 특정 위치가 비어있는지 확인하는 헬퍼 함수
-    _isOccupied(x, y, self) {
-        // 벽 확인
+    _isOccupied(x, y, self, context) {
         if (this.mapManager.isWallAt(x, y, self.width, self.height)) return true;
-        // 다른 유닛 확인 (나중에 추가)
+
+        const selfHasShield = self.equipment?.off_hand?.tags.includes('shield');
+        if (!selfHasShield) return false;
+
+        const allEntities = [context.player, ...context.mercenaryManager.mercenaries, ...context.monsterManager.monsters];
+
+        for (const other of allEntities) {
+            if (other === self) continue;
+
+            // Only block movement when both entities carry shields
+            const otherHasShield = other.equipment?.off_hand?.tags.includes('shield');
+            if (!otherHasShield) continue;
+
+            if (x < other.x + other.width &&
+                x + self.width > other.x &&
+                y < other.y + other.height &&
+                y + self.height > other.y) {
+                return true;
+            }
+        }
+
         return false;
     }
 }

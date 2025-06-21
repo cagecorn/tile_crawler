@@ -3,19 +3,32 @@ export class EquipmentRenderManager {
         console.log('[EquipmentRenderManager] Initialized');
     }
 
-    getWeaponDrawParams(entity) {
-        return {
-            x: entity.x + entity.width * 0.3,
-            y: entity.y + entity.height * 0,
-            width: entity.width * 1,
-            height: entity.height * 1,
-        };
+    drawEquipment(ctx, entity) {
+        this.drawShield(ctx, entity);
+        this.drawWeapon(ctx, entity);
     }
 
     drawWeapon(ctx, entity) {
-        const weapon = entity.equipment?.weapon;
+        const weapon = entity.equipment?.main_hand;
         if (!weapon || !weapon.image) return;
-        const { x, y, width, height } = this.getWeaponDrawParams(entity);
-        ctx.drawImage(weapon.image, x, y, width, height);
+
+        const drawWidth = entity.width * 0.8;
+        const drawHeight = entity.height * 0.8;
+        const drawX = entity.width * 0.1;
+        const drawY = entity.height * 0.1;
+
+        ctx.drawImage(weapon.image, drawX, drawY, drawWidth, drawHeight);
+    }
+
+    drawShield(ctx, entity) {
+        const shield = entity.equipment?.off_hand;
+        if (!shield || !shield.image) return;
+
+        const drawWidth = entity.width * 0.7;
+        const drawHeight = entity.height * 0.7;
+        const drawX = -entity.width * 0.1;
+        const drawY = entity.height * 0.2;
+
+        ctx.drawImage(shield.image, drawX, drawY, drawWidth, drawHeight);
     }
 }
