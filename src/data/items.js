@@ -171,6 +171,11 @@ export const ITEMS = {
         tags: ['pet'],
         imageKey: 'pet-fox',
         cooldown: 600,
+        aura: {
+            skillId: 'regeneration_aura',
+            range: 256,
+            level: 1
+        }
     },
     pet_food: {
         name: 'Pet Food',

@@ -41,4 +41,21 @@ describe('Artifact Item', () => {
         assert.strictEqual(vfxLog.length, 1, 'vfx triggered');
         assert.strictEqual(vfxLog[0].img, arti.image, 'correct image used');
     });
+
+    test('only one artifact used when multiple are available', () => {
+        const charFactory = new CharacterFactory(assets);
+        const itemFactory = new ItemFactory(assets);
+        const itemAI = new ItemAIManager();
+        itemAI.setEffectManager({ addEffect(){} });
+        const merc = charFactory.create('mercenary', { x:0, y:0, tileSize:1, groupId:'g', jobId:'warrior', image:null });
+        merc.consumables = [
+            itemFactory.create('healing_talisman',0,0,1),
+            itemFactory.create('healing_talisman',0,0,1)
+        ];
+        merc.consumables.forEach(i => i.cooldownRemaining = 0);
+        const context = { player:merc, mercenaryManager:{ mercenaries:[merc] }, monsterManager:{ monsters:[] } };
+        itemAI.update(context);
+        const readyCount = merc.consumables.filter(i => i.cooldownRemaining > 0).length;
+        assert.strictEqual(readyCount, 1, 'only one artifact consumed cooldown');
+    });
 });
