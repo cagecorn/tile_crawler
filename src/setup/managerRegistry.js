@@ -2,14 +2,13 @@ import * as Managers from '../managers/index.js';
 import { TagManager } from '../managers/tagManager.js';
 import { CombatCalculator } from '../combat.js';
 import { KnockbackEngine } from '../engines/knockbackEngine.js';
+import { AIEngine } from '../engines/aiEngine.js';
+import { MBTIEngine } from '../engines/mbtiEngine.js';
 import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
 import { FogManager } from '../managers/fogManager.js';
 import { MicroEngine } from '../micro/MicroEngine.js';
 import { MicroCombatManager } from '../micro/MicroCombatManager.js';
-import { PossessionAIManager } from '../managers/possessionAIManager.js';
-import { TankerGhostAI, RangedGhostAI, SupporterGhostAI, CCGhostAI } from '../ai.js';
-import { Ghost } from '../entities.js';
 
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
@@ -49,30 +48,17 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.effectIconManager = new Managers.EffectIconManager(eventManager, assets);
 
     // AI 관련
-    managers.metaAIManager = new Managers.MetaAIManager(eventManager);
-    managers.possessionAIManager = new PossessionAIManager(eventManager);
-    const ghostAIs = {
-        tanker: new TankerGhostAI(),
-        ranged: new RangedGhostAI(),
-        supporter: new SupporterGhostAI(),
-        cc: new CCGhostAI(),
-    };
-    const ghostTypes = Object.keys(ghostAIs);
-    const numGhosts = Math.floor(Math.random() * 3) + 1;
-    for (let i = 0; i < numGhosts; i++) {
-        const randomType = ghostTypes[Math.floor(Math.random() * ghostTypes.length)];
-        managers.possessionAIManager.addGhost(new Ghost(randomType, ghostAIs[randomType]));
-    }
+    managers.mbtiEngine = new MBTIEngine();
+    managers.aiEngine = new AIEngine(eventManager, managers.mbtiEngine);
 
     // 기타 주요 관리자들
     managers.skillManager = new Managers.SkillManager(eventManager);
-    managers.skillManager.setManagers(managers.effectManager, factory, managers.metaAIManager, managers.monsterManager);
+    managers.skillManager.setManagers(managers.effectManager, factory, managers.aiEngine, managers.monsterManager);
     managers.projectileManager = new Managers.ProjectileManager(eventManager, assets, managers.vfxManager);
-    managers.itemAIManager = new Managers.ItemAIManager(eventManager, managers.projectileManager, managers.vfxManager, managers.effectManager);
     managers.auraManager = new Managers.AuraManager(managers.effectManager, eventManager, managers.vfxManager);
     managers.synergyManager = new Managers.SynergyManager(eventManager);
     managers.speechBubbleManager = new Managers.SpeechBubbleManager(eventManager);
-    managers.petManager = new Managers.PetManager(eventManager, factory, managers.metaAIManager, managers.auraManager, managers.vfxManager);
+    managers.petManager = new Managers.PetManager(eventManager, factory, managers.aiEngine, managers.auraManager, managers.vfxManager);
 
     // 마이크로 월드
     managers.microEngine = new MicroEngine(eventManager);

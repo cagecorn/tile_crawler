@@ -82,6 +82,7 @@ export function registerGameEventListeners(engine) {
         vfxManager.addTextPopup(data.trait, data.entity);
     });
 
+
     uiManager.init({
         onStatUp: (stat) => {
             if (gameState.statPoints > 0) {

@@ -5,7 +5,7 @@ export class SkillManager {
         this.eventManager = eventManager;
         this.effectManager = null;
         this.factory = null;
-        this.metaAIManager = null;
+        this.aiEngine = null;
         this.monsterManager = null;
         console.log("[SkillManager] Initialized");
 
@@ -20,10 +20,10 @@ export class SkillManager {
         this.effectManager = effectManager;
     }
 
-    setManagers(effectManager, factory, metaAIManager, monsterManager = null) {
+    setManagers(effectManager, factory, aiEngine, monsterManager = null) {
         this.effectManager = effectManager;
         this.factory = factory;
-        this.metaAIManager = metaAIManager;
+        this.aiEngine = aiEngine;
         this.monsterManager = monsterManager;
     }
 
@@ -90,8 +90,8 @@ export class SkillManager {
         if (this.monsterManager) {
             this.monsterManager.monsters.push(monster);
         }
-        if (this.metaAIManager) {
-            const group = this.metaAIManager.groups[caster.groupId];
+        if (this.aiEngine) {
+            const group = this.aiEngine.groups[caster.groupId];
             if (group) group.addMember(monster);
         }
     }

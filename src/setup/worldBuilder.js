@@ -3,11 +3,11 @@ import { SKILLS } from '../data/skills.js';
 import { EMBLEMS } from '../data/emblems.js';
 
 export function buildInitialWorld(managers, assets) {
-    const { factory, mapManager, itemManager, metaAIManager, mercenaryManager, monsterManager, equipmentManager } = managers;
+    const { factory, mapManager, itemManager, aiEngine, mercenaryManager, monsterManager, equipmentManager } = managers;
 
     // 그룹 생성
-    const playerGroup = metaAIManager.createGroup('player_party', STRATEGY.AGGRESSIVE);
-    const monsterGroup = metaAIManager.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
+    const playerGroup = aiEngine.createGroup('player_party', STRATEGY.AGGRESSIVE);
+    const monsterGroup = aiEngine.createGroup('dungeon_monsters', STRATEGY.AGGRESSIVE);
 
     // 플레이어 생성
     const startPos = mapManager.getRandomFloorPosition() || { x: mapManager.tileSize, y: mapManager.tileSize };
@@ -21,6 +21,7 @@ export function buildInitialWorld(managers, assets) {
     });
     player.ai = null;
     playerGroup.addMember(player);
+    aiEngine.addMember(playerGroup.id, player);
 
     const gameState = {
         player,
@@ -68,6 +69,7 @@ export function buildInitialWorld(managers, assets) {
                 image: assets.monster,
             });
             monsterGroup.addMember(monster);
+            aiEngine.addMember(monsterGroup.id, monster);
             monsterManager.monsters.push(monster);
         }
     }
@@ -86,6 +88,7 @@ export function buildInitialWorld(managers, assets) {
             const newMerc = mercenaryManager.hireMercenary(jobId, player.x, player.y, mapManager.tileSize, playerGroup.id);
             if (newMerc) {
                 playerGroup.addMember(newMerc);
+                aiEngine.addMember(playerGroup.id, newMerc);
                 managers.eventManager.publish('log', { message: `${newMerc.constructor.name} 용병을 고용했습니다.` });
             }
         } else {
