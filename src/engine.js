@@ -7,6 +7,7 @@ import { InputHandler } from './inputHandler.js';
 import { createManagers } from './setup/managerRegistry.js';
 import { buildInitialWorld } from './setup/worldBuilder.js';
 import { registerGameEventListeners } from './setup/eventListeners.js';
+import { EFFECTS } from './data/effects.js';
 
 export class Engine {
     constructor(assets) {
@@ -133,7 +134,11 @@ export class Engine {
         this.managers.projectileManager.render(this.layerManager.contexts.vfx);
         this.managers.speechBubbleManager.render(this.layerManager.contexts.vfx);
         this.managers.uiManager.renderHpBars(this.layerManager.contexts.vfx, player, this.managers.monsterManager.monsters, this.managers.mercenaryManager.mercenaries);
-        this.managers.effectIconManager.render(this.layerManager.contexts.vfx, [player, ...this.managers.monsterManager.monsters, ...this.managers.mercenaryManager.mercenaries], this.managers.effectManager.effectsData);
+        this.managers.effectIconManager.render(
+            this.layerManager.contexts.vfx,
+            [player, ...this.managers.monsterManager.monsters, ...this.managers.mercenaryManager.mercenaries],
+            EFFECTS
+        );
         this.managers.fogManager.render(this.layerManager.contexts.weather, this.mapManager.tileSize);
 
         Object.values(this.layerManager.contexts).forEach(ctx => ctx.restore());
