@@ -68,3 +68,8 @@
 - CombatEngine 도입으로 전투 관련 이벤트 처리를 전담하도록 구조 분리.
 - managerRegistry에서 CombatEngine을 초기화하고 Engine 루프에 통합.
 - eventListeners.js에서 중복되던 전투 이벤트 핸들러를 제거하여 책임을 축소.
+
+## 세션 16
+- StatEngine 도입으로 경험치와 레벨업 처리를 전담.
+- managerRegistry에서 StatEngine을 초기화하고 exp_gained 이벤트를 처리하도록 함.
+- 신규 테스트 `statEngine.test.js`로 경험치 이벤트 흐름을 검증.
