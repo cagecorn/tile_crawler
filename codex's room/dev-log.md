@@ -83,3 +83,8 @@
 - VFXEngine을 도입해 전투 및 MBTI 팝업 효과 처리를 전담하도록 분리.
 - managerRegistry와 Engine 루프에 VFXEngine을 통합.
 - CombatEngine과 eventListeners의 시각 효과 코드를 이동하고 테스트 `vfxEngine.test.js` 추가.
+
+## 세션 19
+- EffectEngine을 새로 도입해 버프와 디버프 적용을 이벤트 기반으로 관리하도록 구조화.
+- managerRegistry에 EffectEngine을 등록하고 엔진 루프에서 효과 갱신이 자동으로 이루어지게 개선.
+- 문서 `docs-managers-summary.md`에 엔진 설명 추가하고 테스트 `effectEngine.test.js` 작성.
