@@ -1,9 +1,12 @@
+import { debugLog } from '../utils/logger.js';
+
 export class TraitManager {
     constructor(eventManager = null, assets = null, factory = null) {
         this.eventManager = eventManager;
         this.assets = assets;
         this.factory = factory;
         console.log('[TraitManager] Initialized');
+        debugLog('[TraitManager] Initialized');
     }
 
     applyTraits(entity, traitData) {

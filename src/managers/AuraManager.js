@@ -1,3 +1,5 @@
+import { debugLog } from '../utils/logger.js';
+
 export class AuraManager {
     constructor(effectManager, eventManager = null, vfxManager = null) {
         this.effectManager = effectManager;
@@ -15,6 +17,7 @@ export class AuraManager {
             });
         }
         console.log('[AuraManager] Initialized');
+        debugLog('[AuraManager] Initialized');
     }
 
     registerAura(sourceEntity, auraData) {
@@ -40,6 +43,7 @@ export class AuraManager {
         }
         this.activeAuras.push(record);
         console.log(`[AuraManager] ${sourceEntity.name || sourceEntity.id} aura registered.`);
+        debugLog(`[AuraManager] ${sourceEntity.name || sourceEntity.id} aura registered.`);
     }
 
     unregisterAura(sourceEntity) {
@@ -51,6 +55,7 @@ export class AuraManager {
             }
             this.activeAuras.splice(idx, 1);
             console.log(`[AuraManager] ${sourceEntity.name || sourceEntity.id} aura removed.`);
+            debugLog(`[AuraManager] ${sourceEntity.name || sourceEntity.id} aura removed.`);
         }
     }
 

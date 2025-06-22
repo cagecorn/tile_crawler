@@ -1,4 +1,5 @@
 import { SKILLS } from '../data/skills.js';
+import { debugLog } from '../utils/logger.js';
 
 export class SkillManager {
     constructor(eventManager = null) {
@@ -8,6 +9,7 @@ export class SkillManager {
         this.aiEngine = null;
         this.monsterManager = null;
         console.log("[SkillManager] Initialized");
+        debugLog("[SkillManager] Initialized");
 
         if (this.eventManager) {
             this.eventManager.subscribe('skill_used', ({ caster, skill, target }) => {

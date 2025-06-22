@@ -1,6 +1,7 @@
 import { SKILLS } from '../data/skills.js';
 import { AI_PLAYBOOK } from '../data/aiPlaybook.js';
 import { MBTIEngine } from './mbtiEngine.js';
+import { debugLog } from '../utils/logger.js';
 
 export const STRATEGY = {
     IDLE: 'idle',
@@ -22,6 +23,7 @@ export class AIEngine {
             }
         });
         console.log('[AIEngine] Initialized');
+        debugLog('[AIEngine] Initialized');
     }
 
     setTacticsEnabled(enabled) {
@@ -180,9 +182,11 @@ export class AIEngine {
     executeIndividualBehaviors(context) {
         const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
         console.log(`[AIEngine] Processing ${membersSorted.length} members`);
+        debugLog(`[AIEngine] Processing ${membersSorted.length} members`);
         for (const member of membersSorted) {
             if (member.hp <= 0 || member.isPlayer) {
                 console.log(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
+                debugLog(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
                 continue;
             }
             if (!member.behaviors || member.behaviors.length === 0) {
@@ -208,6 +212,7 @@ export class AIEngine {
             const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, context);
             finalAction.triggeredTraits = triggeredTraits;
             console.log(`[AIEngine] Member action:`, finalAction);
+            debugLog(`[AIEngine] Member action:`, finalAction);
             this.executeAction(member, finalAction, context);
         }
     }

@@ -1,4 +1,5 @@
 import { SYNERGIES } from '../data/synergies.js';
+import { debugLog } from '../utils/logger.js';
 
 export class SynergyManager {
     constructor(eventManager) {
@@ -41,6 +42,9 @@ export class SynergyManager {
         }
         if (active) {
             console.log(
+                `시너지 [${data.name}] ${active.count}단계 활성화: ${active.description}`
+            );
+            debugLog(
                 `시너지 [${data.name}] ${active.count}단계 활성화: ${active.description}`
             );
 

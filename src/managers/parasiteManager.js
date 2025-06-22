@@ -1,7 +1,10 @@
+import { debugLog } from '../utils/logger.js';
+
 export class ParasiteManager {
     constructor(eventManager = null) {
         this.eventManager = eventManager;
         console.log('[ParasiteManager] Initialized');
+        debugLog('[ParasiteManager] Initialized');
     }
 
     equip(entity, parasite) {

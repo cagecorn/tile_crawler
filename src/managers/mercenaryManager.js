@@ -1,4 +1,5 @@
 import { TRAITS } from '../data/traits.js';
+import { debugLog } from '../utils/logger.js';
 
 export class MercenaryManager {
     constructor(eventManager = null, assets = null, factory = null) {
@@ -9,6 +10,7 @@ export class MercenaryManager {
         this.equipmentRenderManager = null;
         this.traitManager = null;
         console.log("[MercenaryManager] Initialized");
+        debugLog("[MercenaryManager] Initialized");
 
         if (this.eventManager) {
             this.eventManager.subscribe('entity_removed', (data) => {
