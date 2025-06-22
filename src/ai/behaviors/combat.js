@@ -12,7 +12,18 @@ export class CombatBehavior extends Behavior {
         }
 
         const currentVisionRange = self.stats?.get('visionRange') ?? self.visionRange;
-        const visibleEnemies = enemies.filter(e => Math.hypot(e.x - self.x, e.y - self.y) < currentVisionRange);
+        const visibleEnemies = enemies.filter(e => {
+            const distance = Math.hypot(e.x - self.x, e.y - self.y);
+            if (distance > currentVisionRange) return false;
+            if (!mapManager) return true;
+            return hasLineOfSight(
+                Math.floor(self.x / mapManager.tileSize),
+                Math.floor(self.y / mapManager.tileSize),
+                Math.floor(e.x / mapManager.tileSize),
+                Math.floor(e.y / mapManager.tileSize),
+                mapManager
+            );
+        });
         if (visibleEnemies.length === 0) {
             return { type: 'idle' };
         }
