@@ -73,3 +73,8 @@
 - StatEngine 도입으로 경험치와 레벨업 처리를 전담.
 - managerRegistry에서 StatEngine을 초기화하고 exp_gained 이벤트를 처리하도록 함.
 - 신규 테스트 `statEngine.test.js`로 경험치 이벤트 흐름을 검증.
+
+## 세션 17
+- Emotion Card 시스템 1단계 구현: Entity에 emotionSlots 추가하고 EquipmentManager가 카드 장착을 지원하도록 수정.
+- StatManager가 알파벳 상태와 카드 조합시 추가 보너스를 계산하도록 개선.
+- 샘플 아이템 `fury_p_card`를 정의하고 테스트 `emotionCard.test.js` 작성.

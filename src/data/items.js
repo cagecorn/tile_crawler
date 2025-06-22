@@ -224,4 +224,15 @@ export const ITEMS = {
         weaponDamage: 4,
         armorResist: 0.1,
     },
+
+    // --- 감정 카드 ---
+    fury_p_card: {
+        name: '격분의 P 카드',
+        type: 'emotion_card',
+        slot: 'JP',
+        alphabet: 'P',
+        imageKey: 'p-card',
+        stateBonus: { attackPower: 2 },
+        tags: ['emotion_card'],
+    },
 };

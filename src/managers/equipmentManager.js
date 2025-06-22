@@ -16,7 +16,12 @@ export class EquipmentManager {
         const slot = this._getSlotForItem(item);
         if (!slot) return;
 
-        const oldItem = entity.equipment[slot];
+        let oldItem;
+        if (this._isEmotionSlot(slot)) {
+            oldItem = entity.emotionSlots[slot];
+        } else {
+            oldItem = entity.equipment[slot];
+        }
         if (oldItem?.tags.includes('emblem')) {
             this.eventManager?.publish('emblem_unequipped', { entity });
         }
@@ -24,7 +29,11 @@ export class EquipmentManager {
             inventory.push(oldItem);
         }
 
-        entity.equipment[slot] = item;
+        if (this._isEmotionSlot(slot)) {
+            entity.emotionSlots[slot] = item;
+        } else {
+            entity.equipment[slot] = item;
+        }
 
         if (entity.stats && typeof entity.stats.updateEquipmentStats === 'function') {
             entity.stats.updateEquipmentStats();
@@ -53,9 +62,12 @@ export class EquipmentManager {
      * @param {Array|null} inventory - Optional array to store the removed item.
      */
     unequip(entity, slot, inventory = null) {
-        if (!slot || !entity.equipment[slot]) return;
+        if (!slot) return;
+        const isEmotion = this._isEmotionSlot(slot);
+        const hasItem = isEmotion ? entity.emotionSlots[slot] : entity.equipment[slot];
+        if (!hasItem) return;
 
-        const oldItem = entity.equipment[slot];
+        const oldItem = hasItem;
         if (oldItem?.tags.includes('emblem')) {
             this.eventManager?.publish('emblem_unequipped', { entity });
         }
@@ -63,7 +75,11 @@ export class EquipmentManager {
             inventory.push(oldItem);
         }
 
-        entity.equipment[slot] = null;
+        if (isEmotion) {
+            entity.emotionSlots[slot] = null;
+        } else {
+            entity.equipment[slot] = null;
+        }
 
         if (entity.stats && typeof entity.stats.updateEquipmentStats === 'function') {
             entity.stats.updateEquipmentStats();
@@ -89,6 +105,11 @@ export class EquipmentManager {
         // 2. 기존 로직 (하위 호환용)
         if ((item.tags && item.tags.includes('weapon')) || item.type === 'weapon') return 'main_hand';
         if ((item.tags && item.tags.includes('armor')) || item.type === 'armor') return 'armor';
+        if (item.type === 'emotion_card') return item.slot || null;
         return null;
+    }
+
+    _isEmotionSlot(slot) {
+        return ['IE', 'SN', 'TF', 'JP'].includes(slot);
     }
 }
