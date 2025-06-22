@@ -132,7 +132,7 @@ export class Engine {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
                 if (name === 'fogManager' || name === 'knockbackEngine' || name === 'vfxEngine' || name === 'uiManager') return;
                 try {
-                    manager.update(allEntities);
+                    manager.update(allEntities, context);
                 } catch (err) {
                     console.error(`Manager ${name} update error`, err);
                     this.eventManager.publish('debug', { tag: 'ERROR', message: `${name} update failed: ${err.message}` });

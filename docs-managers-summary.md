@@ -64,6 +64,7 @@
 | `vfxManager.js` | 파티클 및 스프라이트 효과를 생성하여 시각 연출을 담당합니다. |
 | `../engines/effectEngine.js` | 버프/디버프 지속 시간을 관리하고 apply/remove 이벤트를 처리합니다. |
 | `../engines/statEngine.js` | 경험치와 레벨업 처리를 담당하는 전용 엔진입니다. |
+| `../engines/turnEngine.js` | TurnManager를 감싸 전체 턴 흐름을 관리합니다. |
 | `../engines/knockbackEngine.js` | 넉백 물리와 위치 보정을 전담하는 전용 엔진입니다. |
 | `../micro/MicroEngine.js` | 미시 세계 전투와 아이템 상태 갱신을 담당하는 엔진입니다. |
 | `../micro/MicroTurnManager.js` | 모든 아이템의 쿨타임 감소를 전담합니다. |
