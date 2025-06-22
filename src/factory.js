@@ -44,6 +44,13 @@ export class CharacterFactory {
         const jobStats = (type === 'mercenary' && config.jobId && JOBS[config.jobId]?.stats) ? JOBS[config.jobId].stats : {};
         Object.assign(stats, originBonus, jobStats);
 
+        // Mercenaries used to share the very large default vision range of 4 tiles,
+        // causing them to sprint across the entire map the moment they spawned.
+        // Limit their sight so they stay closer to the player unless provoked.
+        if (type === 'mercenary' && stats.visionRange === undefined) {
+            stats.visionRange = 192 * 2;
+        }
+
         // 2-3. 최종 스탯과 속성을 finalConfig에 할당합니다.
         finalConfig.stats = stats;
         finalConfig.properties = properties;

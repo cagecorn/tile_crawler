@@ -2,7 +2,7 @@
 
 // === 몬스터 사망 워크플로우 ('코드 1') ===
 export function monsterDeathWorkflow(context) {
-    const { eventManager, victim, attacker } = context;
+    const { eventManager, victim, attacker, player } = context;
 
     // 1. "경험치 획득!" 이벤트를 방송한다.
     if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
@@ -11,6 +11,10 @@ export function monsterDeathWorkflow(context) {
         // 경험치는 StatEngine을 통해 일관적으로 처리하도록 이벤트만 발행한다.
         // applied 플래그를 넘기지 않아 항상 StatEngine이 적용한다.
         eventManager.publish('exp_gained', { entity: attacker, exp });
+        // If a mercenary delivered the final blow, the player should also share the experience.
+        if (!attacker.isPlayer && player) {
+            eventManager.publish('exp_gained', { entity: player, exp: Math.floor(exp / 2) });
+        }
     }
     
     // 2. (미래를 위한 구멍) "아이템 드랍!" 이벤트를 방송한다.

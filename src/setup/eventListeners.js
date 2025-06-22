@@ -35,7 +35,8 @@ export function registerGameEventListeners(engine) {
         const context = {
             eventManager,
             attacker: data.attacker,
-            victim: data.victim
+            victim: data.victim,
+            player: gameState.player
         };
         monsterDeathWorkflow(context);
     });
