@@ -11,7 +11,7 @@
 
 ## 2. 엔진 격상 스케줄 요약
 - **1단계**: 구조 점검과 경험치·레벨링 로직 검토.
-- **2단계**: TurnEngine, EffectEngine, VFXEngine, StatEngine, CombatEngine, EventEngine, SpriteEngine, EmbargoTestEngine, MapEngine을 순차적으로 도입.
+- **2단계**: TurnEngine, EffectEngine, VFXEngine, StatEngine, CombatEngine, EventEngine, SpriteEngine,  ProjectileEngine, EmbargoTestEngine, MapEngine을 순차적으로 도입.
 - **3단계**: CoreLinkEngine으로 엔진 간 연결을 정리하고 StrategyAIEngine을 추가.
 - **4단계**: 경험치와 시각 효과 버그를 우선 수정하며 테스트를 강화.
 
