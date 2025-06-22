@@ -10,7 +10,7 @@ describe('StatEngine', () => {
 
     new StatEngine(eventManager);
 
-    eventManager.publish('exp_gained', { player, exp: 10 });
+    eventManager.publish('exp_gained', { entity: player, exp: 10 });
 
     assert.strictEqual(gained, 10);
   });

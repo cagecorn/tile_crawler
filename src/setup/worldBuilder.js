@@ -3,7 +3,7 @@ import { SKILLS } from '../data/skills.js';
 import { EMBLEMS } from '../data/emblems.js';
 
 export function buildInitialWorld(managers, assets) {
-    const { factory, mapManager, itemManager, aiEngine, mercenaryManager, monsterManager, equipmentManager } = managers;
+    const { factory, mapManager, itemManager, aiEngine, mercenaryManager, monsterManager, equipmentManager, saveLoadManager } = managers;
 
     // 그룹 생성
     const playerGroup = aiEngine.createGroup('player_party', STRATEGY.AGGRESSIVE);
@@ -95,6 +95,24 @@ export function buildInitialWorld(managers, assets) {
     for (const [id, job] of Object.entries(hireButtons)) {
         const btn = document.getElementById(id);
         if (btn) btn.onclick = () => hire(job);
+    }
+
+    const saveBtn = document.getElementById('save-game-btn');
+    if (saveBtn) {
+        saveBtn.onclick = () => {
+            if (!saveLoadManager) {
+                console.error('SaveLoadManager is not available.');
+                return;
+            }
+            try {
+                const saveData = saveLoadManager.gatherSaveData(gameState, monsterManager, mercenaryManager);
+                localStorage.setItem('tileCrawlerSaveData', JSON.stringify(saveData));
+                managers.eventManager.publish('log', { message: '✅ 게임 상태가 저장되었습니다.', color: 'lightgreen' });
+            } catch (error) {
+                console.error('Failed to save game state:', error);
+                managers.eventManager.publish('log', { message: '❌ 게임 저장에 실패했습니다.', color: 'red' });
+            }
+        };
     }
 
     function hire(jobId) {
