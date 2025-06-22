@@ -97,3 +97,7 @@
 ## 세션 21
 - SpriteEngine 신설로 간단한 스프라이트 애니메이션을 이벤트 기반으로 관리.
 - managerRegistry와 Engine 루프에 SpriteEngine을 연결하고 테스트 `spriteEngine.test.js` 작성.
+
+## 세션 22
+- MonsterManager에 기본 경험치 값을 적용하여 일반 몬스터 처치 시 경험치가 0이던 문제 수정.
+- monsterManager.test.js 추가로 기본 경험치 로직을 검증.
