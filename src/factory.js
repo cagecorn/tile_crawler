@@ -110,6 +110,11 @@ export class CharacterFactory {
             entity.behaviors.push(new CombatBehavior(), new WanderBehavior());
         }
 
+        // 장비 상태에 맞게 AI를 업데이트한다.
+        if (typeof entity.updateAI === 'function') {
+            entity.updateAI();
+        }
+
         // 모든 유닛의 스탯을 최종적으로 한 번 더 계산하여 마무리합니다.
         entity.stats?.recalculate();
         entity.stats?.updateEquipmentStats();

@@ -22,7 +22,6 @@ export class AIEngine {
                 this.groups[groupId]?.removeMember?.(data.victimId);
             }
         });
-        console.log('[AIEngine] Initialized');
         debugLog('[AIEngine] Initialized');
     }
 
@@ -181,11 +180,9 @@ export class AIEngine {
 
     executeIndividualBehaviors(context) {
         const membersSorted = [...context.allies].sort((a,b) => (b.attackSpeed || 1) - (a.attackSpeed || 1));
-        console.log(`[AIEngine] Processing ${membersSorted.length} members`);
         debugLog(`[AIEngine] Processing ${membersSorted.length} members`);
         for (const member of membersSorted) {
             if (member.hp <= 0) {
-                console.log(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
                 debugLog(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
                 continue;
             }
@@ -201,11 +198,26 @@ export class AIEngine {
             if (Array.isArray(member.effects) && member.effects.some(e => e.tags && e.tags.includes('cc'))) continue;
 
             let baseAction = { type: 'idle' };
-            for (const behavior of member.behaviors) {
-                const action = behavior.decideAction(member, context);
-                if (action && action.type !== 'idle') {
-                    baseAction = action;
-                    break;
+
+            // 무기에 할당된 AI가 있으면 우선적으로 결정한다.
+            const weapon = member.equipment?.weapon;
+            if (weapon && context.microItemAIManager) {
+                const weaponAI = context.microItemAIManager.getWeaponAI(weapon);
+                if (weaponAI) {
+                    const weaponAction = weaponAI.decideAction(member, weapon, context);
+                    if (weaponAction && weaponAction.type !== 'idle') {
+                        baseAction = weaponAction;
+                    }
+                }
+            }
+
+            if (baseAction.type === 'idle') {
+                for (const behavior of member.behaviors) {
+                    const action = behavior.decideAction(member, context);
+                    if (action && action.type !== 'idle') {
+                        baseAction = action;
+                        break;
+                    }
                 }
             }
 
@@ -252,6 +264,12 @@ export class AIEngine {
                     if (movementManager) {
                         movementManager.moveEntityTowards(entity, action.target, context);
                     }
+                }
+                break; }
+            case 'weapon_skill': {
+                const weapon = entity.equipment?.weapon;
+                if (weapon?.weaponStats?.canUseSkill(action.skillId)) {
+                    eventManager.publish('weapon_skill_used', { caster: entity, weapon, skillId: action.skillId, target: action.target });
                 }
                 break; }
             case 'move':

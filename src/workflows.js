@@ -8,14 +8,9 @@ export function monsterDeathWorkflow(context) {
     if (!victim.isFriendly && (attacker.isPlayer || attacker.isFriendly)) {
         const exp = victim.expValue;
 
-        // 실제 경험치를 즉시 적용하여 테스트에서도 검증 가능하도록 한다.
-        if (attacker.stats && typeof attacker.stats.addExp === 'function') {
-            attacker.stats.addExp(exp);
-        }
-
-        // Indicate the exp has already been applied so global listeners don't
-        // apply it again.
-        eventManager.publish('exp_gained', { player: attacker, exp, applied: true });
+        // 경험치는 StatEngine을 통해 일관적으로 처리하도록 이벤트만 발행한다.
+        // applied 플래그를 넘기지 않아 항상 StatEngine이 적용한다.
+        eventManager.publish('exp_gained', { entity: attacker, exp });
     }
     
     // 2. (미래를 위한 구멍) "아이템 드랍!" 이벤트를 방송한다.

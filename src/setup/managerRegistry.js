@@ -78,6 +78,8 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.speechBubbleManager = new Managers.SpeechBubbleManager(eventManager);
     managers.petManager = new Managers.PetManager(eventManager, factory, managers.aiEngine, managers.auraManager, managers.vfxManager);
 
+    managers.saveLoadManager = new Managers.SaveLoadManager();
+
     // 시각 효과 처리를 담당하는 VFXEngine을 초기화합니다.
     managers.vfxEngine = new VFXEngine(eventManager, managers.vfxManager, assets);
     managers.spriteEngine = new SpriteEngine(eventManager, managers.vfxManager);

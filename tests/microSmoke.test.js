@@ -3,6 +3,7 @@ import { CharacterFactory, ItemFactory } from '../src/factory.js';
 import { MercenaryManager } from '../src/managers/mercenaryManager.js';
 import { EventManager } from '../src/managers/eventManager.js';
 import { monsterDeathWorkflow } from '../src/workflows.js';
+import { StatEngine } from '../src/engines/statEngine.js';
 import { describe, test, assert } from './helpers.js';
 
 describe('Integration', () => {
@@ -30,6 +31,7 @@ test('간단한 게임 흐름', () => {
     assert.ok(summoner && summoner.ai, '소환사 용병 고용');
 
     const monster = factory.create('monster', { x:2, y:0, tileSize:1, groupId:'dungeon_monsters', baseStats:{ expValue:5 } });
+    new StatEngine(eventManager);
     let expEvent = false;
     eventManager.subscribe('exp_gained', () => { expEvent = true; });
 

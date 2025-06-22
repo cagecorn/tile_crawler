@@ -1,5 +1,6 @@
 import { monsterDeathWorkflow } from '../src/workflows.js';
 import { EventManager } from '../src/managers/eventManager.js';
+import { StatEngine } from '../src/engines/statEngine.js';
 import { describe, test, assert } from './helpers.js';
 
 describe('Integration', () => {
@@ -29,6 +30,7 @@ describe('Integration', () => {
     };
     const context = { eventManager, attacker: mockAttacker, victim: mockVictim };
 
+    new StatEngine(eventManager);
     eventManager.subscribe('exp_gained', () => { expEventFired = true });
     eventManager.subscribe('drop_loot', () => { lootEventFired = true });
     eventManager.subscribe('entity_removed', (data) => {
