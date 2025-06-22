@@ -3,7 +3,7 @@ import { Behavior } from './base.js';
 export class WanderBehavior extends Behavior {
     decideAction(self, context) {
         const { player, allies, mapManager } = context;
-        if (!self.isFriendly || self.isPlayer) {
+        if (self.isPlayer) {
             return { type: 'idle' };
         }
         const target = this._getWanderPosition(self, player, allies, mapManager);

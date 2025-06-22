@@ -58,6 +58,11 @@ export class CombatBehavior extends Behavior {
             return { type: 'idle' };
         }
 
+        const leashRange = currentVisionRange * 0.8;
+        if (distToPlayer > leashRange) {
+            return { type: 'move', target: player };
+        }
+
         // 교전 시작 거리를 시야의 일부 비율로 제한하여 즉시 돌격을 방지한다
         const engagementRange = currentVisionRange * ENGAGEMENT_RATIO;
 
