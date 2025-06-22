@@ -1,8 +1,9 @@
-import { disarmWorkflow, armorBreakWorkflow } from '../workflows.js';
+import { disarmWorkflow, armorBreakWorkflow, monsterDeathWorkflow } from '../workflows.js';
 import { SKILLS } from '../data/skills.js';
+import { Item } from '../entities.js';
 export function registerGameEventListeners(engine) {
     const { eventManager, managers, gameState, assets } = engine;
-    const { vfxManager, uiManager, equipmentManager } = managers;
+    const { combatCalculator, vfxManager, effectManager, monsterManager, itemManager, uiManager, motionManager, equipmentManager, projectileManager } = managers;
 
     
     eventManager.subscribe('game_over', () => {
@@ -16,6 +17,28 @@ export function registerGameEventListeners(engine) {
 
     eventManager.subscribe('weapon_disarmed', (data) => disarmWorkflow({ ...data, ...managers }));
     eventManager.subscribe('armor_broken', (data) => armorBreakWorkflow({ ...data, ...managers }));
+
+    eventManager.subscribe('damage_calculated', (data) => {
+        data.defender.takeDamage(data.damage);
+        eventManager.publish('entity_damaged', { ...data });
+        if (data.defender.hp <= 0) {
+            eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
+        }
+    });
+
+    eventManager.subscribe('entity_death', (data) => {
+        vfxManager.addDeathAnimation(data.victim, 'explode');
+        if (data.victim.unitType === 'monster') {
+            const corpse = new Item(data.victim.x, data.victim.y, data.victim.tileSize, 'corpse', assets.corpse);
+            itemManager.addItem(corpse);
+        }
+        const context = {
+            eventManager,
+            attacker: data.attacker,
+            victim: data.victim
+        };
+        monsterDeathWorkflow(context);
+    });
 
     eventManager.subscribe('key_pressed', (data) => {
         if (gameState.isPaused || gameState.isGameOver) return;

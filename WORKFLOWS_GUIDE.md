@@ -11,10 +11,10 @@ of actions that touches more than one manager in this file.
 - **Emit events instead of hard dependencies.** Each workflow should publish
   events for other systems to react to. Direct calls are allowed, but events
   make unit tests easier.
-- **Example:** `monsterDeathWorkflow(context)` broadcasts `entity_death`,
-  applies experience immediately, triggers a loot drop, and finally removes the
-  monster. Tests import this workflow to simulate a kill without running the
-  entire game loop.
+- **Example:** `monsterDeathWorkflow(context)` applies experience immediately,
+  triggers a loot drop, and finally removes the monster. In the main game
+  loop, an `entity_death` event should call this workflow so tests can
+  simulate a kill without running the entire game loop.
 
 ## When to Add a Workflow
 1. A feature triggers multiple managers or requires several side effects.

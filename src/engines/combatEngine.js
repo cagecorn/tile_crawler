@@ -1,4 +1,3 @@
-import { Item } from '../entities.js';
 import { debugLog } from '../utils/logger.js';
 
 export class CombatEngine {
@@ -7,7 +6,7 @@ export class CombatEngine {
         this.managers = managers;
         this.assets = assets || {};
 
-        const { combatCalculator, effectManager, microCombatManager, itemManager } = managers;
+        const { combatCalculator, effectManager, microCombatManager } = managers;
 
         if (this.eventManager) {
             this.eventManager.subscribe('entity_attack', data => {
@@ -16,13 +15,6 @@ export class CombatEngine {
                 combatCalculator.handleAttack(data);
             });
 
-            this.eventManager.subscribe('damage_calculated', data => {
-                data.defender.takeDamage(data.damage);
-                this.eventManager.publish('entity_damaged', { ...data });
-                if (data.defender.hp <= 0) {
-                    this.eventManager.publish('entity_death', { attacker: data.attacker, victim: data.defender });
-                }
-            });
 
             this.eventManager.subscribe('entity_damaged', data => {
                 const sleepEffect = data.defender.effects.find(e => e.id === 'sleep');
@@ -34,16 +26,6 @@ export class CombatEngine {
                 }
             });
 
-            this.eventManager.subscribe('entity_death', data => {
-                if (!data.victim.isFriendly && (data.attacker.isPlayer || data.attacker.isFriendly)) {
-                    const exp = data.victim.expValue || 0;
-                    if (exp > 0) this.eventManager.publish('exp_gained', { player: data.attacker, exp });
-                }
-                if (data.victim.unitType === 'monster') {
-                    const corpse = new Item(data.victim.x, data.victim.y, data.victim.tileSize, 'corpse', this.assets.corpse);
-                    itemManager.addItem(corpse);
-                }
-            });
 
             this.eventManager.subscribe('exp_gained', data => {
                 if (!data.applied && data.player?.stats) {
