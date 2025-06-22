@@ -77,7 +77,7 @@ export class Engine {
         if (this.gameState.isPaused || this.gameState.isGameOver) return;
 
         const { player } = this.gameState;
-        const { monsterManager, mercenaryManager, petManager, itemManager, aiEngine, fogManager } = this.managers;
+        const { monsterManager, mercenaryManager, petManager, itemManager, aiEngine, fogManager, projectileEngine } = this.managers;
 
         this.managers.knockbackEngine.update();
         this.managers.vfxEngine.update();
@@ -128,10 +128,12 @@ export class Engine {
             aiEngine,
         };
 
+        projectileEngine.update(allEntities);
+
         // ✨ AI 엔진을 루프의 가장 마지막에 업데이트하여 다른 시스템의 변경사항을 모두 반영하도록 합니다.
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
-                if (name === 'fogManager' || name === 'knockbackEngine' || name === 'vfxEngine' || name === 'spriteEngine' || name === 'uiManager') return;
+                if (name === 'fogManager' || name === 'knockbackEngine' || name === 'vfxEngine' || name === 'spriteEngine' || name === 'uiManager' || name === 'projectileManager' || name === 'projectileEngine') return;
                 try {
                     manager.update(allEntities, context);
                 } catch (err) {
