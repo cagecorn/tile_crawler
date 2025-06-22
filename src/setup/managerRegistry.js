@@ -12,11 +12,14 @@ import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
 import { FogManager } from '../managers/fogManager.js';
 import { MicroEngine } from '../micro/MicroEngine.js';
+import { MicroTurnEngine } from '../engines/microTurnEngine.js';
 import { MicroCombatManager } from '../micro/MicroCombatManager.js';
 import { CombatEngine } from '../engines/combatEngine.js';
 import { StatEngine } from '../engines/statEngine.js';
 import { TurnEngine } from '../engines/turnEngine.js';
 import { ProjectileEngine } from '../engines/projectileEngine.js';
+import { SkillEngine } from '../engines/skillEngine.js';
+import { MovementEngine } from '../engines/movementEngine.js';
 
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
@@ -65,6 +68,8 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.skillManager.setManagers(managers.effectManager, factory, managers.aiEngine, managers.monsterManager);
     managers.projectileManager = new Managers.ProjectileManager(eventManager, assets, managers.vfxManager);
     managers.projectileEngine = new ProjectileEngine(eventManager, managers.projectileManager);
+    managers.skillEngine = new SkillEngine(eventManager, managers.skillManager);
+    managers.movementEngine = new MovementEngine(eventManager, managers.movementManager);
     managers.auraManager = new Managers.AuraManager(managers.effectManager, eventManager, managers.vfxManager);
     managers.synergyManager = new Managers.SynergyManager(eventManager);
     managers.speechBubbleManager = new Managers.SpeechBubbleManager(eventManager);
@@ -76,7 +81,8 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.effectEngine = new EffectEngine(eventManager, managers.effectManager);
 
     // 마이크로 월드
-    managers.microEngine = new MicroEngine(eventManager);
+    managers.microTurnEngine = new MicroTurnEngine();
+    managers.microEngine = new MicroEngine(eventManager, managers.microTurnEngine);
     managers.microCombatManager = new MicroCombatManager(eventManager);
     managers.microItemAIManager = new Managers.MicroItemAIManager();
 
