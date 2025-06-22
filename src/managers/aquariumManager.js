@@ -3,6 +3,8 @@
 import { TRAITS } from '../data/traits.js';
 import { EquipmentManager } from './equipmentManager.js';
 import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
+
+const DEFAULT_EXP_VALUE = 5;
 export class AquariumManager {
     constructor(eventManager, monsterManager, itemManager, mapManager, charFactory, itemFactory, vfxManager = null, traitManager = null) {
         this.eventManager = eventManager;
@@ -74,6 +76,7 @@ export class AquariumManager {
 
             const vision = opts.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
             const stats = adjustMonsterStatsForAquarium({
+                expValue: opts.baseStats?.expValue ?? DEFAULT_EXP_VALUE,
                 ...(opts.baseStats || {}),
                 visionRange: vision,
             });
@@ -127,6 +130,7 @@ export class AquariumManager {
             if (pos) {
                 const vision = feature.baseStats?.visionRange ?? this.mapManager.tileSize * 2;
                 const stats = adjustMonsterStatsForAquarium({
+                    expValue: feature.baseStats?.expValue ?? DEFAULT_EXP_VALUE,
                     ...feature.baseStats,
                     visionRange: vision,
                 });

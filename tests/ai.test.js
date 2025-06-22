@@ -14,6 +14,14 @@ describe('Behavior AI', () => {
     assert.strictEqual(action.target, enemy);
   });
 
+  test('CombatBehavior idles when target is far', () => {
+    const beh = new CombatBehavior();
+    const self = { x:0, y:0, attackRange:2, visionRange:30, equipment:{}, properties:{} };
+    const enemy = { x:25, y:0, hp:10 };
+    const action = beh.decideAction(self, { enemies:[enemy], allies:[], player:{}, mapManager:mapStub });
+    assert.strictEqual(action.type, 'idle');
+  });
+
   test('HealBehavior heals wounded ally', () => {
     const beh = new HealBehavior();
     const self = { x:0, y:0, attackRange:10, mp:20, skills:['heal'], skillCooldowns:{}, properties:{ mbti:'ENFP' } };

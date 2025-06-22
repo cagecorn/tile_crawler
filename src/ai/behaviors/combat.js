@@ -1,6 +1,8 @@
 import { Behavior } from './base.js';
 import { hasLineOfSight } from '../../utils/geometry.js';
 
+const ENGAGEMENT_RATIO = 0.6;
+
 export class CombatBehavior extends Behavior {
     decideAction(self, context) {
         const { player, enemies, mapManager, eventManager } = context;
@@ -35,6 +37,13 @@ export class CombatBehavior extends Behavior {
 
         self.currentTarget = nearestTarget;
         const distance = Math.hypot(nearestTarget.x - self.x, nearestTarget.y - self.y);
+
+        // 교전 시작 거리를 시야의 일부 비율로 제한하여 즉시 돌격을 방지한다
+        const engagementRange = currentVisionRange * ENGAGEMENT_RATIO;
+
+        if (distance > engagementRange && distance > self.attackRange) {
+            return { type: 'idle' };
+        }
 
         const weaponTags = self.equipment?.weapon?.tags || [];
         const isRanged = weaponTags.includes('ranged') || weaponTags.includes('bow');
