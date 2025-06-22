@@ -1,7 +1,8 @@
 // src/assetLoader.js
 
 export class AssetLoader {
-    constructor() {
+    constructor({ silent = false } = {}) {
+        this.silent = silent;
         this.assets = {};
         this.promises = [];
     }
@@ -15,7 +16,9 @@ export class AssetLoader {
                 resolve(img);
             };
             img.onerror = () => {
-                console.warn(`[AssetLoader] Missing image: ${src}`);
+                if (!this.silent) {
+                    console.warn(`[AssetLoader] Missing image: ${src}`);
+                }
                 const placeholder = new Image();
                 placeholder.src =
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAEklEQVR42mP8/5+hHgAGgwJ/lzzYowAAAABJRU5ErkJggg==';
