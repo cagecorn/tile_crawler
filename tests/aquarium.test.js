@@ -51,4 +51,17 @@ describe('Aquarium', () => {
         assert.strictEqual(stats.get('maxHp'), (10 + base.endurance * 5) * 2);
         assert.ok(Math.abs(stats.get('attackPower')) < 0.001);
     });
+
+    test('spawnMonsterGroup assigns default exp value', () => {
+        const eventManager = new EventManager();
+        const monsterManager = new MonsterManager(0, new AquariumMapManager(), assets, eventManager, new CharacterFactory(assets));
+        const itemManager = new ItemManager(0, monsterManager.mapManager, assets);
+        const factory = new CharacterFactory(assets);
+        const vfx = new VFXManager(eventManager);
+        const aquariumManager = new AquariumManager(eventManager, monsterManager, itemManager, monsterManager.mapManager, factory, { create(){return null;} }, vfx, null);
+        aquariumManager.spawnMonsterGroup(1);
+        assert.strictEqual(monsterManager.monsters.length, 1);
+        const monster = monsterManager.monsters[0];
+        assert.strictEqual(monster.stats.get('expValue'), 5);
+    });
 });
