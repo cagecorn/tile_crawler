@@ -2,6 +2,8 @@ import { TRAITS } from '../data/traits.js';
 import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
 import { debugLog } from '../utils/logger.js';
 
+const DEFAULT_EXP_VALUE = 5;
+
 export class MonsterManager {
     constructor(eventManager, mapManager, assets, factory) {
         this.eventManager = eventManager;
@@ -29,7 +31,7 @@ export class MonsterManager {
         for (let i = 0; i < count; i++) {
             const pos = this.mapManager.getRandomFloorPosition();
             if (pos) {
-                let stats = {};
+                let stats = { expValue: DEFAULT_EXP_VALUE };
                 if (this.mapManager.name === 'aquarium') {
                     stats = adjustMonsterStatsForAquarium(stats);
                 }
