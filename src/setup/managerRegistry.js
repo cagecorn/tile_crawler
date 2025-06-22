@@ -6,6 +6,7 @@ import { AIEngine } from '../engines/aiEngine.js';
 import { MBTIEngine } from '../engines/mbtiEngine.js';
 import { VFXEngine } from '../engines/vfxEngine.js';
 import { EffectEngine } from '../engines/effectEngine.js';
+import { EventEngine } from '../engines/eventEngine.js';
 import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
 import { FogManager } from '../managers/fogManager.js';
@@ -79,6 +80,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.combatEngine = new CombatEngine(eventManager, managers, assets);
     managers.statEngine = new StatEngine(eventManager);
     managers.turnEngine = new TurnEngine(eventManager);
+    managers.eventEngine = new EventEngine(eventManager);
 
     // --- 여기에 로그 매니저 생성 코드를 추가합니다. ---
     managers.combatLogManager = new Managers.CombatLogManager(eventManager);
