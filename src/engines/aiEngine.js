@@ -184,7 +184,7 @@ export class AIEngine {
         console.log(`[AIEngine] Processing ${membersSorted.length} members`);
         debugLog(`[AIEngine] Processing ${membersSorted.length} members`);
         for (const member of membersSorted) {
-            if (member.hp <= 0 || member.isPlayer) {
+            if (member.hp <= 0) {
                 console.log(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
                 debugLog(`[AIEngine] Skipping member: hp=${member.hp}, behaviors=${!!member.behaviors}, isPlayer=${member.isPlayer}`);
                 continue;
@@ -240,6 +240,17 @@ export class AIEngine {
                     entity.mp -= skill.manaCost;
                     entity.skillCooldowns[action.skillId] = skill.cooldown;
                     eventManager.publish('skill_used', { caster: entity, skill, target: action.target });
+                }
+                break; }
+            case 'charge_attack': {
+                const skill = action.skill || SKILLS.charge_attack;
+                if (skill && entity.mp >= skill.manaCost && (entity.skillCooldowns[skill.id] || 0) <= 0) {
+                    entity.mp -= skill.manaCost;
+                    entity.skillCooldowns[skill.id] = skill.cooldown;
+                    eventManager.publish('entity_attack', { attacker: entity, defender: action.target, skill });
+                    if (movementManager) {
+                        movementManager.moveEntityTowards(entity, action.target, context);
+                    }
                 }
                 break; }
             case 'move':

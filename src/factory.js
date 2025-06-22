@@ -1,6 +1,5 @@
 // src/factory.js
 import { Player, Mercenary, Monster, Item, Pet } from './entities.js';
-import { rollOnTable } from './utils/random.js';
 import { FAITHS } from './data/faiths.js';
 import { ORIGINS } from './data/origins.js';
 import { TRAITS } from './data/traits.js';
@@ -10,16 +9,15 @@ import { EMBLEMS } from './data/emblems.js';
 import { PREFIXES, SUFFIXES } from './data/affixes.js';
 import { JOBS } from './data/jobs.js';
 import { SKILLS } from './data/skills.js';
-import { CompositeAI, PurifierAI } from './ai.js';
 import { MBTI_TYPES } from './data/mbti.js';
 import { PETS } from './data/pets.js';
 import { WeaponStatManager } from './micro/WeaponStatManager.js';
 import { SYNERGIES } from './data/synergies.js';
-// 새 행동 모듈들
 import { CombatBehavior } from './ai/behaviors/combat.js';
 import { HealBehavior } from './ai/behaviors/heal.js';
 import { BardBehavior } from './ai/behaviors/bard.js';
 import { WanderBehavior } from './ai/behaviors/wander.js';
+import { PurifierAI } from './ai.js';
 
 export class CharacterFactory {
     constructor(assets) {
@@ -27,9 +25,6 @@ export class CharacterFactory {
         this.itemFactory = new ItemFactory(assets);
     }
 
-    /**
-     * ✨ 안정성을 위해 재설계된 create 메서드입니다.
-     */
     create(type, config) {
         // 1. 최종적으로 엔티티에 전달될 설정 객체를 미리 준비합니다.
         const finalConfig = { ...config };
@@ -42,27 +37,18 @@ export class CharacterFactory {
         properties.mbti = this._rollMBTI();
         properties.origin = this._rollRandomKey(ORIGINS);
         properties.traits = this._rollMultipleRandomKeys(TRAITS, 2);
+        properties.faith = (type !== 'player') ? this._rollRandomKey(FAITHS) : null;
 
-        if (type !== 'player') {
-            properties.faith = this._rollRandomKey(FAITHS);
-        } else {
-            // 플레이어는 신앙을 갖지 않습니다.
-            properties.faith = null;
-        }
-
-        // 2-2. 결정된 속성에 따른 보너스 스탯을 'stats' 객체에 합칩니다.
-        const originBonus = ORIGINS[properties.origin].stat_bonuses;
-        Object.assign(stats, originBonus);
-
-        if (type === 'mercenary' && config.jobId && JOBS[config.jobId]) {
-            Object.assign(stats, JOBS[config.jobId].stats);
-        }
+        // 2-2. 결정된 속성과 직업에 따른 보너스 스탯을 'stats' 객체에 순서대로 합칩니다.
+        const originBonus = ORIGINS[properties.origin]?.stat_bonuses || {};
+        const jobStats = (type === 'mercenary' && config.jobId && JOBS[config.jobId]?.stats) ? JOBS[config.jobId].stats : {};
+        Object.assign(stats, originBonus, jobStats);
 
         // 2-3. 최종 스탯과 속성을 finalConfig에 할당합니다.
         finalConfig.stats = stats;
         finalConfig.properties = properties;
 
-        // 3. 타입에 맞는 캐릭터를 생성합니다.
+        // 3. 타입에 맞는 캐릭터 클래스를 선택하여 '불량품 없는' 유닛을 생성합니다.
         let entity;
         switch (type) {
             case 'player':
@@ -74,15 +60,15 @@ export class CharacterFactory {
             case 'monster':
                 entity = new Monster(finalConfig);
                 break;
-            case 'pet': {
+            case 'pet':
                 const petData = PETS[config.petId] || PETS.fox;
-                finalConfig.stats = { ...finalConfig.stats, ...(petData.baseStats || {}) };
-                finalConfig.image = finalConfig.image || this.assets[petData.imageKey];
+                finalConfig.stats = { ...stats, ...(petData.baseStats || {}) };
+                finalConfig.image = config.image || this.assets[petData.imageKey];
                 finalConfig.auraSkill = petData.auraSkill;
                 entity = new Pet(finalConfig);
                 break;
-            }
             default:
+                console.error(`Unknown character type: ${type}`);
                 return null;
         }
 
@@ -91,22 +77,23 @@ export class CharacterFactory {
         if (type === 'player') {
             entity.skills.push(SKILLS.fireball.id, SKILLS.iceball.id, SKILLS.teleport.id);
         } else if (type === 'mercenary') {
-            if (config.jobId === 'healer') {
+            const { jobId, tileSize } = config;
+            if (jobId === 'healer') {
                 entity.skills.push(SKILLS.heal.id, SKILLS.purify.id);
                 entity.behaviors.push(new HealBehavior(), new PurifierAI());
-            } else if (config.jobId === 'bard') {
+            } else if (jobId === 'bard') {
                 entity.skills.push(SKILLS.guardian_hymn.id, SKILLS.courage_hymn.id);
-                const vb = this.itemFactory.create('violin_bow', 0, 0, config.tileSize);
+                const vb = this.itemFactory.create('violin_bow', 0, 0, tileSize);
                 if (vb) entity.equipment.weapon = vb;
                 entity.behaviors.push(new BardBehavior());
-            } else if (config.jobId === 'warrior') {
+            } else if (jobId === 'warrior') {
                 entity.skills.push(SKILLS.charge_attack.id);
-            } else if (config.jobId === 'archer') {
-                const bow = this.itemFactory.create('long_bow', 0, 0, config.tileSize);
+            } else if (jobId === 'archer') {
+                const bow = this.itemFactory.create('long_bow', 0, 0, tileSize);
                 if (bow) entity.equipment.weapon = bow;
                 const r = Math.random();
                 entity.skills.push(r < 0.5 ? SKILLS.double_thrust.id : SKILLS.hawk_eye.id);
-            } else if (config.jobId === 'wizard') {
+            } else if (jobId === 'wizard') {
                 const r = Math.random();
                 entity.skills.push(r < 0.5 ? SKILLS.fireball.id : SKILLS.iceball.id);
             } else {
@@ -114,48 +101,43 @@ export class CharacterFactory {
                 entity.skills.push(r < 0.5 ? SKILLS.double_strike.id : SKILLS.charge_attack.id);
             }
 
-            if (!entity.equipment.weapon && type !== 'bard') {
-                const sword = this.itemFactory.create('sword', 0, 0, config.tileSize);
+            if (!entity.equipment.weapon) {
+                const sword = this.itemFactory.create('sword', 0, 0, tileSize);
                 if (sword) entity.equipment.weapon = sword;
             }
-
             entity.behaviors.push(new CombatBehavior(), new WanderBehavior());
-        } else if (type === 'monster' || type === 'pet') {
+        } else { // Monster and Pet
             entity.behaviors.push(new CombatBehavior(), new WanderBehavior());
         }
 
-        if (entity.stats?.updateEquipmentStats) {
-            entity.stats.updateEquipmentStats();
-        }
+        // 모든 유닛의 스탯을 최종적으로 한 번 더 계산하여 마무리합니다.
+        entity.stats?.recalculate();
+        entity.stats?.updateEquipmentStats();
 
         return entity;
     }
 
-    // === 아래는 다이스를 굴리는 내부 함수들 (수정 없음) ===
     _rollMBTI() {
-        const idx = Math.floor(Math.random() * MBTI_TYPES.length);
-        return MBTI_TYPES[idx];
+        return MBTI_TYPES[Math.floor(Math.random() * MBTI_TYPES.length)];
     }
     _rollRandomKey(obj) {
         const keys = Object.keys(obj);
         return keys[Math.floor(Math.random() * keys.length)];
     }
-
     _rollMultipleRandomKeys(obj, count) {
         const keys = Object.keys(obj);
         const result = [];
-        while (result.length < count && keys.length) {
+        for (let i = 0; i < count; i++) {
+            if (keys.length === 0) break;
             const idx = Math.floor(Math.random() * keys.length);
             result.push(keys.splice(idx, 1)[0]);
         }
         return result;
     }
-    _rollStars() {
-        return { strength: 1, agility: 1, endurance: 1, focus: 1, intelligence: 1 };
-    }
 }
 
-// === ItemFactory 클래스 새로 추가 ===
+
+// 아이템 팩토리는 수정할 필요가 없습니다. 그대로 둡니다.
 export class ItemFactory {
     constructor(assets) {
         this.assets = assets;
@@ -165,15 +147,11 @@ export class ItemFactory {
         const baseItem = ITEMS[itemId] || ARTIFACTS[itemId] || EMBLEMS[itemId];
         if (!baseItem) return null;
 
-        // 아이템 생성 시 imageKey로부터 올바른 이미지를 불러온다
         const itemImage = this.assets[baseItem.imageKey];
-        if (!itemImage) {
-            console.warn(`Missing image for item ${itemId} with key ${baseItem.imageKey}`);
-        }
         const item = new Item(x, y, tileSize, baseItem.name, itemImage);
         item.baseId = itemId;
         item.type = baseItem.type;
-        item.tags = [...baseItem.tags];
+        item.tags = [...(baseItem.tags || [])];
 
         if (baseItem.tier) item.tier = baseItem.tier;
         if (baseItem.durability) item.durability = baseItem.durability;
@@ -196,7 +174,7 @@ export class ItemFactory {
         if (baseItem.effectId) item.effectId = baseItem.effectId;
 
         if (item.type === 'weapon' || item.type === 'armor') {
-            const numSockets = Math.floor(Math.random() * 4); // 0~3개 소켓
+            const numSockets = Math.floor(Math.random() * 4);
             item.sockets = Array(numSockets).fill(null);
             this._applySynergies(item);
         } else {
@@ -231,7 +209,7 @@ export class ItemFactory {
 
     _applySynergies(item) {
         const synergyKeys = Object.keys(SYNERGIES);
-        const synergyCount = Math.floor(Math.random() * 4); // 0 ~ 3개
+        const synergyCount = Math.floor(Math.random() * 4);
         const available = [...synergyKeys];
         for (let i = 0; i < synergyCount; i++) {
             if (available.length === 0) break;
@@ -239,9 +217,5 @@ export class ItemFactory {
             const chosen = available.splice(idx, 1)[0];
             item.synergies.push(chosen);
         }
-    }
-
-    _createSockets() {
-        return [];
     }
 }

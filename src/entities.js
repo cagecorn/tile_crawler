@@ -39,9 +39,7 @@ class Entity {
         this.maxFullness = config.maxFullness ?? 100;
         this.fullness = config.fullness ?? this.maxFullness;
         this.maxAffinity = config.maxAffinity ?? 200;
-        if (config.affinity !== undefined) {
-            this.affinity = config.affinity;
-        }
+        this.affinity = config.affinity ?? this.maxAffinity;
 
         // --- 장비창(Equipment) 추가 ---
         this.equipment = {
