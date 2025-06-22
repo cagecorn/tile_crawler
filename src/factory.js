@@ -163,7 +163,7 @@ export class ItemFactory {
         if (baseItem.weight) item.weight = baseItem.weight;
         if (baseItem.toughness) item.toughness = baseItem.toughness;
         if (item.type === 'weapon' || item.tags.includes('weapon')) {
-            item.weaponStats = new WeaponStatManager(itemId);
+            item.weaponStats = new WeaponStatManager(itemId, item.tags);
         }
         if (baseItem.range) {
             item.range = baseItem.range;

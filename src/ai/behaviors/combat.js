@@ -52,7 +52,8 @@ export class CombatBehavior extends Behavior {
         if (mbti.includes('P')) triggeredTraits.push('P');
 
         if (isRanged) {
-            if (distance < self.attackRange * 0.5 && !mbti.includes('P')) {
+            const isTooClose = distance < self.tileSize;
+            if (distance < self.attackRange * 0.5 && !mbti.includes('P') && !isTooClose) {
                 const retreatTarget = { x: self.x - (nearestTarget.x - self.x), y: self.y - (nearestTarget.y - self.y) };
                 return { type: 'move', target: retreatTarget, triggeredTraits };
             }

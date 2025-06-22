@@ -3,13 +3,14 @@ import { WEAPON_SKILLS } from '../data/weapon-skills.js';
 import { debugLog } from '../utils/logger.js';
 
 export class WeaponStatManager {
-    constructor(itemId) {
+    constructor(itemId, tags = []) {
         this.level = 1;
         this.exp = 0;
         this.expNeeded = 20; // 초기 필요 경험치
         this.skills = [];    // 이 무기가 현재 사용할 수 있는 스킬 목록
         this.cooldown = 0;   // 이 무기의 스킬 쿨다운
         this.ai = this._getAIByItemId(itemId);
+        this.weaponTags = tags;
 
         this._unlockSkills(); // 1레벨 스킬 즉시 해금
     }
@@ -31,9 +32,17 @@ export class WeaponStatManager {
     }
 
     _unlockSkills() {
+        const WEAPON_TYPES = ['sword', 'dagger', 'bow', 'spear', 'estoc', 'axe', 'mace', 'staff', 'scythe', 'whip', 'violin_bow'];
+
         for (const skillId in WEAPON_SKILLS) {
             const skill = WEAPON_SKILLS[skillId];
-            if (!this.skills.includes(skillId) && this.level >= (skill.requiredLevel || 1)) {
+            if (this.skills.includes(skillId) || this.level < (skill.requiredLevel || 1)) {
+                continue;
+            }
+
+            const skillWeaponTag = skill.tags.find(t => WEAPON_TYPES.includes(t));
+
+            if (skillWeaponTag && this.weaponTags.includes(skillWeaponTag)) {
                 this.skills.push(skillId);
                 console.log(`[Micro-World] 새로운 무기 스킬 [${skill.name}]을 배웠습니다!`);
                 debugLog(`[Micro-World] 새로운 무기 스킬 [${skill.name}]을 배웠습니다!`);
