@@ -16,6 +16,7 @@ import { MicroCombatManager } from '../micro/MicroCombatManager.js';
 import { CombatEngine } from '../engines/combatEngine.js';
 import { StatEngine } from '../engines/statEngine.js';
 import { TurnEngine } from '../engines/turnEngine.js';
+import { ProjectileEngine } from '../engines/projectileEngine.js';
 
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
@@ -63,6 +64,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.skillManager = new Managers.SkillManager(eventManager);
     managers.skillManager.setManagers(managers.effectManager, factory, managers.aiEngine, managers.monsterManager);
     managers.projectileManager = new Managers.ProjectileManager(eventManager, assets, managers.vfxManager);
+    managers.projectileEngine = new ProjectileEngine(eventManager, managers.projectileManager);
     managers.auraManager = new Managers.AuraManager(managers.effectManager, eventManager, managers.vfxManager);
     managers.synergyManager = new Managers.SynergyManager(eventManager);
     managers.speechBubbleManager = new Managers.SpeechBubbleManager(eventManager);
