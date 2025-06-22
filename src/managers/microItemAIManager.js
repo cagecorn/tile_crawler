@@ -1,6 +1,8 @@
+import { debugLog } from '../utils/logger.js';
+
 export class MicroItemAIManager {
     constructor() {
-        console.log('[MicroItemAIManager] Initialized');
+        debugLog('[MicroItemAIManager] Initialized');
     }
 
     /**

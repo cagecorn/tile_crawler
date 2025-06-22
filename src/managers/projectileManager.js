@@ -1,5 +1,6 @@
 import { Projectile } from "../entities.js";
 import { findEntitiesInRadius } from '../utils/entityUtils.js';
+import { debugLog } from '../utils/logger.js';
 
 export class ProjectileManager {
     constructor(eventManager, assets, vfxManager = null) {
@@ -7,7 +8,7 @@ export class ProjectileManager {
         this.eventManager = eventManager;
         this.assets = assets;
         this.vfxManager = vfxManager;
-        console.log("[ProjectileManager] Initialized");
+        debugLog("[ProjectileManager] Initialized");
     }
 
     create(caster, target, skill) {

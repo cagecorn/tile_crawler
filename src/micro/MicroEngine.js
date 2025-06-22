@@ -1,4 +1,5 @@
 import { MicroTurnManager } from './MicroTurnManager.js';
+import { debugLog } from '../utils/logger.js';
 
 // src/micro/MicroEngine.js
 
@@ -12,7 +13,7 @@ export class MicroEngine {
         if (this.eventManager) {
             this.eventManager.subscribe('attack_landed', data => this.handleAttackLanded(data));
         }
-        console.log('[MicroEngine] Initialized and subscribed to events.');
+        debugLog('[MicroEngine] Initialized and subscribed to events.');
     }
 
     handleAttackLanded(data) {

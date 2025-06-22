@@ -1,4 +1,5 @@
 import { Particle } from '../particle.js';
+import { debugLog } from '../utils/logger.js';
 
 export class VFXManager {
     constructor(eventManager = null, itemManager = null) {
@@ -13,7 +14,7 @@ export class VFXManager {
                 this.addKnockbackEffect(data.attacker, data.weapon);
             });
         }
-        console.log("[VFXManager] Initialized");
+        debugLog("[VFXManager] Initialized");
     }
 
     /**

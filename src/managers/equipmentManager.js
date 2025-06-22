@@ -1,8 +1,10 @@
+import { debugLog } from '../utils/logger.js';
+
 export class EquipmentManager {
     constructor(eventManager = null) {
         this.eventManager = eventManager;
         this.tagManager = null;
-        console.log('[EquipmentManager] Initialized');
+        debugLog('[EquipmentManager] Initialized');
     }
 
     setTagManager(tagManager) {

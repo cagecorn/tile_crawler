@@ -1,8 +1,9 @@
 import { RangedAI, MeleeAI } from '../ai.js';
+import { debugLog } from '../utils/logger.js';
 
 export class TagManager {
     constructor() {
-        console.log("[TagManager] Initialized");
+        debugLog("[TagManager] Initialized");
     }
 
     /**

@@ -4,6 +4,7 @@ import { FAITHS } from '../data/faiths.js';
 import { TRAITS } from '../data/traits.js';
 import { SYNERGIES } from '../data/synergies.js';
 import { ARTIFACTS } from '../data/artifacts.js';
+import { debugLog } from '../utils/logger.js';
 
 export class UIManager {
     constructor() {
@@ -691,7 +692,7 @@ export class UIManager {
         } else if (item.baseId === 'potion' || item.name === 'potion') {
             const player = gameState.player;
             player.hp = Math.min(player.maxHp, player.hp + 5);
-            console.log(`포션을 사용했습니다! HP +5`);
+            debugLog(`포션을 사용했습니다! HP +5`);
             if (this.particleDecoratorManager) {
                 this.particleDecoratorManager.playHealingEffect(player);
             }

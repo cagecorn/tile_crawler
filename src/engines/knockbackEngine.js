@@ -1,3 +1,5 @@
+import { debugLog } from '../utils/logger.js';
+
 export class KnockbackEngine {
     constructor(eventManager, mapManager, vfxManager) {
         this.eventManager = eventManager;
@@ -12,7 +14,7 @@ export class KnockbackEngine {
             });
         }
 
-        console.log('[KnockbackEngine] Initialized');
+        debugLog('[KnockbackEngine] Initialized');
     }
 
     /**

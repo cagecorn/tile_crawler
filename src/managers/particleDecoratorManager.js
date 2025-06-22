@@ -1,10 +1,12 @@
+import { debugLog } from '../utils/logger.js';
+
 export class ParticleDecoratorManager {
     constructor(eventManager = null, assets = null, factory = null) {
         this.vfxManager = null;
         this.mapManager = null;
         this.emitters = [];
         this.initialized = false;
-        console.log('[ParticleDecoratorManager] Initialized');
+        debugLog('[ParticleDecoratorManager] Initialized');
     }
 
     setManagers(vfxManager, mapManager) {

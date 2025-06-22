@@ -1,9 +1,11 @@
 const TIER_ORDER = { normal: 1, rare: 2, unique: 3 };
 
+import { debugLog } from '../utils/logger.js';
+
 export class MicroCombatManager {
     constructor(eventManager) {
         this.eventManager = eventManager;
-        console.log('[MicroCombatManager] Initialized');
+        debugLog('[MicroCombatManager] Initialized');
     }
 
     resolveAttack(attacker, defender) {

@@ -1,5 +1,6 @@
 import { TRAITS } from '../data/traits.js';
 import { adjustMonsterStatsForAquarium } from '../utils/aquariumUtils.js';
+import { debugLog } from '../utils/logger.js';
 
 export class MonsterManager {
     constructor(eventManager, mapManager, assets, factory) {
@@ -9,7 +10,7 @@ export class MonsterManager {
         this.factory = factory;
         this.monsters = [];
         this.traitManager = null;
-        console.log("[MonsterManager] Initialized");
+        debugLog("[MonsterManager] Initialized");
 
         if (this.eventManager) {
             this.eventManager.subscribe('entity_removed', (data) => {

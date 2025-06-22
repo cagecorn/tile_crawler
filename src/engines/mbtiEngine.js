@@ -1,6 +1,8 @@
+import { debugLog } from '../utils/logger.js';
+
 export class MBTIEngine {
     constructor() {
-        console.log('[MBTIEngine] Initialized');
+        debugLog('[MBTIEngine] Initialized');
     }
 
     /**
