@@ -62,7 +62,11 @@ export class CombatCalculator {
             return;
         }
 
-        if (defendingWeapon && defendingWeapon.weaponStats?.canUseSkill('parry')) {
+        if (
+            defendingWeapon &&
+            defendingWeapon.weaponStats?.canUseSkill('parry') &&
+            Array.isArray(defendingWeapon.tags) && defendingWeapon.tags.includes('sword')
+        ) {
             const parrySkillData = WEAPON_SKILLS.parry;
             if (Math.random() < parrySkillData.procChance) {
                 this.eventManager.publish('log', {

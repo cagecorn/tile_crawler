@@ -1,7 +1,8 @@
 import { Behavior } from './base.js';
 import { hasLineOfSight } from '../../utils/geometry.js';
 
-const ENGAGEMENT_RATIO = 0.6;
+// Reduce how far allies will pursue targets so they don't abandon the player.
+const ENGAGEMENT_RATIO = 0.35;
 
 export class CombatBehavior extends Behavior {
     decideAction(self, context) {
@@ -37,6 +38,14 @@ export class CombatBehavior extends Behavior {
 
         self.currentTarget = nearestTarget;
         const distance = Math.hypot(nearestTarget.x - self.x, nearestTarget.y - self.y);
+
+        // Stay near the player: if both we and the target are far away,
+        // ignore the enemy so allies don't sprint across the map.
+        const distToPlayer = Math.hypot(player.x - self.x, player.y - self.y);
+        const targetDistToPlayer = Math.hypot(nearestTarget.x - player.x, nearestTarget.y - player.y);
+        if (distToPlayer > currentVisionRange && targetDistToPlayer > currentVisionRange) {
+            return { type: 'idle' };
+        }
 
         // 교전 시작 거리를 시야의 일부 비율로 제한하여 즉시 돌격을 방지한다
         const engagementRange = currentVisionRange * ENGAGEMENT_RATIO;
