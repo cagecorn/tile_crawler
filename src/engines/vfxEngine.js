@@ -22,8 +22,20 @@ export class VFXEngine {
             });
 
             this.eventManager.subscribe('skill_used', data => {
-                const { caster, skill } = data;
+                const { caster, skill, target } = data;
                 this.vfxManager.castEffect(caster, skill);
+                if (skill?.vfxKey && this.assets[skill.vfxKey]) {
+                    const ent = target || caster;
+                    this.vfxManager.addSpriteEffect(
+                        this.assets[skill.vfxKey],
+                        ent.x + ent.width / 2,
+                        ent.y + ent.height / 2,
+                        {
+                            width: ent.width,
+                            height: ent.height,
+                        }
+                    );
+                }
             });
 
             this.eventManager.subscribe('entity_damaged', data => {
