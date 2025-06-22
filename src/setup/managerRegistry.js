@@ -4,6 +4,7 @@ import { CombatCalculator } from '../combat.js';
 import { KnockbackEngine } from '../engines/knockbackEngine.js';
 import { AIEngine } from '../engines/aiEngine.js';
 import { MBTIEngine } from '../engines/mbtiEngine.js';
+import { VFXEngine } from '../engines/vfxEngine.js';
 import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
 import { FogManager } from '../managers/fogManager.js';
@@ -62,6 +63,9 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.synergyManager = new Managers.SynergyManager(eventManager);
     managers.speechBubbleManager = new Managers.SpeechBubbleManager(eventManager);
     managers.petManager = new Managers.PetManager(eventManager, factory, managers.aiEngine, managers.auraManager, managers.vfxManager);
+
+    // 시각 효과 처리를 담당하는 VFXEngine을 초기화합니다.
+    managers.vfxEngine = new VFXEngine(eventManager, managers.vfxManager, assets);
 
     // 마이크로 월드
     managers.microEngine = new MicroEngine(eventManager);

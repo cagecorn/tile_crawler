@@ -80,6 +80,7 @@ export class Engine {
         const { monsterManager, mercenaryManager, petManager, itemManager, aiEngine, fogManager } = this.managers;
 
         this.managers.knockbackEngine.update();
+        this.managers.vfxEngine.update();
 
         // Player movement
         let moveX = 0, moveY = 0;
@@ -129,7 +130,7 @@ export class Engine {
         // ✨ AI 엔진을 루프의 가장 마지막에 업데이트하여 다른 시스템의 변경사항을 모두 반영하도록 합니다.
         Object.entries(this.managers).forEach(([name, manager]) => {
             if (typeof manager.update === 'function' && manager !== aiEngine) {
-                if (name === 'fogManager' || name === 'knockbackEngine' || name === 'uiManager') return;
+                if (name === 'fogManager' || name === 'knockbackEngine' || name === 'vfxEngine' || name === 'uiManager') return;
                 try {
                     manager.update(allEntities);
                 } catch (err) {

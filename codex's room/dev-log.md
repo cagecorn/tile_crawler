@@ -78,3 +78,8 @@
 - Emotion Card 시스템 1단계 구현: Entity에 emotionSlots 추가하고 EquipmentManager가 카드 장착을 지원하도록 수정.
 - StatManager가 알파벳 상태와 카드 조합시 추가 보너스를 계산하도록 개선.
 - 샘플 아이템 `fury_p_card`를 정의하고 테스트 `emotionCard.test.js` 작성.
+
+## 세션 18
+- VFXEngine을 도입해 전투 및 MBTI 팝업 효과 처리를 전담하도록 분리.
+- managerRegistry와 Engine 루프에 VFXEngine을 통합.
+- CombatEngine과 eventListeners의 시각 효과 코드를 이동하고 테스트 `vfxEngine.test.js` 추가.

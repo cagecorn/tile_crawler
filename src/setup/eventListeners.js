@@ -17,11 +17,6 @@ export function registerGameEventListeners(engine) {
     eventManager.subscribe('weapon_disarmed', (data) => disarmWorkflow({ ...data, ...managers }));
     eventManager.subscribe('armor_broken', (data) => armorBreakWorkflow({ ...data, ...managers }));
 
-    eventManager.subscribe('skill_used', (data) => {
-        const { caster, skill } = data;
-        vfxManager.castEffect(caster, skill);
-    });
-
     eventManager.subscribe('key_pressed', (data) => {
         if (gameState.isPaused || gameState.isGameOver) return;
         const skillIndex = parseInt(data.key) - 1;
@@ -34,10 +29,6 @@ export function registerGameEventListeners(engine) {
                 eventManager.publish('skill_used', { caster: gameState.player, skill: skillData, target: null });
             }
         }
-    });
-
-    eventManager.subscribe('ai_mbti_trait_triggered', (data) => {
-        vfxManager.addTextPopup(data.trait, data.entity);
     });
 
 
