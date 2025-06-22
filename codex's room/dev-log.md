@@ -88,3 +88,8 @@
 - EffectEngine을 새로 도입해 버프와 디버프 적용을 이벤트 기반으로 관리하도록 구조화.
 - managerRegistry에 EffectEngine을 등록하고 엔진 루프에서 효과 갱신이 자동으로 이루어지게 개선.
 - 문서 `docs-managers-summary.md`에 엔진 설명 추가하고 테스트 `effectEngine.test.js` 작성.
+
+## 세션 20
+- TurnEngine 도입으로 턴 진행 로직을 엔진화.
+- managerRegistry에서 TurnEngine을 초기화하고 Engine 루프에 컨텍스트 전달을 지원하도록 수정.
+- 새 테스트 `turnEngine.test.js`로 위임 동작을 검증.
