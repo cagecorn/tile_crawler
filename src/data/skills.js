@@ -19,6 +19,8 @@ export const SKILLS = {
         manaCost: 10,
         cooldown: 90,
         tags: ['skill', 'support', 'healing', 'magic', '회복', '마법'],
+        // 시전 시 녹색 힐링 이펙트가 표시된다
+        vfxKey: 'healing-effect',
     },
     purify: {
         id: 'purify',
@@ -28,6 +30,8 @@ export const SKILLS = {
         cooldown: 90,
         tags: ['skill', 'support', 'cleanse', 'magic', '정화', '마법'],
         removeTags: ['status_ailment'],
+        // 정화 시 하얀 정화 이펙트가 재생된다
+        vfxKey: 'purify-effect',
     },
     poison_sting: {
         id: 'poison_sting',
@@ -85,6 +89,8 @@ export const SKILLS = {
         cooldown: 180,
         tags: ['skill', 'buff', 'shield', 'song', 'support', '버프', '연주'],
         effects: { target: ['shield'] },
+        // 보호막 이펙트 스프라이트 표시
+        vfxKey: 'guardian-hymn-effect',
     },
     courage_hymn: {
         id: 'courage_hymn',
@@ -94,6 +100,8 @@ export const SKILLS = {
         cooldown: 180,
         tags: ['skill', 'buff', 'attack_up', 'song', 'support', '버프', '연주'],
         effects: { target: ['bonus_damage'] },
+        // 공격력 증가 이펙트 스프라이트 표시
+        vfxKey: 'courage-hymn-effect',
     },
     hawk_eye: {
         id: 'hawk_eye',
