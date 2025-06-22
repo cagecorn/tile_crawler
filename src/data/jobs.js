@@ -8,8 +8,6 @@ export const JOBS = {
             endurance: 6,
             // 초반 밸런스에 맞춰 이동 속도를 낮춘다
             movement: 4,
-            hp: 40,
-            attackPower: 17,
         }
     },
     archer: {
@@ -20,8 +18,6 @@ export const JOBS = {
             agility: 8,
             endurance: 4,
             movement: 4,
-            hp: 30,
-            attackPower: 15,
         }
     },
     healer: {
@@ -33,8 +29,6 @@ export const JOBS = {
             endurance: 4,
             focus: 8,
             movement: 4,
-            hp: 28,
-            attackPower: 10,
         }
     },
     wizard: {
@@ -47,8 +41,6 @@ export const JOBS = {
             focus: 9,
             intelligence: 8,
             movement: 4,
-            hp: 24,
-            attackPower: 12,
         }
     },
     summoner: {
@@ -61,8 +53,6 @@ export const JOBS = {
             focus: 10,
             intelligence: 9,
             movement: 4,
-            hp: 22,
-            attackPower: 11,
         }
     },
     bard: {
@@ -74,8 +64,6 @@ export const JOBS = {
             endurance: 4,
             focus: 8,
             movement: 4,
-            hp: 26,
-            attackPower: 10,
         }
     },
 };
