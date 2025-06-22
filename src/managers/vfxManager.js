@@ -1,4 +1,5 @@
 import { Particle } from '../particle.js';
+import { debugLog } from '../utils/logger.js';
 
 export class VFXManager {
     constructor(eventManager = null, itemManager = null) {
@@ -14,6 +15,7 @@ export class VFXManager {
             });
         }
         console.log("[VFXManager] Initialized");
+        debugLog("[VFXManager] Initialized");
     }
 
     /**

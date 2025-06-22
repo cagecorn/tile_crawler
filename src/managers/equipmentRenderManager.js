@@ -1,6 +1,9 @@
+import { debugLog } from '../utils/logger.js';
+
 export class EquipmentRenderManager {
     constructor(eventManager = null, assets = null, factory = null) {
         console.log('[EquipmentRenderManager] Initialized');
+        debugLog('[EquipmentRenderManager] Initialized');
     }
 
     drawEquipment(ctx, entity) {

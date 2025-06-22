@@ -1,4 +1,5 @@
 import { Item } from '../entities.js';
+import { debugLog } from '../utils/logger.js';
 
 export class ItemManager {
     constructor(eventManager, mapManager, assets) {
@@ -7,6 +8,7 @@ export class ItemManager {
         this.mapManager = mapManager;
         this.assets = assets;
         console.log("[ItemManager] Initialized");
+        debugLog("[ItemManager] Initialized");
     }
 
     _spawnItems(count) {

@@ -1,3 +1,5 @@
+import { debugLog } from '../utils/logger.js';
+
 export class SaveLoadManager {
     // 게임의 현재 상태를 하나의 객체로 수집 (스냅샷 찍기)
     gatherSaveData(gameState, monsterManager, mercenaryManager) {
@@ -16,5 +18,6 @@ export class SaveLoadManager {
     // (미래를 위한 구멍) 저장된 데이터로 게임 상태를 복원하는 함수
     loadGameFromData(saveData, gameState, ...allManagers) {
         console.log("게임 불러오기 기능은 여기에 구현될 예정입니다.");
+        debugLog("게임 불러오기 기능은 여기에 구현될 예정입니다.");
     }
 }

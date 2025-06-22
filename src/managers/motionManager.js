@@ -1,10 +1,12 @@
 import { findEntitiesInRadius } from '../utils/entityUtils.js';
+import { debugLog } from '../utils/logger.js';
 
 export class MotionManager {
     constructor(mapManager, pathfindingManager) {
         this.mapManager = mapManager;
         this.pathfindingManager = pathfindingManager;
         console.log("[MotionManager] Initialized");
+        debugLog("[MotionManager] Initialized");
     }
 
     dashTowards(entity, target, maxTiles = 8, allEnemies = [], eventManager = null, vfxManager = null, strikeImage = null) {
@@ -98,6 +100,7 @@ export class MotionManager {
             if (vfxManager) {
                 const fromPos = { x: target.x, y: target.y };
                 console.log(`[MotionManager] 끌어당기기 애니메이션 시작: ${target.constructor.name}를 (${fromPos.x}, ${fromPos.y}) → (${bestPos.x}, ${bestPos.y})로 이동`);
+                debugLog(`[MotionManager] 끌어당기기 애니메이션 시작: ${target.constructor.name}를 (${fromPos.x}, ${fromPos.y}) → (${bestPos.x}, ${bestPos.y})로 이동`);
                 vfxManager.addPullAnimation(target, fromPos, bestPos);
             } else {
                 target.x = bestPos.x;
@@ -105,6 +108,7 @@ export class MotionManager {
             }
         } else {
             console.log('[MotionManager] 끌어당기기 실패: 주체 주변에 공간이 없습니다.');
+            debugLog('[MotionManager] 끌어당기기 실패: 주체 주변에 공간이 없습니다.');
         }
     }
 
@@ -123,6 +127,7 @@ export class MotionManager {
 
         if (this.mapManager.isWallAt(destX, destY, target.width, target.height)) {
             console.log('[MotionManager] 넉백 실패: 목적지에 벽이 있음');
+            debugLog('[MotionManager] 넉백 실패: 목적지에 벽이 있음');
             return null;
         }
 

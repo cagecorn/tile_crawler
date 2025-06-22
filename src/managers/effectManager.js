@@ -1,10 +1,12 @@
 import { EFFECTS } from '../data/effects.js';
+import { debugLog } from '../utils/logger.js';
 
 export class EffectManager {
     constructor(eventManager, vfxManager = null) {
         this.eventManager = eventManager;
         this.vfxManager = vfxManager;
         console.log("[EffectManager] Initialized");
+        debugLog("[EffectManager] Initialized");
     }
 
     addEffect(target, effectId, caster = null) {

@@ -1,5 +1,6 @@
 import { SwordAI, DaggerAI, BowAI, SpearAI, ViolinBowAI, EstocAI, AxeAI, MaceAI, StaffAI, ScytheAI, WhipAI } from './WeaponAI.js';
 import { WEAPON_SKILLS } from '../data/weapon-skills.js';
+import { debugLog } from '../utils/logger.js';
 
 export class WeaponStatManager {
     constructor(itemId) {
@@ -25,6 +26,7 @@ export class WeaponStatManager {
         this.exp -= this.expNeeded;
         this.expNeeded = Math.floor(this.expNeeded * 1.8); // 레벨업 시 필요 경험치 증가
         console.log(`[Micro-World] 무기가 ${this.level}레벨로 성장했습니다!`);
+        debugLog(`[Micro-World] 무기가 ${this.level}레벨로 성장했습니다!`);
         this._unlockSkills();
     }
 
@@ -34,6 +36,7 @@ export class WeaponStatManager {
             if (!this.skills.includes(skillId) && this.level >= (skill.requiredLevel || 1)) {
                 this.skills.push(skillId);
                 console.log(`[Micro-World] 새로운 무기 스킬 [${skill.name}]을 배웠습니다!`);
+                debugLog(`[Micro-World] 새로운 무기 스킬 [${skill.name}]을 배웠습니다!`);
             }
         }
     }
