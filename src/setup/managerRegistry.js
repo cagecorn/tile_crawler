@@ -10,6 +10,7 @@ import { FogManager } from '../managers/fogManager.js';
 import { MicroEngine } from '../micro/MicroEngine.js';
 import { MicroCombatManager } from '../micro/MicroCombatManager.js';
 import { CombatEngine } from '../engines/combatEngine.js';
+import { StatEngine } from '../engines/statEngine.js';
 
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
@@ -69,6 +70,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
 
     // 전투 처리를 담당하는 CombatEngine을 도입합니다.
     managers.combatEngine = new CombatEngine(eventManager, managers, assets);
+    managers.statEngine = new StatEngine(eventManager);
 
     // --- 여기에 로그 매니저 생성 코드를 추가합니다. ---
     managers.combatLogManager = new Managers.CombatLogManager(eventManager);
