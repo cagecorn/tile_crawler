@@ -1,14 +1,14 @@
-import { MicroTurnManager } from './MicroTurnManager.js';
 import { debugLog } from '../utils/logger.js';
+import { MicroTurnEngine } from '../engines/microTurnEngine.js';
 
 // src/micro/MicroEngine.js
 
 // MicroEngine handles the micro-world progression. It listens for combat events
 // and updates weapon experience and proficiency accordingly.
 export class MicroEngine {
-    constructor(eventManager) {
+    constructor(eventManager, microTurnEngine = null) {
         this.eventManager = eventManager;
-        this.turnManager = new MicroTurnManager();
+        this.turnEngine = microTurnEngine;
 
         if (this.eventManager) {
             this.eventManager.subscribe('attack_landed', data => this.handleAttackLanded(data));
@@ -56,8 +56,8 @@ export class MicroEngine {
     }
 
     update(allItems) {
-        // 게임 루프로부터 전달된 아이템 목록을 TurnManager에 위임한다
-        this.turnManager.update(allItems);
+        // 게임 루프로부터 전달된 아이템 목록을 MicroTurnEngine에 위임한다
+        this.turnEngine?.update(allItems);
         // Additional micro-world systems can be ticked here.
     }
 }

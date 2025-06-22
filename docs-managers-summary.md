@@ -70,5 +70,8 @@
 | `../engines/spriteEngine.js` | 다중 프레임 스프라이트 애니메이션을 관리합니다. |
 | `../micro/MicroEngine.js` | 미시 세계 전투와 아이템 상태 갱신을 담당하는 엔진입니다. |
 | `../micro/MicroTurnManager.js` | 모든 아이템의 쿨타임 감소를 전담합니다. |
+| `../engines/skillEngine.js` | SkillManager와 연계해 스킬 사용 이벤트를 처리합니다. |
+| `../engines/movementEngine.js` | 이동 요청 이벤트를 받아 MovementManager에 위임합니다. |
+| `../engines/microTurnEngine.js` | MicroTurnManager 업데이트를 담당하는 경량 엔진입니다. |
 
 추가 매니저가 도입되면 이 목록을 계속 확장해 주세요.
