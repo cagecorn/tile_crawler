@@ -6,6 +6,7 @@ import { AIEngine } from '../engines/aiEngine.js';
 import { MBTIEngine } from '../engines/mbtiEngine.js';
 import { VFXEngine } from '../engines/vfxEngine.js';
 import { EffectEngine } from '../engines/effectEngine.js';
+import { SpriteEngine } from '../engines/spriteEngine.js';
 import { EventEngine } from '../engines/eventEngine.js';
 import { PathfindingManager } from '../managers/pathfindingManager.js';
 import { MovementManager } from '../managers/movementManager.js';
@@ -69,6 +70,7 @@ export function createManagers(eventManager, assets, factory, mapManager) {
 
     // 시각 효과 처리를 담당하는 VFXEngine을 초기화합니다.
     managers.vfxEngine = new VFXEngine(eventManager, managers.vfxManager, assets);
+    managers.spriteEngine = new SpriteEngine(eventManager, managers.vfxManager);
     managers.effectEngine = new EffectEngine(eventManager, managers.effectManager);
 
     // 마이크로 월드

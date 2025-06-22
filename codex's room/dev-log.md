@@ -93,3 +93,7 @@
 - TurnEngine 도입으로 턴 진행 로직을 엔진화.
 - managerRegistry에서 TurnEngine을 초기화하고 Engine 루프에 컨텍스트 전달을 지원하도록 수정.
 - 새 테스트 `turnEngine.test.js`로 위임 동작을 검증.
+
+## 세션 21
+- SpriteEngine 신설로 간단한 스프라이트 애니메이션을 이벤트 기반으로 관리.
+- managerRegistry와 Engine 루프에 SpriteEngine을 연결하고 테스트 `spriteEngine.test.js` 작성.
