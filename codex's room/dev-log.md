@@ -63,3 +63,8 @@
 
 ## 세션 14
 - `auto-patch-algorithm.md` 문서를 작성하여 Codex의 자율 업데이트 절차를 정리.
+
+## 세션 15
+- CombatEngine 도입으로 전투 관련 이벤트 처리를 전담하도록 구조 분리.
+- managerRegistry에서 CombatEngine을 초기화하고 Engine 루프에 통합.
+- eventListeners.js에서 중복되던 전투 이벤트 핸들러를 제거하여 책임을 축소.
