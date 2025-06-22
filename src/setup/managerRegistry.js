@@ -20,9 +20,14 @@ import { TurnEngine } from '../engines/turnEngine.js';
 import { ProjectileEngine } from '../engines/projectileEngine.js';
 import { SkillEngine } from '../engines/skillEngine.js';
 import { MovementEngine } from '../engines/movementEngine.js';
+import { CoreLinkEngine } from '../engines/coreLinkEngine.js';
 
 export function createManagers(eventManager, assets, factory, mapManager) {
     const managers = {};
+
+    // \u2728 1. CoreLinkEngine\uC744 \uAC00\uC7A5 \uBA3C\uC800 \uC0DD\uC131\uD569\uB2C8\uB2E4.
+    const coreLinkEngine = new CoreLinkEngine();
+    managers.coreLinkEngine = coreLinkEngine;
 
     // 외부에서 전달된 기본 도구 보존
     managers.eventManager = eventManager;
@@ -105,6 +110,12 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     // UI Manager는 콜백 등으로 인해 별도 처리될 수 있으므로 마지막에 추가
     managers.uiManager = new Managers.UIManager();
     managers.uiManager.mercenaryManager = managers.mercenaryManager;
+
+    // \u2728 2. \uC0DD\uC131\uB41C \uBAA8\uB4E0 \uBAA9\uB85D\uC744 coreLinkEngine\uC5D0 \uB4F1\uB85D\uD569\uB2C8\uB2E4.
+    coreLinkEngine.registerMany(managers);
+
+    // \u2728 \uAE30\uD0C0 \uC5F0\uB3D9 \uC608\uC2DC: combatEngine\uC774 coreLinkEngine\uC744 \uD65C\uC6A9
+    managers.combatEngine.coreLinkEngine = coreLinkEngine;
 
     return managers;
 }
