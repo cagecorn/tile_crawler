@@ -105,6 +105,19 @@ export class StatManager {
                 }
             }
         }
+
+        if (this.entity.emotionSlots) {
+            for (const slot in this.entity.emotionSlots) {
+                const card = this.entity.emotionSlots[slot];
+                if (!card) continue;
+                if (card.stats) {
+                    const src = card.stats instanceof Map ? card.stats.entries() : Object.entries(card.stats);
+                    for (const [stat, value] of src) {
+                        this._fromEquipment[stat] = (this._fromEquipment[stat] || 0) + value;
+                    }
+                }
+            }
+        }
         this.recalculate();
     }
 
@@ -137,6 +150,19 @@ export class StatManager {
                 if (bonus) {
                     for (const [stat, val] of Object.entries(bonus)) {
                         final[stat] = (final[stat] || 0) + val;
+                    }
+                }
+
+                if (this.entity.emotionSlots) {
+                    for (const slot in this.entity.emotionSlots) {
+                        const card = this.entity.emotionSlots[slot];
+                        if (!card) continue;
+                        if (card.alphabet && effect.id === `state_${card.alphabet}`) {
+                            const bonusStats = card.stateBonus || {};
+                            for (const [s, v] of Object.entries(bonusStats)) {
+                                final[s] = (final[s] || 0) + v;
+                            }
+                        }
                     }
                 }
             }

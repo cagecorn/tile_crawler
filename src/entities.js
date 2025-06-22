@@ -59,6 +59,9 @@ class Entity {
             enumerable: false,
         });
 
+        // --- 감정 카드 슬롯(E/I, S/N, T/F, J/P) ---
+        this.emotionSlots = { IE: null, SN: null, TF: null, JP: null };
+
         // 텔레포트 스킬 사용을 위한 위치 저장용 프로퍼티
         this.teleportSavedPos = null;
         this.teleportReturnPos = null;
