@@ -60,3 +60,6 @@
 - 알파벳 상태 효과 8종을 `effects.js`에 추가.
 - `StatManager`가 상태 효과를 감지해 스탯 보너스를 적용하도록 수정.
 - 새 테스트 `alphabetState.test.js`로 이동 속도 증가를 확인.
+
+## 세션 14
+- `auto-patch-algorithm.md` 문서를 작성하여 Codex의 자율 업데이트 절차를 정리.
