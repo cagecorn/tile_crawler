@@ -10,6 +10,7 @@ export class MonsterManager {
         this.factory = factory;
         this.monsters = [];
         this.traitManager = null;
+        this.equipmentRenderManager = null;
         console.log("[MonsterManager] Initialized");
         debugLog("[MonsterManager] Initialized");
 
@@ -40,6 +41,9 @@ export class MonsterManager {
                     image: this.assets?.monster,
                     baseStats: stats
                 });
+                if (this.equipmentRenderManager) {
+                    monster.equipmentRenderManager = this.equipmentRenderManager;
+                }
                 this.monsters.push(monster);
             }
         }

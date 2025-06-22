@@ -19,6 +19,9 @@ export function buildInitialWorld(managers, assets) {
         image: assets.player,
         baseStats: { strength: 5, agility: 5, endurance: 15, movement: 4 },
     });
+    if (managers.equipmentRenderManager) {
+        player.equipmentRenderManager = managers.equipmentRenderManager;
+    }
     player.ai = null;
     playerGroup.addMember(player);
     aiEngine.addMember(playerGroup.id, player);
@@ -71,6 +74,9 @@ export function buildInitialWorld(managers, assets) {
                 groupId: monsterGroup.id,
                 image: assets.monster,
             });
+            if (managers.equipmentRenderManager) {
+                monster.equipmentRenderManager = managers.equipmentRenderManager;
+            }
             monsterGroup.addMember(monster);
             aiEngine.addMember(monsterGroup.id, monster);
             monsterManager.monsters.push(monster);

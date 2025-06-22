@@ -211,8 +211,9 @@ export class AIEngine {
 
             const { finalAction, triggeredTraits } = this.mbtiEngine.refineAction(baseAction, member, context);
             finalAction.triggeredTraits = triggeredTraits;
-            console.log(`[AIEngine] Member action:`, finalAction);
-            debugLog(`[AIEngine] Member action:`, finalAction);
+            if (finalAction.type !== 'idle') {
+                debugLog(`[AIEngine] Member action:`, finalAction);
+            }
             this.executeAction(member, finalAction, context);
         }
     }

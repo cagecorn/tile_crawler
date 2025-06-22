@@ -47,11 +47,14 @@ export function createManagers(eventManager, assets, factory, mapManager) {
     managers.itemManager = new Managers.ItemManager(eventManager, mapManager, assets);
     managers.monsterManager = new Managers.MonsterManager(eventManager, mapManager, assets, factory);
     managers.mercenaryManager = new Managers.MercenaryManager(eventManager, assets, factory);
+    managers.equipmentRenderManager = new Managers.EquipmentRenderManager(eventManager, assets, factory);
     managers.equipmentManager = new Managers.EquipmentManager(eventManager);
     managers.equipmentManager.setTagManager(managers.tagManager);
     managers.traitManager = new Managers.TraitManager(eventManager, assets, factory);
     managers.mercenaryManager.setTraitManager(managers.traitManager);
     managers.monsterManager.setTraitManager(managers.traitManager);
+    managers.mercenaryManager.equipmentRenderManager = managers.equipmentRenderManager;
+    managers.monsterManager.equipmentRenderManager = managers.equipmentRenderManager;
 
     // 시각 및 효과
     managers.vfxManager = new Managers.VFXManager(eventManager, managers.itemManager);
