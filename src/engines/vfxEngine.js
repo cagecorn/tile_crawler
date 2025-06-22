@@ -30,9 +30,8 @@ export class VFXEngine {
                 this.vfxManager.flashEntity(data.defender, { color: 'rgba(255, 100, 100, 0.6)' });
             });
 
-            this.eventManager.subscribe('entity_death', data => {
-                this.vfxManager.addDeathAnimation(data.victim, 'explode');
-            });
+            // Death VFX is handled in registerGameEventListeners so tests can
+            // easily verify removal and loot logic without requiring this engine.
 
             this.eventManager.subscribe('ai_mbti_trait_triggered', data => {
                 this.vfxManager.addTextPopup(data.trait, data.entity);
