@@ -22,6 +22,22 @@ describe('Behavior AI', () => {
     assert.strictEqual(action.type, 'idle');
   });
 
+  test('Ranged unit attacks when enemy is too close to retreat', () => {
+    const beh = new CombatBehavior();
+    const self = {
+      x: 0,
+      y: 0,
+      tileSize: 1,
+      attackRange: 6,
+      visionRange: 20,
+      equipment: { weapon: { tags: ['ranged', 'bow'] } },
+      properties: { mbti: 'ISTJ' }
+    };
+    const enemy = { x: 0.5, y: 0, hp: 10 };
+    const action = beh.decideAction(self, { enemies:[enemy], allies:[], player:{}, mapManager:mapStub });
+    assert.strictEqual(action.type, 'attack');
+  });
+
   test('HealBehavior heals wounded ally', () => {
     const beh = new HealBehavior();
     const self = { x:0, y:0, attackRange:10, mp:20, skills:['heal'], skillCooldowns:{}, properties:{ mbti:'ENFP' } };

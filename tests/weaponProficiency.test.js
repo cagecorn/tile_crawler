@@ -19,4 +19,10 @@ describe('Micro-World: Weapon Proficiency', () => {
     sword.weaponStats.cooldown = 30;
     assert.strictEqual(sword.weaponStats.cooldown, 30);
   });
+
+  test('무기 태그에 맞는 스킬만 해금된다', () => {
+    const bowStats = new WeaponStatManager('long_bow', ['ranged', 'bow']);
+    assert.ok(bowStats.skills.includes('charge_shot'), '활 스킬 습득');
+    assert.ok(!bowStats.skills.includes('parry'), '검 스킬은 배우지 않아야 함');
+  });
 });
